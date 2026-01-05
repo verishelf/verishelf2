@@ -1,0 +1,25 @@
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# API Routes - Proxy to Node.js server (if using Apache proxy)
+# Note: DreamHost Passenger handles this differently, but this is a fallback
+RewriteCond %{REQUEST_URI} ^/api/(.*)$
+RewriteRule ^api/(.*)$ http://localhost:3000/api/$1 [P,L]
+
+# Serve React app from /app directory
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} ^/app
+RewriteRule ^app/(.*)$ /app/index.html [L]
+
+# Don't rewrite if file exists
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Default: serve landing page
+RewriteRule ^$ index.html [L]
