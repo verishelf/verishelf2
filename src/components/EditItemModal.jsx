@@ -3,6 +3,21 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 export default function EditItemModal({ item, onClose, onSave }) {
+  const [theme, setTheme] = useState(() => {
+    return document.documentElement.getAttribute("data-theme") || "dark";
+  });
+
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setTheme(document.documentElement.getAttribute("data-theme") || "dark");
+    };
+    const observer = new MutationObserver(handleThemeChange);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    return () => observer.disconnect();
+  }, []);
   const [name, setName] = useState("");
   const [expiry, setExpiry] = useState(null);
   const [qty, setQty] = useState(1);
@@ -84,12 +99,22 @@ export default function EditItemModal({ item, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="bg-slate-900 rounded-2xl border border-slate-800 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white">Edit Product</h2>
+      <div className={`rounded-2xl border max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto ${
+        theme === "light"
+          ? "bg-white border-gray-300 shadow-2xl"
+          : "bg-slate-900 border-slate-800"
+      }`}>
+        <div className={`p-6 border-b flex items-center justify-between ${
+          theme === "light" ? "border-gray-300" : "border-slate-800"
+        }`}>
+          <h2 className={`text-2xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>Edit Product</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+              theme === "light"
+                ? "bg-gray-200 hover:bg-gray-300 text-gray-700 hover:text-gray-900"
+                : "bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white"
+            }`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -100,110 +125,150 @@ export default function EditItemModal({ item, onClose, onSave }) {
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-300 mb-2">Product Name *</label>
+              <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Product Name *</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white"
+                className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+                  theme === "light"
+                    ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900"
+                    : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
+                }`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Category</label>
+              <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Category</label>
               <input
                 type="text"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 placeholder="e.g., Dairy, Produce"
-                className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white placeholder-slate-500"
+                className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+                  theme === "light"
+                    ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900 placeholder-gray-400"
+                    : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white placeholder-slate-500"
+                }`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Barcode</label>
+              <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Barcode</label>
               <input
                 type="text"
                 value={barcode}
                 onChange={(e) => setBarcode(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white"
+                className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+                  theme === "light"
+                    ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900"
+                    : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
+                }`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Quantity</label>
+              <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Quantity</label>
               <input
                 type="number"
                 min="1"
                 value={qty}
                 onChange={(e) => setQty(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white"
+                className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+                  theme === "light"
+                    ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900"
+                    : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
+                }`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Price ($)</label>
+              <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Price ($)</label>
               <input
                 type="number"
                 step="0.01"
                 min="0"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white"
+                className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+                  theme === "light"
+                    ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900"
+                    : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
+                }`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Expiry Date *</label>
+              <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Expiry Date *</label>
               <DatePicker
                 selected={expiry}
                 onChange={(date) => setExpiry(date)}
                 dateFormat="yyyy-MM-dd"
                 minDate={new Date()}
-                className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white"
+                className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+                  theme === "light"
+                    ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900"
+                    : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
+                }`}
                 wrapperClassName="w-full"
+                calendarClassName={theme === "light" 
+                  ? "bg-white border border-gray-300 rounded-lg shadow-xl"
+                  : "bg-slate-900 border border-slate-800 rounded-lg shadow-xl"
+                }
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Batch/Lot Number</label>
+              <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Batch/Lot Number</label>
               <input
                 type="text"
                 value={batchNumber}
                 onChange={(e) => setBatchNumber(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white"
+                className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+                  theme === "light"
+                    ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900"
+                    : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
+                }`}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Supplier</label>
+              <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Supplier</label>
               <input
                 type="text"
                 value={supplier}
                 onChange={(e) => setSupplier(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white"
+                className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+                  theme === "light"
+                    ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900"
+                    : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
+                }`}
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-300 mb-2">Notes</label>
+              <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Notes</label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white resize-none"
+                className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors resize-none ${
+                  theme === "light"
+                    ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900"
+                    : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
+                }`}
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-300 mb-2">Product Photo</label>
+              <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Product Photo</label>
               {imagePreview ? (
                 <div className="relative">
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="w-full h-48 object-cover rounded-lg border border-slate-700"
+                    className={`w-full h-48 object-cover rounded-lg border ${theme === "light" ? "border-gray-300" : "border-slate-700"}`}
                   />
                   <button
                     type="button"
@@ -216,12 +281,16 @@ export default function EditItemModal({ item, onClose, onSave }) {
                   </button>
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-700 hover:border-emerald-500/50 rounded-lg cursor-pointer transition-colors bg-slate-950/50">
+                <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                  theme === "light"
+                    ? "border-gray-300 hover:border-emerald-500/50 bg-gray-50"
+                    : "border-slate-700 hover:border-emerald-500/50 bg-slate-950/50"
+                }`}>
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <svg className="w-10 h-10 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-10 h-10 mb-3 ${theme === "light" ? "text-gray-500" : "text-slate-400"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <p className="mb-2 text-sm text-slate-400">
+                    <p className={`mb-2 text-sm ${theme === "light" ? "text-gray-600" : "text-slate-400"}`}>
                       <span className="font-semibold">Click to upload</span> or drag and drop
                     </p>
                   </div>
@@ -237,11 +306,15 @@ export default function EditItemModal({ item, onClose, onSave }) {
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t border-slate-800">
+          <div className={`flex gap-3 pt-4 border-t ${theme === "light" ? "border-gray-300" : "border-slate-800"}`}>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg transition-colors"
+              className={`flex-1 px-6 py-3 font-semibold rounded-lg transition-colors ${
+                theme === "light"
+                  ? "bg-gray-300 hover:bg-gray-400 text-gray-900 border border-gray-400"
+                  : "bg-slate-800 hover:bg-slate-700 text-white"
+              }`}
             >
               Cancel
             </button>

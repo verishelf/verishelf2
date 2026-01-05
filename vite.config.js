@@ -4,5 +4,5 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/dashboard/',  // Base path for deployment on verishelf.com/app/
+  base: '/dashboard/',  // Base path for deployment on verishelf.com/dashboard/
 })

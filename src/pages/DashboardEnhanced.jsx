@@ -112,31 +112,31 @@ export default function DashboardEnhanced() {
 
   // Theme-aware class helpers
   const btnClass = theme === "light" 
-    ? "px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg text-sm transition-colors"
+    ? "px-3 py-2 bg-gray-300 hover:bg-gray-400 text-gray-900 rounded-lg text-sm transition-colors border border-gray-400"
     : "px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm transition-colors";
   
   const btnClassFlex = theme === "light"
-    ? "px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg text-sm transition-colors flex items-center gap-1.5"
+    ? "px-3 py-2 bg-gray-300 hover:bg-gray-400 text-gray-900 rounded-lg text-sm transition-colors flex items-center gap-1.5 border border-gray-400"
     : "px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm transition-colors flex items-center gap-1.5";
   
   const dropdownClass = theme === "light"
-    ? "bg-gray-200 border border-gray-300 rounded-lg shadow-xl p-1 min-w-[150px]"
+    ? "bg-white border border-gray-400 rounded-lg shadow-xl p-1 min-w-[150px]"
     : "bg-slate-800 border border-slate-700 rounded-lg shadow-xl p-1 min-w-[150px]";
   
   const dropdownItemClass = theme === "light"
-    ? "w-full text-left px-3 py-2 text-sm text-gray-900 hover:bg-gray-300 rounded"
+    ? "w-full text-left px-3 py-2 text-sm text-gray-900 hover:bg-gray-200 rounded"
     : "w-full text-left px-3 py-2 text-sm text-white hover:bg-slate-700 rounded";
   
   const textSecondaryClass = theme === "light"
-    ? "text-gray-600"
+    ? "text-gray-700"
     : "text-slate-400";
   
   const btnClassMobile = theme === "light"
-    ? "px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
+    ? "px-3 py-2 bg-gray-300 hover:bg-gray-400 text-gray-900 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 border border-gray-400"
     : "px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm transition-colors flex items-center justify-center gap-2";
   
   const mobileMenuBorderClass = theme === "light"
-    ? "border-gray-300"
+    ? "border-gray-400"
     : "border-slate-800";
 
   // Save to localStorage
@@ -400,13 +400,13 @@ export default function DashboardEnhanced() {
   return (
     <div className={`min-h-screen transition-colors duration-200 ${
       theme === "light" 
-        ? "bg-gradient-to-b from-gray-50 via-white to-gray-50" 
+        ? "bg-gradient-to-b from-gray-100 via-gray-50 to-gray-100" 
         : "bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950"
     }`}>
       {/* Navigation */}
       <nav className={`fixed w-full backdrop-blur-lg z-50 border-b transition-colors duration-200 ${
         theme === "light"
-          ? "bg-white/95 border-gray-200 supports-[backdrop-filter]:bg-white/80"
+          ? "bg-white/95 border-gray-300 supports-[backdrop-filter]:bg-white/80 shadow-sm"
           : "bg-slate-950/95 border-slate-800 supports-[backdrop-filter]:bg-slate-950/80"
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">

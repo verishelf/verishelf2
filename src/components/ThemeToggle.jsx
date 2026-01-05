@@ -16,7 +16,7 @@ export default function ThemeToggle() {
   };
 
   const btnClass = theme === "light"
-    ? "px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+    ? "px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-900 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 border border-gray-400"
     : "px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2";
 
   return (

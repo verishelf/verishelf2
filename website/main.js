@@ -1,26 +1,22 @@
 // VeriShelf Website - Authentication & Stripe Integration
 
 // Configuration
-// IMPORTANT: Replace these with your actual Stripe keys
-// Get them from: https://dashboard.stripe.com/apikeys
-const STRIPE_PUBLISHABLE_KEY = window.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_YOUR_PUBLISHABLE_KEY_HERE';
-const API_BASE_URL = window.VITE_API_URL || 'http://localhost:3000/api';
+const STRIPE_PUBLISHABLE_KEY = 'pk_test_51SkhdR9ELeRLvDS57hteUCEnMzmsWIGbY5VECFeRHLKShcU6j9144UwCsO6o2TIgDdMWJ7uCKu37Djo5ceTXdd8J00kdAi7eNV';
+const API_BASE_URL = 'http://localhost:3000/api'; // Replace with your backend API URL
 
 // Initialize Stripe
 let stripe = null;
 let elements = null;
 let cardElement = null;
 
-if (STRIPE_PUBLISHABLE_KEY && STRIPE_PUBLISHABLE_KEY !== 'pk_test_YOUR_PUBLISHABLE_KEY_HERE') {
+if (STRIPE_PUBLISHABLE_KEY) {
   try {
     stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
     elements = stripe.elements();
-    console.log('✅ Stripe initialized successfully');
+    console.log('Stripe initialized successfully');
   } catch (error) {
-    console.error('❌ Stripe initialization failed:', error);
+    console.error('Error initializing Stripe:', error);
   }
-} else {
-  console.warn('⚠️ Stripe publishable key not configured. Please set your key in the HTML file.');
 }
 
 // Selected plan for subscription
@@ -44,108 +40,112 @@ const plans = {
 };
 
 // Discount tiers based on number of locations
-function getDiscountTier(locationCount) {
-  if (locationCount >= 201) return { discount: 0.25, tier: '201+' };
-  if (locationCount >= 101) return { discount: 0.20, tier: '101-200' };
-  if (locationCount >= 51) return { discount: 0.15, tier: '51-100' };
-  if (locationCount >= 26) return { discount: 0.10, tier: '26-50' };
-  if (locationCount >= 11) return { discount: 0.05, tier: '11-25' };
-  return { discount: 0, tier: '1-10' };
+function getDiscount(locationCount) {
+  if (locationCount >= 201) return 0.30; // 30% discount
+  if (locationCount >= 101) return 0.25; // 25% discount
+  if (locationCount >= 51) return 0.20;  // 20% discount
+  if (locationCount >= 26) return 0.15;  // 15% discount
+  if (locationCount >= 11) return 0.10;  // 10% discount
+  if (locationCount >= 6) return 0.05;   // 5% discount
+  return 0; // No discount
+}
+
+// Get number of locations from input
+function getLocationCount() {
+  const input = document.getElementById('location-count');
+  return Math.max(1, parseInt(input?.value || 1) || 1);
 }
 
 // Update pricing based on location count
 function updatePricing() {
-  // Check both possible IDs for location input
-  const locationInput = document.getElementById('locationCount') || document.getElementById('location-count');
-  if (!locationInput) return;
+  const locationCount = getLocationCount();
+  const discount = getDiscount(locationCount);
+  const discountPercent = Math.round(discount * 100);
   
-  const locationCount = parseInt(locationInput.value) || 1;
+  // Update Professional plan
+  const professionalPrice = plans.professional.basePrice * (1 - discount);
+  const professionalTotal = professionalPrice * locationCount;
+  document.getElementById('price-professional').textContent = `$${Math.round(professionalPrice)}`;
+  document.getElementById('total-professional').textContent = locationCount > 1 
+    ? `$${Math.round(professionalTotal).toLocaleString()}/month total` 
+    : '';
   
-  // Ensure minimum of 1 location
-  if (locationCount < 1) {
-    locationInput.value = 1;
-    return updatePricing();
+  // Update Enterprise plan
+  const enterprisePrice = plans.enterprise.basePrice * (1 - discount);
+  const enterpriseTotal = enterprisePrice * locationCount;
+  document.getElementById('price-enterprise').textContent = `$${Math.round(enterprisePrice)}`;
+  document.getElementById('total-enterprise').textContent = locationCount > 1 
+    ? `$${Math.round(enterpriseTotal).toLocaleString()}/month total` 
+    : '';
+  
+  // Update signup modal plan buttons if modal is open
+  const professionalBtn = document.getElementById('plan-btn-professional');
+  const enterpriseBtn = document.getElementById('plan-btn-enterprise');
+  
+  if (professionalBtn) {
+    const priceEl = professionalBtn.querySelector('.text-2xl');
+    if (priceEl) {
+      priceEl.textContent = `$${Math.round(professionalPrice)}`;
+    }
   }
   
-  const discountTier = getDiscountTier(locationCount);
-  const discountPercent = discountTier.discount * 100;
+  if (enterpriseBtn) {
+    const priceEl = enterpriseBtn.querySelector('.text-2xl');
+    if (priceEl) {
+      priceEl.textContent = `$${Math.round(enterprisePrice)}`;
+    }
+  }
   
-  // Update discount badge
-  const discountBadge = document.getElementById('discountBadge');
-  const discountText = document.getElementById('discountText');
+  // Update discount info
+  const discountText = document.getElementById('discount-text');
+  const savingsText = document.getElementById('savings-text');
   
-  if (discountPercent > 0) {
-    discountBadge.textContent = `${discountPercent}% OFF`;
-    discountBadge.classList.remove('text-slate-400');
-    discountBadge.classList.add('text-emerald-400');
-    discountText.textContent = `${discountTier.tier} locations`;
+  if (discount > 0) {
+    discountText.textContent = `${discountPercent}% volume discount applied`;
+    discountText.classList.remove('text-slate-400');
+    discountText.classList.add('text-emerald-400', 'font-semibold');
+    
+    // Calculate savings
+    const professionalSavings = (plans.professional.basePrice * locationCount) - professionalTotal;
+    const enterpriseSavings = (plans.enterprise.basePrice * locationCount) - enterpriseTotal;
+    savingsText.textContent = `Save up to $${Math.round(Math.max(professionalSavings, enterpriseSavings)).toLocaleString()}/month`;
+    savingsText.classList.remove('hidden');
   } else {
-    discountBadge.textContent = '0% OFF';
-    discountBadge.classList.remove('text-emerald-400');
-    discountBadge.classList.add('text-slate-400');
-    discountText.textContent = 'No discount for 1-10 locations';
+    discountText.textContent = 'Enter more locations for volume discounts';
+    discountText.classList.remove('text-emerald-400', 'font-semibold');
+    discountText.classList.add('text-slate-400');
+    savingsText.textContent = '';
+    savingsText.classList.add('hidden');
   }
   
-  // Update Professional plan pricing
-  const professionalBasePrice = plans.professional.basePrice;
-  const professionalDiscountedPrice = professionalBasePrice * (1 - discountTier.discount);
-  const professionalTotal = professionalDiscountedPrice * locationCount;
+  // Update plan prices in memory
+  plans.professional.price = Math.round(professionalPrice);
+  plans.enterprise.price = Math.round(enterprisePrice);
   
-  const professionalPriceEl = document.getElementById('professional-price');
-  const professionalOriginalEl = document.getElementById('professional-original');
-  const professionalTotalEl = document.getElementById('professional-total-amount');
-  
-  professionalPriceEl.textContent = `$${Math.round(professionalDiscountedPrice)}`;
-  professionalTotalEl.textContent = `$${Math.round(professionalTotal).toLocaleString()}`;
-  
-  if (discountPercent > 0) {
-    professionalOriginalEl.textContent = `$${professionalBasePrice}`;
-    professionalOriginalEl.classList.remove('hidden');
-  } else {
-    professionalOriginalEl.classList.add('hidden');
+  // If a plan is already selected, update its display
+  if (selectedPlan) {
+    selectSignupPlan(Object.keys(plans).find(key => plans[key].name === selectedPlan.name));
   }
-  
-  // Update Enterprise plan pricing
-  const enterpriseBasePrice = plans.enterprise.basePrice;
-  const enterpriseDiscountedPrice = enterpriseBasePrice * (1 - discountTier.discount);
-  const enterpriseTotal = enterpriseDiscountedPrice * locationCount;
-  
-  const enterprisePriceEl = document.getElementById('enterprise-price');
-  const enterpriseOriginalEl = document.getElementById('enterprise-original');
-  const enterpriseTotalEl = document.getElementById('enterprise-total-amount');
-  
-  enterprisePriceEl.textContent = `$${Math.round(enterpriseDiscountedPrice)}`;
-  enterpriseTotalEl.textContent = `$${Math.round(enterpriseTotal).toLocaleString()}`;
-  
-  if (discountPercent > 0) {
-    enterpriseOriginalEl.textContent = `$${enterpriseBasePrice}`;
-    enterpriseOriginalEl.classList.remove('hidden');
-  } else {
-    enterpriseOriginalEl.classList.add('hidden');
+}
+
+// Increment/Decrement location count
+function incrementLocations() {
+  const input = document.getElementById('location-count');
+  if (input) {
+    input.value = parseInt(input.value || 1) + 1;
+    updatePricing();
   }
-  
-  // Update signup modal pricing
-  const signupProfessionalPrice = document.getElementById('signup-professional-price');
-  const signupProfessionalTotal = document.getElementById('signup-professional-total');
-  const signupEnterprisePrice = document.getElementById('signup-enterprise-price');
-  const signupEnterpriseTotal = document.getElementById('signup-enterprise-total');
-  
-  if (signupProfessionalPrice) {
-    signupProfessionalPrice.textContent = `$${Math.round(professionalDiscountedPrice)}`;
+}
+
+function decrementLocations() {
+  const input = document.getElementById('location-count');
+  if (input) {
+    const current = parseInt(input.value || 1);
+    if (current > 1) {
+      input.value = current - 1;
+      updatePricing();
+    }
   }
-  if (signupProfessionalTotal) {
-    signupProfessionalTotal.textContent = `Total: $${Math.round(professionalTotal).toLocaleString()}/mo`;
-  }
-  if (signupEnterprisePrice) {
-    signupEnterprisePrice.textContent = `$${Math.round(enterpriseDiscountedPrice)}`;
-  }
-  if (signupEnterpriseTotal) {
-    signupEnterpriseTotal.textContent = `Total: $${Math.round(enterpriseTotal).toLocaleString()}/mo`;
-  }
-  
-  // Update plan prices for payment processing
-  plans.professional.price = Math.round(professionalDiscountedPrice);
-  plans.enterprise.price = Math.round(enterpriseDiscountedPrice);
 }
 
 // Modal Management
@@ -162,30 +162,6 @@ function closeModal(modalId) {
   if (modal) {
     modal.classList.remove('active');
     document.body.style.overflow = '';
-    
-    // Clean up Stripe Elements when payment modal is closed
-    if (modalId === 'paymentModal' && cardElement) {
-      try {
-        cardElement.unmount();
-        cardElement.destroy();
-        cardElement = null;
-      } catch (e) {
-        // Element might not be mounted, ignore
-        cardElement = null;
-      }
-      
-      // Clear card element container
-      const cardElementContainer = document.getElementById('card-element');
-      if (cardElementContainer) {
-        cardElementContainer.innerHTML = '';
-      }
-      
-      // Clear any error messages
-      const cardErrors = document.getElementById('card-errors');
-      if (cardErrors) {
-        cardErrors.textContent = '';
-      }
-    }
   }
 }
 
@@ -266,7 +242,11 @@ async function handleLogin(event) {
     closeModal('loginModal');
     
     // Redirect to dashboard
-    window.location.href = '/dashboard/';
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      window.location.href = '../dist/index.html';
+    } else {
+      window.location.href = '/app/';
+    }
   } catch (error) {
     alert('Login failed. Please check your credentials.');
     console.error('Login error:', error);
@@ -292,6 +272,15 @@ function selectSignupPlan(planKey) {
   if (selectedBtn) {
     selectedBtn.classList.add('border-emerald-500', 'bg-emerald-500/10');
     selectedBtn.classList.remove('border-slate-700');
+    
+    // Update price display in signup modal
+    const locationCount = getLocationCount();
+    const discount = getDiscount(locationCount);
+    const discountedPrice = selectedPlan.basePrice * (1 - discount);
+    const priceElement = selectedBtn.querySelector('.text-2xl');
+    if (priceElement) {
+      priceElement.textContent = `$${Math.round(discountedPrice)}`;
+    }
   }
 
   // Enable proceed button
@@ -384,33 +373,31 @@ function openPaymentModal() {
     return;
   }
 
-  // Get current location count - check both possible IDs
-  const locationInput = document.getElementById('locationCount') || document.getElementById('location-count');
-  const locationCount = parseInt(locationInput?.value || '1') || 1;
+  // Get location count and calculate final price
+  const locationCount = getLocationCount();
+  const discount = getDiscount(locationCount);
+  const pricePerLocation = selectedPlan.basePrice * (1 - discount);
+  const finalPrice = pricePerLocation * locationCount;
+  const discountPercent = Math.round(discount * 100);
   
-  // Calculate pricing with discount
-  const discountTier = getDiscountTier(locationCount);
-  const pricePerLocation = Math.round(selectedPlan.basePrice * (1 - discountTier.discount));
-  const totalPrice = pricePerLocation * locationCount;
+  // Update payment info
+  document.getElementById('selectedPlanName').textContent = selectedPlan.name;
+  document.getElementById('selectedPlanLocations').textContent = `${locationCount} location${locationCount > 1 ? 's' : ''}`;
+  document.getElementById('selectedPlanPricePerLocation').textContent = `$${Math.round(pricePerLocation)}${discount > 0 ? ` (${discountPercent}% off)` : ''}`;
+  document.getElementById('selectedPlanPrice').textContent = `$${Math.round(finalPrice).toLocaleString()}/month`;
   
-  // Update payment info in modal
-  const planNameEl = document.getElementById('selectedPlanName');
-  const planLocationsEl = document.getElementById('selectedPlanLocations');
-  const planPricePerLocationEl = document.getElementById('selectedPlanPricePerLocation');
-  const planTotalPriceEl = document.getElementById('selectedPlanPrice');
-  
-  if (planNameEl) planNameEl.textContent = selectedPlan.name;
-  if (planLocationsEl) planLocationsEl.textContent = locationCount;
-  if (planPricePerLocationEl) planPricePerLocationEl.textContent = `$${pricePerLocation.toLocaleString()}`;
-  if (planTotalPriceEl) planTotalPriceEl.textContent = `$${totalPrice.toLocaleString()}/month`;
+  // Store location count for payment processing
+  selectedPlan.locationCount = locationCount;
+  selectedPlan.finalPrice = Math.round(finalPrice);
+  selectedPlan.pricePerLocation = Math.round(pricePerLocation);
 
   openModal('paymentModal');
 
-  // Wait for modal to be visible before initializing Stripe Elements
+  // Wait for modal to be visible before mounting Stripe Elements
   setTimeout(() => {
-  // Initialize Stripe Elements if not already done
-    if (!stripe || !elements) {
-      console.warn('Stripe not initialized. Please configure your Stripe publishable key.');
+    // Initialize Stripe Elements if not already done
+    if (!stripe) {
+      console.error('Stripe is not initialized. Please check your publishable key.');
       const displayError = document.getElementById('card-errors');
       if (displayError) {
         displayError.textContent = 'Payment system is not available. Please refresh the page.';
@@ -418,27 +405,15 @@ function openPaymentModal() {
       return;
     }
 
-    // Check if card element already exists and is mounted
-    const cardElementContainer = document.getElementById('card-element');
-    if (!cardElementContainer) {
-      console.error('Card element container not found');
-      return;
-    }
-
-    // Unmount and destroy existing element if it exists
+    // Unmount existing element if it exists
     if (cardElement) {
       try {
         cardElement.unmount();
-        cardElement.destroy();
+        cardElement = null;
       } catch (e) {
-        // Element might not be mounted, ignore
         console.log('No existing card element to unmount');
       }
-      cardElement = null;
     }
-
-    // Clear any existing content in the container
-    cardElementContainer.innerHTML = '';
 
     const style = {
       base: {
@@ -455,25 +430,22 @@ function openPaymentModal() {
     };
 
     try {
-      // Create new card element
-    cardElement = elements.create('card', { style });
-    cardElement.mount('#card-element');
+      cardElement = elements.create('card', { style });
+      cardElement.mount('#card-element');
 
-    // Handle real-time validation errors
-    cardElement.on('change', ({ error }) => {
-      const displayError = document.getElementById('card-errors');
-        if (displayError) {
-      if (error) {
-        displayError.textContent = error.message;
-      } else {
-        displayError.textContent = '';
-      }
+      // Handle real-time validation errors
+      cardElement.on('change', ({ error }) => {
+        const displayError = document.getElementById('card-errors');
+        if (error) {
+          displayError.textContent = error.message;
+        } else {
+          displayError.textContent = '';
         }
       });
-
-      console.log('✅ Stripe Elements mounted successfully');
+      
+      console.log('Stripe Elements mounted successfully');
     } catch (error) {
-      console.error('❌ Error creating Stripe Elements:', error);
+      console.error('Error mounting Stripe Elements:', error);
       const displayError = document.getElementById('card-errors');
       if (displayError) {
         displayError.textContent = 'Error loading payment form: ' + error.message;
@@ -497,122 +469,52 @@ async function handlePayment(event) {
   submitButton.textContent = 'Processing...';
 
   try {
-    // Get pending signup data
-    const pendingSignup = JSON.parse(localStorage.getItem('pending_signup') || '{}');
-    
-    // Get location count - check both possible IDs
-    const locationInput = document.getElementById('locationCount') || document.getElementById('location-count');
-    const locationCount = parseInt(locationInput?.value || '1') || 1;
-    
-    if (!pendingSignup.email) {
-      throw new Error('Please complete signup first');
-    }
-    
-    // Calculate pricing with discount for the subscription
-    const discountTier = getDiscountTier(locationCount);
-    const pricePerLocation = Math.round(selectedPlan.basePrice * (1 - discountTier.discount));
-
-    // Step 1: Create or get customer
-    const customerResponse = await fetch(`${API_BASE_URL}/customers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: pendingSignup.email,
-        name: pendingSignup.name,
-        metadata: {
-          company: pendingSignup.company,
-          planKey: Object.keys(plans).find(key => plans[key].name === selectedPlan.name)
-        }
-      })
-    });
-
-    if (!customerResponse.ok) {
-      const error = await customerResponse.json();
-      throw new Error(error.error || 'Failed to create customer');
-    }
-
-    const { customerId } = await customerResponse.json();
-
-    // Step 2: Create payment method
-    const { paymentMethod, error: pmError } = await stripe.createPaymentMethod({
+    // Create payment method
+    const { paymentMethod, error } = await stripe.createPaymentMethod({
       type: 'card',
       card: cardElement,
     });
 
-    if (pmError) {
-      cardErrors.textContent = pmError.message;
+    if (error) {
+      cardErrors.textContent = error.message;
       submitButton.disabled = false;
       submitButton.textContent = 'Subscribe Now';
       return;
     }
 
-    // Step 3: Create subscription via backend
-    const planKey = Object.keys(plans).find(key => plans[key].name === selectedPlan.name);
+    // In production, send paymentMethod.id to your backend
+    // const response = await fetch(`${API_BASE_URL}/subscriptions/create`, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': `Bearer ${getAuthToken()}`
+    //   },
+    //   body: JSON.stringify({
+    //     paymentMethodId: paymentMethod.id,
+    //     priceId: selectedPlan.priceId,
+    //   })
+    // });
+
+    // Get pending signup data
+    const pendingSignup = JSON.parse(localStorage.getItem('pending_signup') || '{}');
     
-    const subscriptionResponse = await fetch(`${API_BASE_URL}/subscriptions/create`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        customerId,
-        paymentMethodId: paymentMethod.id,
-        planKey,
-        locationCount,
-        metadata: {
-          email: pendingSignup.email,
-          name: pendingSignup.name,
-          company: pendingSignup.company
-        }
-      })
-    });
-
-    if (!subscriptionResponse.ok) {
-      const error = await subscriptionResponse.json();
-      throw new Error(error.error || 'Failed to create subscription');
-    }
-
-    const { clientSecret, subscriptionId } = await subscriptionResponse.json();
-
-    // Step 4: Confirm payment for subscription
-    // For subscriptions, we use confirmPayment with the payment intent client secret
-    const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: paymentMethod.id
-    });
-
-    if (confirmError) {
-      cardErrors.textContent = confirmError.message;
-      submitButton.disabled = false;
-      submitButton.textContent = 'Subscribe Now';
-      return;
-    }
-    
-    // Verify payment was successful
-    if (paymentIntent && paymentIntent.status !== 'succeeded') {
-      throw new Error(`Payment ${paymentIntent.status}. Please try again.`);
-    }
-
-    // Step 5: Store user and subscription info
+    // Create user account with subscription
     const user = {
       name: pendingSignup.name,
       email: pendingSignup.email,
       company: pendingSignup.company,
-      customerId: customerId,
       loggedIn: true
     };
 
     localStorage.setItem('verishelf_user', JSON.stringify(user));
     
-    // Use the pricing already calculated above
-    const totalPrice = pricePerLocation * locationCount;
-    
+    // Store subscription info
     localStorage.setItem('verishelf_subscription', JSON.stringify({
-      subscriptionId,
       plan: selectedPlan.name,
-      planKey,
-      price: pricePerLocation,
+      price: selectedPlan.finalPrice || selectedPlan.price,
+      locationCount: selectedPlan.locationCount || 1,
       basePrice: selectedPlan.basePrice,
-      discount: discountTier.discount,
-      locationCount: locationCount,
-      totalPrice: totalPrice,
+      discount: getDiscount(selectedPlan.locationCount || 1),
       status: 'active',
       startDate: new Date().toISOString(),
       paymentMethodId: paymentMethod.id
@@ -621,27 +523,22 @@ async function handlePayment(event) {
     // Clear pending signup
     localStorage.removeItem('pending_signup');
 
-    // Clear any errors and show success message
-    if (cardErrors) {
-      cardErrors.classList.remove('text-red-400');
-      cardErrors.classList.add('text-green-400');
-      cardErrors.textContent = '✓ Payment successful! Account created and subscription activated. Redirecting to dashboard...';
-    }
-    
-    // Show success state on button
-    submitButton.disabled = true;
-    submitButton.textContent = '✓ Payment Successful!';
-    submitButton.classList.remove('bg-emerald-500', 'hover:bg-emerald-600');
-    submitButton.classList.add('bg-green-600', 'cursor-not-allowed');
+    // Close payment modal
+    closeModal('paymentModal');
 
-    // Redirect to dashboard after a brief delay for better UX
-    setTimeout(() => {
-      window.location.href = '/dashboard/';
-    }, 2000);
+    // Show success and redirect
+    alert('Account created and subscription activated! Redirecting to dashboard...');
+    // Redirect to React app dashboard
+    // For local testing: use dist folder, for production: use /app/
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      window.location.href = '../dist/index.html';
+    } else {
+      window.location.href = '/app/';
+    }
 
   } catch (error) {
     console.error('Payment error:', error);
-    cardErrors.textContent = error.message || 'An error occurred. Please try again.';
+    cardErrors.textContent = 'An error occurred. Please try again.';
     submitButton.disabled = false;
     submitButton.textContent = 'Subscribe Now';
   }
@@ -689,7 +586,11 @@ async function handlePostPurchaseSignup(event) {
     closeModal('postPurchaseModal');
     
     // Redirect to dashboard
-    window.location.href = '/dashboard/';
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      window.location.href = '../dist/index.html';
+    } else {
+      window.location.href = '/app/';
+    }
   } catch (error) {
     alert('Setup failed. Please try again.');
     console.error('Post-purchase signup error:', error);
@@ -763,6 +664,25 @@ document.querySelectorAll('.animate-slide-up').forEach(el => {
 
 // Initialize pricing on page load
 window.addEventListener('load', () => {
+  // Verify Stripe is loaded
+  if (typeof Stripe === 'undefined') {
+    console.error('Stripe.js library not loaded. Please check your internet connection.');
+    alert('Payment system is not available. Please check your internet connection and refresh the page.');
+  } else {
+    console.log('Stripe.js library loaded successfully');
+    
+    // Re-initialize Stripe if needed
+    if (STRIPE_PUBLISHABLE_KEY && !stripe) {
+      try {
+        stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+        elements = stripe.elements();
+        console.log('Stripe initialized on page load');
+      } catch (error) {
+        console.error('Error initializing Stripe on page load:', error);
+      }
+    }
+  }
+  
   updatePricing();
   
   const pendingSignup = localStorage.getItem('pending_signup');
@@ -791,7 +711,11 @@ window.addEventListener('load', () => {
         loginButton.textContent = user.name || user.email || 'Account';
         loginButton.onclick = () => {
           // Show account menu or redirect to dashboard
-          window.location.href = '/dashboard/';
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            window.location.href = '../dist/index.html';
+          } else {
+            window.location.href = '/app/';
+          }
         };
       }
     }

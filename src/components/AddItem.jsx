@@ -4,6 +4,21 @@ import "react-datepicker/dist/react-datepicker.css";
 import { getSettings } from "../utils/settings";
 
 export default function AddItem({ onAdd, selectedLocation, template, onTemplateSelect }) {
+  const [theme, setTheme] = useState(() => {
+    return document.documentElement.getAttribute("data-theme") || "dark";
+  });
+
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setTheme(document.documentElement.getAttribute("data-theme") || "dark");
+    };
+    const observer = new MutationObserver(handleThemeChange);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    return () => observer.disconnect();
+  }, []);
   const [name, setName] = useState("");
   const [expiry, setExpiry] = useState(null);
   const [qty, setQty] = useState(1);
@@ -133,28 +148,36 @@ export default function AddItem({ onAdd, selectedLocation, template, onTemplateS
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
         </div>
-        <h3 className="text-xl font-bold text-white">Add Product</h3>
+        <h3 className={`text-xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>Add Product</h3>
       </div>
 
       <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-2">
-          <label className="block text-sm font-medium text-slate-300 mb-2">Product Name *</label>
+          <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Product Name *</label>
           <input
             type="text"
             placeholder="Enter product name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white placeholder-slate-500"
+            className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+              theme === "light"
+                ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900 placeholder-gray-400"
+                : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white placeholder-slate-500"
+            }`}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">Category</label>
+          <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Category</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white"
+            className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+              theme === "light"
+                ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900"
+                : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
+            }`}
           >
             <option value="">Select category...</option>
             {(settings.categories || []).map((cat) => (
@@ -166,18 +189,22 @@ export default function AddItem({ onAdd, selectedLocation, template, onTemplateS
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">Quantity</label>
+          <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Quantity</label>
           <input
             type="number"
             min="1"
             value={qty}
             onChange={(e) => setQty(e.target.value)}
-            className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white"
+            className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+              theme === "light"
+                ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900"
+                : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
+            }`}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">Price ($)</label>
+          <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Price ($)</label>
           <input
             type="number"
             step="0.01"
@@ -185,15 +212,19 @@ export default function AddItem({ onAdd, selectedLocation, template, onTemplateS
             placeholder="0.00"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white placeholder-slate-500"
+            className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+              theme === "light"
+                ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900 placeholder-gray-400"
+                : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white placeholder-slate-500"
+            }`}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">Expiry Date *</label>
+          <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Expiry Date *</label>
           <div className="relative">
             <svg
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none z-10"
+              className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10 ${theme === "light" ? "text-gray-500" : "text-slate-400"}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -207,21 +238,28 @@ export default function AddItem({ onAdd, selectedLocation, template, onTemplateS
               minDate={new Date()}
               placeholderText="Select expiry date"
               required
-              className="w-full pl-12 pr-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white"
+              className={`w-full pl-12 pr-4 py-3 border rounded-lg outline-none transition-colors ${
+                theme === "light"
+                  ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900"
+                  : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
+              }`}
               wrapperClassName="w-full"
-              calendarClassName="bg-slate-900 border border-slate-800 rounded-lg shadow-xl"
+              calendarClassName={theme === "light" 
+                ? "bg-white border border-gray-300 rounded-lg shadow-xl"
+                : "bg-slate-900 border border-slate-800 rounded-lg shadow-xl"
+              }
             />
           </div>
         </div>
 
         <div className="lg:col-span-4">
-          <label className="block text-sm font-medium text-slate-300 mb-2">Product Photo (Optional)</label>
+          <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Product Photo (Optional)</label>
           {imagePreview ? (
             <div className="relative">
               <img
                 src={imagePreview}
                 alt="Preview"
-                className="w-full h-48 object-cover rounded-lg border border-slate-700"
+                className={`w-full h-48 object-cover rounded-lg border ${theme === "light" ? "border-gray-300" : "border-slate-700"}`}
               />
               <button
                 type="button"
@@ -234,15 +272,19 @@ export default function AddItem({ onAdd, selectedLocation, template, onTemplateS
               </button>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-700 hover:border-emerald-500/50 rounded-lg cursor-pointer transition-colors bg-slate-950/50">
+            <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+              theme === "light"
+                ? "border-gray-300 hover:border-emerald-500/50 bg-gray-50"
+                : "border-slate-700 hover:border-emerald-500/50 bg-slate-950/50"
+            }`}>
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <svg className="w-10 h-10 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-10 h-10 mb-3 ${theme === "light" ? "text-gray-500" : "text-slate-400"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <p className="mb-2 text-sm text-slate-400">
+                <p className={`mb-2 text-sm ${theme === "light" ? "text-gray-600" : "text-slate-400"}`}>
                   <span className="font-semibold">Click to upload</span> or drag and drop
                 </p>
-                <p className="text-xs text-slate-500">PNG, JPG, GIF up to 5MB</p>
+                <p className={`text-xs ${theme === "light" ? "text-gray-500" : "text-slate-500"}`}>PNG, JPG, GIF up to 5MB</p>
               </div>
       <input
                 ref={fileInputRef}

@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+
 export default function SearchAndFilters({
   searchQuery,
   onSearchChange,
@@ -8,15 +10,40 @@ export default function SearchAndFilters({
   categories = [],
   searchInputRef,
 }) {
+  const [theme, setTheme] = useState(() => {
+    return document.documentElement.getAttribute("data-theme") || "dark";
+  });
+
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setTheme(document.documentElement.getAttribute("data-theme") || "dark");
+    };
+    const observer = new MutationObserver(handleThemeChange);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  const inputClass = `w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+    theme === "light"
+      ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900 placeholder-gray-400"
+      : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white placeholder-slate-500"
+  }`;
+
+  const labelClass = `block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`;
+  const iconClass = `absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${theme === "light" ? "text-gray-500" : "text-slate-400"}`;
+
   return (
     <div className="card-gradient rounded-2xl p-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Search */}
         <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-slate-300 mb-2">Search Products</label>
+          <label className={labelClass}>Search Products</label>
           <div className="relative">
             <svg
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400"
+              className={iconClass}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -29,18 +56,18 @@ export default function SearchAndFilters({
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search by name, barcode, category, supplier... (Ctrl+F)"
-              className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white placeholder-slate-500"
+              className={`pl-10 ${inputClass}`}
             />
           </div>
         </div>
 
         {/* Status Filter */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">Filter by Status</label>
+          <label className={labelClass}>Filter by Status</label>
           <select
             value={statusFilter}
             onChange={(e) => onStatusFilterChange(e.target.value)}
-            className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white"
+            className={inputClass}
           >
             <option value="all">All Status</option>
             <option value="expired">Expired</option>
@@ -52,11 +79,11 @@ export default function SearchAndFilters({
         {/* Category Filter */}
         {categories.length > 0 && (
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Filter by Category</label>
+            <label className={labelClass}>Filter by Category</label>
             <select
               value={categoryFilter}
               onChange={(e) => onCategoryFilterChange(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white"
+              className={inputClass}
             >
               <option value="all">All Categories</option>
               {categories.map((cat) => (

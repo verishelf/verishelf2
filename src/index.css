@@ -14,7 +14,7 @@
 }
 
   html[data-theme="light"] body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-gray-100 text-gray-900 antialiased;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02";
   }
 }
@@ -37,11 +37,82 @@
 }
 
   html[data-theme="light"] .card-gradient {
-    @apply bg-gradient-to-br from-white to-gray-50 border border-gray-200;
+    @apply bg-gradient-to-br from-white to-gray-100 border border-gray-300 shadow-sm;
   }
   
   .card-gradient-hover {
     @apply hover:border-emerald-500/30 transition-all duration-300;
+  }
+
+  /* Light theme input styles */
+  html[data-theme="light"] input[type="text"],
+  html[data-theme="light"] input[type="number"],
+  html[data-theme="light"] input[type="email"],
+  html[data-theme="light"] input[type="password"],
+  html[data-theme="light"] input[type="date"],
+  html[data-theme="light"] input[type="search"],
+  html[data-theme="light"] textarea,
+  html[data-theme="light"] select {
+    @apply bg-white border-gray-300 text-gray-900 placeholder-gray-400;
+  }
+
+  html[data-theme="light"] input[type="text"]:hover,
+  html[data-theme="light"] input[type="number"]:hover,
+  html[data-theme="light"] input[type="email"]:hover,
+  html[data-theme="light"] input[type="password"]:hover,
+  html[data-theme="light"] input[type="date"]:hover,
+  html[data-theme="light"] input[type="search"]:hover,
+  html[data-theme="light"] textarea:hover,
+  html[data-theme="light"] select:hover {
+    @apply border-emerald-500/50;
+  }
+
+  html[data-theme="light"] input[type="text"]:focus,
+  html[data-theme="light"] input[type="number"]:focus,
+  html[data-theme="light"] input[type="email"]:focus,
+  html[data-theme="light"] input[type="password"]:focus,
+  html[data-theme="light"] input[type="date"]:focus,
+  html[data-theme="light"] input[type="search"]:focus,
+  html[data-theme="light"] textarea:focus,
+  html[data-theme="light"] select:focus {
+    @apply border-emerald-500 outline-none ring-2 ring-emerald-500/20;
+  }
+
+  /* Light theme button styles - override black/dark buttons */
+  html[data-theme="light"] button.bg-slate-950,
+  html[data-theme="light"] button.bg-slate-900,
+  html[data-theme="light"] button.bg-slate-800,
+  html[data-theme="light"] .bg-slate-950 button,
+  html[data-theme="light"] .bg-slate-900 button,
+  html[data-theme="light"] .bg-slate-800 button {
+    @apply bg-gray-300 hover:bg-gray-400 text-gray-900 border border-gray-400 !important;
+  }
+
+  /* Light theme backgrounds - override dark backgrounds */
+  html[data-theme="light"] .bg-slate-950:not(button):not(input):not(select):not(textarea),
+  html[data-theme="light"] .bg-slate-900:not(button):not(input):not(select):not(textarea),
+  html[data-theme="light"] .bg-slate-800:not(button):not(input):not(select):not(textarea) {
+    @apply bg-white;
+  }
+
+  /* Light theme text colors */
+  html[data-theme="light"] .text-slate-300,
+  html[data-theme="light"] .text-slate-400 {
+    @apply text-gray-700;
+  }
+
+  html[data-theme="light"] .text-slate-500 {
+    @apply text-gray-600;
+  }
+
+  html[data-theme="light"] .text-white:not(button):not(.gradient-text) {
+    @apply text-gray-900;
+  }
+
+  /* Light theme borders */
+  html[data-theme="light"] .border-slate-700,
+  html[data-theme="light"] .border-slate-800 {
+    @apply border-gray-300;
   }
 }
 
@@ -183,8 +254,8 @@
 
 /* Light Theme DatePicker Styles */
 html[data-theme="light"] .react-datepicker__input-container input {
-  background-color: rgb(249 250 251);
-  border: 1px solid rgb(209 213 219);
+  background-color: rgb(255 255 255);
+  border: 1px solid rgb(156 163 175);
   color: rgb(17 24 39);
 }
 
@@ -193,14 +264,14 @@ html[data-theme="light"] .react-datepicker__input-container input:hover {
 }
 
 html[data-theme="light"] .react-datepicker {
-  border: 1px solid rgb(209 213 219);
+  border: 1px solid rgb(156 163 175);
   background-color: rgb(255 255 255);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
 }
 
 html[data-theme="light"] .react-datepicker__header {
   background-color: rgb(255 255 255);
-  border-bottom: 1px solid rgb(209 213 219);
+  border-bottom: 1px solid rgb(156 163 175);
 }
 
 html[data-theme="light"] .react-datepicker__current-month {
