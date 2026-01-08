@@ -19,6 +19,7 @@ This guide will help you set up the VeriShelf database in your Supabase project.
 This will create:
 - `users` table - Stores user profiles
 - `subscriptions` table - Stores subscription information
+- `items` table - Stores user-specific inventory/items data
 - Indexes for better performance
 - Row Level Security (RLS) policies
 - Automatic timestamp triggers
@@ -29,6 +30,7 @@ This will create:
 2. You should see:
    - `users` table
    - `subscriptions` table
+   - `items` table
 
 ### 3. Test Authentication
 
@@ -66,12 +68,30 @@ The authentication is now integrated in the website:
 - `created_at` (TIMESTAMPTZ) - Record creation timestamp
 - `updated_at` (TIMESTAMPTZ) - Last update timestamp
 
+### Items Table
+- `id` (BIGSERIAL, Primary Key)
+- `user_id` (UUID) - References users.id
+- `name` (TEXT) - Product/item name
+- `barcode` (TEXT) - Barcode (nullable)
+- `location` (TEXT) - Store/location name
+- `expiry_date` (DATE) - Expiry date
+- `quantity` (INTEGER) - Quantity
+- `category` (TEXT) - Category (nullable)
+- `cost` (DECIMAL) - Cost (nullable)
+- `notes` (TEXT) - Notes (nullable)
+- `removed` (BOOLEAN) - Whether item is removed
+- `removed_at` (TIMESTAMPTZ) - Removal timestamp (nullable)
+- `added_at` (TIMESTAMPTZ) - Creation timestamp
+- `updated_at` (TIMESTAMPTZ) - Last update timestamp
+
 ## Security
 
 Row Level Security (RLS) is enabled:
 - Users can only view/update their own profile
 - Users can only view/update their own subscriptions
+- Users can only view/update/delete their own items
 - All operations require authentication
+- Each user has completely isolated data
 
 ## Testing
 
@@ -91,6 +111,13 @@ Row Level Security (RLS) is enabled:
 3. **Verify in Supabase**:
    - Check `users` table for new user
    - Check `subscriptions` table for new subscription
+   - After adding items in dashboard, check `items` table (user-specific)
+
+4. **Test Dashboard Isolation**:
+   - Create two different user accounts
+   - Add items in each account
+   - Verify each user only sees their own items
+   - Items should be stored with their `user_id` in the database
 
 ## Troubleshooting
 

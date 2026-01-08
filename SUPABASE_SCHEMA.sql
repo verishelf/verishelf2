@@ -86,3 +86,53 @@ CREATE TRIGGER update_subscriptions_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+-- Items/Inventory table (user-specific inventory data)
+CREATE TABLE IF NOT EXISTS items (
+  id BIGSERIAL PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  barcode TEXT,
+  location TEXT NOT NULL,
+  expiry_date DATE NOT NULL,
+  quantity INTEGER DEFAULT 1,
+  category TEXT,
+  cost DECIMAL(10, 2),
+  notes TEXT,
+  removed BOOLEAN DEFAULT FALSE,
+  removed_at TIMESTAMPTZ,
+  added_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create indexes for items table
+CREATE INDEX IF NOT EXISTS idx_items_user_id ON items(user_id);
+CREATE INDEX IF NOT EXISTS idx_items_location ON items(user_id, location);
+CREATE INDEX IF NOT EXISTS idx_items_expiry_date ON items(user_id, expiry_date);
+CREATE INDEX IF NOT EXISTS idx_items_removed ON items(user_id, removed);
+
+-- Enable RLS for items table
+ALTER TABLE items ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for items table
+-- Users can view their own items
+CREATE POLICY "Users can view own items" ON items
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- Users can insert their own items
+CREATE POLICY "Users can create own items" ON items
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Users can update their own items
+CREATE POLICY "Users can update own items" ON items
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- Users can delete their own items
+CREATE POLICY "Users can delete own items" ON items
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- Trigger to update updated_at for items
+CREATE TRIGGER update_items_updated_at
+  BEFORE UPDATE ON items
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+

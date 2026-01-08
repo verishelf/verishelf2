@@ -42,19 +42,13 @@ import { saveSearch } from "../utils/savedSearches";
 import { t, getLanguage, setLanguage, getAvailableLanguages } from "../utils/i18n";
 import { formatCurrency, getCurrencies } from "../utils/currency";
 import { getTimezones } from "../utils/timezone";
+import { initSupabase, checkAuth, getCurrentUserProfile, getUserSubscription, loadItems, saveItem, deleteItem as deleteItemFromSupabase } from "../utils/supabase";
 
 export default function DashboardEnhanced() {
-  const [items, setItems] = useState(() => {
-    const saved = localStorage.getItem("verishelf-items");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return [];
-      }
-    }
-    return [];
-  });
+  const [user, setUser] = useState(null);
+  const [subscription, setSubscription] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState("All Locations");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -89,6 +83,83 @@ export default function DashboardEnhanced() {
     return saved || "dark";
   });
   const searchInputRef = useRef(null);
+
+  // Initialize Supabase and check authentication on mount
+  useEffect(() => {
+    async function initializeAuth() {
+      try {
+        // Initialize Supabase
+        initSupabase();
+        
+        // Check authentication
+        const authData = await checkAuth();
+        if (!authData || !authData.user) {
+          // Not authenticated - redirect to login
+          const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+          window.location.href = isLocalhost ? '/' : '/';
+          return;
+        }
+
+        // Get user ID
+        const userId = authData.user.id || authData.user?.id || JSON.parse(localStorage.getItem('verishelf_user') || '{}').id;
+        if (!userId) {
+          window.location.href = '/';
+          return;
+        }
+
+        // Load user profile
+        const userProfile = await getCurrentUserProfile();
+        setUser(userProfile);
+
+        // Load subscription
+        const userSubscription = await getUserSubscription(userId);
+        setSubscription(userSubscription);
+
+        // Load items from Supabase
+        const userItems = await loadItems(userId);
+        setItems(userItems);
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        // Fallback to localStorage if Supabase fails
+        const localUser = JSON.parse(localStorage.getItem('verishelf_user') || '{}');
+        if (localUser.loggedIn) {
+          setUser(localUser);
+          const saved = localStorage.getItem('verishelf-items');
+          setItems(saved ? JSON.parse(saved) : []);
+        } else {
+          window.location.href = '/';
+        }
+        setLoading(false);
+      }
+    }
+
+    initializeAuth();
+  }, []);
+
+  // Save items to Supabase when they change
+  useEffect(() => {
+    if (!user || !user.id || items.length === 0) return;
+
+    // Debounce saves to avoid too many API calls
+    const timeoutId = setTimeout(async () => {
+      try {
+        // Save each item to Supabase
+        for (const item of items) {
+          await saveItem(user.id, item);
+        }
+        // Also keep localStorage as backup
+        localStorage.setItem("verishelf-items", JSON.stringify(items));
+      } catch (error) {
+        console.error('Error saving items:', error);
+        // Fallback to localStorage
+        localStorage.setItem("verishelf-items", JSON.stringify(items));
+      }
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [items, user]);
 
   // Listen for theme changes
   useEffect(() => {
@@ -139,10 +210,7 @@ export default function DashboardEnhanced() {
     ? "border-gray-400"
     : "border-slate-800";
 
-  // Save to localStorage
-  useEffect(() => {
-    localStorage.setItem("verishelf-items", JSON.stringify(items));
-  }, [items]);
+  // Items are now saved via the useEffect above that syncs to Supabase
 
   // Setup Automated Expiry Engine (15-minute checks)
   useEffect(() => {
@@ -205,7 +273,9 @@ export default function DashboardEnhanced() {
     }
   }, [settings.enableKeyboardShortcuts]);
 
-  const addItem = (item) => {
+  const addItem = async (item) => {
+    if (!user || !user.id) return;
+
     const newItem = {
       ...item,
       id: Date.now(),
@@ -213,6 +283,15 @@ export default function DashboardEnhanced() {
       addedAt: new Date().toISOString(),
       removed: false,
     };
+    
+    // Save to Supabase immediately
+    if (user.id) {
+      const result = await saveItem(user.id, newItem);
+      if (result.success && result.data) {
+        newItem.id = result.data.id; // Use database ID
+      }
+    }
+    
     setItems([...items, newItem]);
     addHistoryEntry("added", newItem.id, newItem.name);
     createAuditLog("added", newItem.id, newItem.name, {
@@ -222,7 +301,14 @@ export default function DashboardEnhanced() {
     sendWebhookEvent("item_added", newItem);
   };
 
-  const updateItem = (updatedItem) => {
+  const updateItem = async (updatedItem) => {
+    if (!user || !user.id) return;
+
+    // Save to Supabase
+    if (user.id) {
+      await saveItem(user.id, updatedItem);
+    }
+
     setItems(items.map((i) => (i.id === updatedItem.id ? updatedItem : i)));
     addHistoryEntry("edited", updatedItem.id, updatedItem.name, { changes: "Product updated" });
     setEditingItem(null);
@@ -243,9 +329,14 @@ export default function DashboardEnhanced() {
     sendWebhookEvent("item_removed", { ...item, removedAt: new Date().toISOString() });
   };
 
-  const deleteItem = (id, skipConfirmation = false) => {
+  const deleteItem = async (id, skipConfirmation = false) => {
     if (!skipConfirmation && !window.confirm("Are you sure you want to permanently delete this item?")) {
       return;
+    }
+
+    // Delete from Supabase
+    if (user && user.id) {
+      await deleteItemFromSupabase(user.id, id);
     }
     const item = items.find((i) => i.id === id);
     setItems(items.filter((i) => i.id !== id));
@@ -397,6 +488,23 @@ export default function DashboardEnhanced() {
     };
   }, [items]);
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated (shouldn't happen due to useEffect, but safety check)
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${
       theme === "light" 
@@ -417,6 +525,23 @@ export default function DashboardEnhanced() {
             
             {/* Desktop Menu */}
             <div className="hidden lg:flex items-center gap-2">
+              {/* User Info */}
+              <div className={`hidden xl:flex items-center gap-3 text-sm ${textSecondaryClass} mr-4 px-3 py-1.5 rounded-lg ${
+                theme === "light" ? "bg-gray-100" : "bg-slate-800"
+              }`}>
+                <div className="flex flex-col items-end">
+                  <span className={`font-semibold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
+                    {user.name || user.email}
+                  </span>
+                  {user.company && (
+                    <span className="text-xs">{user.company}</span>
+                  )}
+                  {subscription && (
+                    <span className="text-xs text-emerald-400">{subscription.plan} Plan</span>
+                  )}
+                </div>
+              </div>
+              
               <div className={`hidden xl:flex items-center gap-2 text-sm ${textSecondaryClass} mr-2`}>
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse-slow"></div>
                 <span>24/7 Monitoring</span>
