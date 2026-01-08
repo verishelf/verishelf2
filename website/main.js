@@ -4,6 +4,13 @@
 const STRIPE_PUBLISHABLE_KEY = 'pk_test_51SkhdR9ELeRLvDS57hteUCEnMzmsWIGbY5VECFeRHLKShcU6j9144UwCsO6o2TIgDdMWJ7uCKu37Djo5ceTXdd8J00kdAi7eNV';
 const API_BASE_URL = 'http://localhost:3000/api'; // Replace with your backend API URL
 
+// Supabase Configuration
+const SUPABASE_URL = 'https://bblwhwobkthawkbyhiwb.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_1aD8kxQVjJqLjo2LoSx7Ww_f6ucmEvS';
+
+// Initialize Supabase Client (will be initialized on window load)
+let supabaseClient = null;
+
 // Initialize Stripe
 let stripe = null;
 let elements = null;
@@ -216,6 +223,21 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// Helper function to ensure Supabase is initialized
+function ensureSupabase() {
+  if (!supabaseClient) {
+    // Try to initialize one more time
+    if (typeof supabase !== 'undefined' && supabase.createClient) {
+      try {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } catch (e) {
+        console.error('Failed to initialize Supabase:', e);
+      }
+    }
+  }
+  return supabaseClient !== null;
+}
+
 // Authentication Functions
 async function handleLogin(event) {
   event.preventDefault();
@@ -223,20 +245,45 @@ async function handleLogin(event) {
   const email = formData.get('email') || event.target.querySelector('input[type="email"]').value;
   const password = formData.get('password') || event.target.querySelector('input[type="password"]').value;
 
+  if (!ensureSupabase()) {
+    alert('Authentication service is not available. Please refresh the page.');
+    return;
+  }
+
   try {
-    // In production, this would call your backend API
-    // const response = await fetch(`${API_BASE_URL}/auth/login`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ email, password })
-    // });
-    
-    // For demo purposes, simulate login
-    localStorage.setItem('verishelf_user', JSON.stringify({
+    // Authenticate with Supabase
+    const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
       email,
-      name: 'User',
-      loggedIn: true
-    }));
+      password
+    });
+
+    if (authError) {
+      throw authError;
+    }
+
+    // Get user profile from database
+    const { data: profileData, error: profileError } = await supabaseClient
+      .from('users')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single();
+
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.error('Error fetching user profile:', profileError);
+    }
+
+    // Store user info in localStorage
+    const user = {
+      id: authData.user.id,
+      email: authData.user.email,
+      name: profileData?.name || authData.user.email?.split('@')[0] || 'User',
+      company: profileData?.company || '',
+      loggedIn: true,
+      session: authData.session
+    };
+
+    localStorage.setItem('verishelf_user', JSON.stringify(user));
+    localStorage.setItem('supabase_session', JSON.stringify(authData.session));
 
     alert('Login successful! Redirecting to dashboard...');
     closeModal('loginModal');
@@ -245,10 +292,10 @@ async function handleLogin(event) {
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       window.location.href = '../dist/index.html';
     } else {
-      window.location.href = '/app/';
+      window.location.href = '/dashboard/';
     }
   } catch (error) {
-    alert('Login failed. Please check your credentials.');
+    alert('Login failed: ' + (error.message || 'Please check your credentials.'));
     console.error('Login error:', error);
   }
 }
@@ -498,23 +545,88 @@ async function handlePayment(event) {
     // Get pending signup data
     const pendingSignup = JSON.parse(localStorage.getItem('pending_signup') || '{}');
     
-    // Create user account with subscription
+    if (!ensureSupabase()) {
+      throw new Error('Database service is not available. Please refresh the page.');
+    }
+
+    // Create user account in Supabase
+    const { data: authData, error: signUpError } = await supabaseClient.auth.signUp({
+      email: pendingSignup.email,
+      password: pendingSignup.password,
+      options: {
+        data: {
+          name: pendingSignup.name,
+          company: pendingSignup.company
+        }
+      }
+    });
+
+    if (signUpError) {
+      throw new Error('Failed to create account: ' + signUpError.message);
+    }
+
+    // Create user profile in database
+    const { error: profileError } = await supabaseClient
+      .from('users')
+      .insert({
+        id: authData.user.id,
+        email: pendingSignup.email,
+        name: pendingSignup.name,
+        company: pendingSignup.company,
+        created_at: new Date().toISOString()
+      });
+
+    if (profileError) {
+      console.error('Error creating user profile:', profileError);
+      // Continue anyway as auth user is created
+    }
+
+    // Create subscription record in database
+    const locationCount = selectedPlan.locationCount || 1;
+    const { error: subscriptionError } = await supabaseClient
+      .from('subscriptions')
+      .insert({
+        user_id: authData.user.id,
+        plan: selectedPlan.name,
+        plan_key: Object.keys(plans).find(key => plans[key].name === selectedPlan.name),
+        price: selectedPlan.finalPrice || selectedPlan.price,
+        price_per_location: selectedPlan.pricePerLocation || selectedPlan.basePrice,
+        location_count: locationCount,
+        base_price: selectedPlan.basePrice,
+        discount: getDiscount(locationCount),
+        status: 'active',
+        start_date: new Date().toISOString(),
+        payment_method_id: paymentMethod.id,
+        stripe_payment_method_id: paymentMethod.id
+      });
+
+    if (subscriptionError) {
+      console.error('Error creating subscription:', subscriptionError);
+      // Continue anyway
+    }
+
+    // Store user info in localStorage
     const user = {
+      id: authData.user.id,
       name: pendingSignup.name,
       email: pendingSignup.email,
       company: pendingSignup.company,
-      loggedIn: true
+      loggedIn: true,
+      session: authData.session
     };
 
     localStorage.setItem('verishelf_user', JSON.stringify(user));
+    if (authData.session) {
+      localStorage.setItem('supabase_session', JSON.stringify(authData.session));
+    }
     
-    // Store subscription info
+    // Store subscription info in localStorage
     localStorage.setItem('verishelf_subscription', JSON.stringify({
       plan: selectedPlan.name,
       price: selectedPlan.finalPrice || selectedPlan.price,
-      locationCount: selectedPlan.locationCount || 1,
+      locationCount: locationCount,
       basePrice: selectedPlan.basePrice,
-      discount: getDiscount(selectedPlan.locationCount || 1),
+      discount: getDiscount(locationCount),
       status: 'active',
       startDate: new Date().toISOString(),
       paymentMethodId: paymentMethod.id
@@ -564,23 +676,58 @@ async function handlePostPurchaseSignup(event) {
   const password = document.getElementById('pp-password').value;
   const company = document.getElementById('pp-company').value;
 
+  if (!ensureSupabase()) {
+    alert('Database service is not available. Please refresh the page.');
+    return;
+  }
+
   try {
-    // Update user info
+    // Create user account in Supabase
+    const { data: authData, error: signUpError } = await supabaseClient.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+          company
+        }
+      }
+    });
+
+    if (signUpError) {
+      throw new Error('Failed to create account: ' + signUpError.message);
+    }
+
+    // Create user profile in database
+    const { error: profileError } = await supabaseClient
+      .from('users')
+      .insert({
+        id: authData.user.id,
+        email,
+        name,
+        company,
+        created_at: new Date().toISOString()
+      });
+
+    if (profileError) {
+      console.error('Error creating user profile:', profileError);
+      // Continue anyway as auth user is created
+    }
+
+    // Store user info in localStorage
     const user = {
+      id: authData.user.id,
       name,
       email,
       company,
-      loggedIn: true
+      loggedIn: true,
+      session: authData.session
     };
 
     localStorage.setItem('verishelf_user', JSON.stringify(user));
-
-    // In production, this would call your backend API
-    // await fetch(`${API_BASE_URL}/auth/complete-profile`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ name, email, password, company })
-    // });
+    if (authData.session) {
+      localStorage.setItem('supabase_session', JSON.stringify(authData.session));
+    }
 
     alert('Account setup complete! Redirecting to dashboard...');
     closeModal('postPurchaseModal');
@@ -589,10 +736,10 @@ async function handlePostPurchaseSignup(event) {
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       window.location.href = '../dist/index.html';
     } else {
-      window.location.href = '/app/';
+      window.location.href = '/dashboard/';
     }
   } catch (error) {
-    alert('Setup failed. Please try again.');
+    alert('Setup failed: ' + (error.message || 'Please try again.'));
     console.error('Post-purchase signup error:', error);
   }
 }
@@ -664,6 +811,31 @@ document.querySelectorAll('.animate-slide-up').forEach(el => {
 
 // Initialize pricing on page load
 window.addEventListener('load', () => {
+  // Initialize Supabase
+  function initSupabase() {
+    if (typeof supabase !== 'undefined' && supabase.createClient) {
+      try {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('Supabase initialized successfully');
+        return true;
+      } catch (error) {
+        console.error('Error initializing Supabase:', error);
+        return false;
+      }
+    }
+    return false;
+  }
+
+  // Try to initialize immediately
+  if (!initSupabase()) {
+    // Try again after a short delay to ensure CDN is loaded
+    setTimeout(() => {
+      if (!initSupabase()) {
+        console.error('Supabase library not loaded. Please check your internet connection.');
+      }
+    }, 500);
+  }
+  
   // Verify Stripe is loaded
   if (typeof Stripe === 'undefined') {
     console.error('Stripe.js library not loaded. Please check your internet connection.');
