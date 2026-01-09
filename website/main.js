@@ -1,7 +1,9 @@
 // VeriShelf Website - Authentication & Stripe Integration
 
 // Configuration
-const STRIPE_PUBLISHABLE_KEY = 'pk_live_51SkhdB8bUD7YcCS8A420PTsRBsaXAWTPkGTpBgcE2k9VpfBqp4Ezts85jBFrcZb5G32uGXAU4vl38J6EqeaiGeYa00f4hOxTiR';
+// TEST KEYS (for testing) - Switch to live keys for production
+const STRIPE_PUBLISHABLE_KEY = 'pk_test_51SkhdR9ELeRLvDS57hteUCEnMzmsWIGbY5VECFeRHLKShcU6j9144UwCsO6o2TIgDdMWJ7uCKu37Djo5ceTXdd8J00kdAi7eNV';
+// LIVE KEY (for production): pk_live_51SkhdB8bUD7YcCS8A420PTsRBsaXAWTPkGTpBgcE2k9VpfBqp4Ezts85jBFrcZb5G32uGXAU4vl38J6EqeaiGeYa00f4hOxTiR
 const API_BASE_URL = 'http://localhost:3000/api'; // Replace with your backend API URL for production
 
 // Supabase Configuration
