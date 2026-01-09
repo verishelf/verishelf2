@@ -94,7 +94,7 @@ function updatePricing() {
     const subtitleEl = professionalBtn.querySelector('.text-xs');
     if (priceEl) {
       // Show total price, not per location
-      priceEl.textContent = `$${Math.round(professionalTotal).toLocaleString()}`;
+      priceEl.textContent = `$${Math.round(professionalTotal).toLocaleString()}/month`;
     }
     if (subtitleEl) {
       if (locationCount > 1) {
@@ -110,7 +110,7 @@ function updatePricing() {
     const subtitleEl = enterpriseBtn.querySelector('.text-xs');
     if (priceEl) {
       // Show total price, not per location
-      priceEl.textContent = `$${Math.round(enterpriseTotal).toLocaleString()}`;
+      priceEl.textContent = `$${Math.round(enterpriseTotal).toLocaleString()}/month`;
     }
     if (subtitleEl) {
       if (locationCount > 1) {
@@ -339,7 +339,7 @@ function updateSignupPlanPrices() {
       // Update price display
       const priceElement = btn.querySelector('.text-2xl');
       if (priceElement) {
-        priceElement.textContent = `$${Math.round(totalPrice).toLocaleString()}`;
+        priceElement.textContent = `$${Math.round(totalPrice).toLocaleString()}/month`;
       }
       
       // Update subtitle to show per location price and discount
