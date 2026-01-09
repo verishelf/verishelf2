@@ -784,8 +784,7 @@ export default function DashboardEnhanced() {
                       Audit Logs
                     </button>
                   </div>
-                  </div>
-                )}
+                </div>
               </div>
               
               <div className="flex-shrink-0">
