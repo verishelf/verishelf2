@@ -11,11 +11,15 @@ Run this command in your terminal:
 npm install express cors dotenv @supabase/supabase-js
 ```
 
-## Step 2: Get Your Stripe Secret Key
+## Step 2: Stripe Secret Key
 
-1. Go to https://dashboard.stripe.com/test/apikeys
-2. Copy your **Secret key** (starts with `sk_test_`)
-3. You'll need this for the `.env` file
+✅ **Your Stripe LIVE secret key has been added to `.env`**
+
+⚠️ **IMPORTANT SECURITY NOTE:** 
+- Your live key was shared in chat - consider rotating it for security
+- The `.env` file is in `.gitignore` and will NOT be committed to Git
+- For production, use your live key (`sk_live_...`)
+- For testing, use test mode key (`sk_test_...`) from https://dashboard.stripe.com/test/apikeys
 
 ## Step 3: Create Environment File
 
