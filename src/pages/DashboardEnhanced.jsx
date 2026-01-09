@@ -561,7 +561,7 @@ export default function DashboardEnhanced() {
             </div>
             
             {/* Desktop Menu */}
-            <div className="hidden lg:flex items-center gap-1 xl:gap-2 justify-end flex-shrink min-w-0 overflow-x-auto">
+            <div className="hidden lg:flex items-center gap-1 xl:gap-2 justify-end flex-shrink min-w-0">
               {/* User Info */}
               <div className={`hidden 2xl:flex items-center gap-2 text-xs xl:text-sm ${textSecondaryClass} mr-2 xl:mr-4 px-2 xl:px-3 py-1 xl:py-1.5 rounded-lg flex-shrink-0 ${
                 theme === "light" ? "bg-gray-100" : "bg-slate-800"
@@ -626,12 +626,20 @@ export default function DashboardEnhanced() {
                 {showExportMenu && (
                   <div 
                     className="absolute top-full left-0 mt-1 z-[100]"
-                    style={{ display: 'block' }}
-                    onMouseEnter={() => {
+                    style={{ 
+                      display: 'block',
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      marginTop: '0.25rem'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.stopPropagation();
                       console.log('Export dropdown hover enter');
                       setShowExportMenu(true);
                     }}
-                    onMouseLeave={() => {
+                    onMouseLeave={(e) => {
+                      e.stopPropagation();
                       console.log('Export dropdown hover leave');
                       setShowExportMenu(false);
                     }}
@@ -768,12 +776,20 @@ export default function DashboardEnhanced() {
                 {showMoreMenu && (
                   <div 
                     className="absolute top-full right-0 mt-1 z-[100] w-48"
-                    style={{ display: 'block' }}
-                    onMouseEnter={() => {
+                    style={{ 
+                      display: 'block',
+                      position: 'absolute',
+                      top: '100%',
+                      right: 0,
+                      marginTop: '0.25rem'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.stopPropagation();
                       console.log('More dropdown hover enter');
                       setShowMoreMenu(true);
                     }}
-                    onMouseLeave={() => {
+                    onMouseLeave={(e) => {
+                      e.stopPropagation();
                       console.log('More dropdown hover leave');
                       setShowMoreMenu(false);
                     }}
