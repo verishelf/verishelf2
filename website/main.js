@@ -528,9 +528,82 @@ function openPaymentModal() {
 
   openModal('paymentModal');
 
-  // Note: We're using Stripe Checkout which redirects to Stripe's hosted page
-  // No need to mount card elements here - the payment form is just for display
-  // The actual payment will happen on Stripe's secure checkout page
+  // Wait for modal to be visible before mounting Stripe Elements
+  setTimeout(() => {
+    // Initialize Stripe Elements if not already done
+    if (!stripe) {
+      console.error('Stripe is not initialized. Please check your publishable key.');
+      const displayError = document.getElementById('card-errors');
+      if (displayError) {
+        displayError.textContent = 'Payment system is not available. Please refresh the page.';
+      }
+      return;
+    }
+
+    // Ensure elements instance exists
+    if (!elements) {
+      elements = stripe.elements();
+    }
+
+    // Unmount existing element if it exists
+    if (cardElement) {
+      try {
+        cardElement.unmount();
+        cardElement.destroy();
+        cardElement = null;
+      } catch (e) {
+        console.log('Error unmounting existing card element:', e);
+      }
+    }
+
+    // Check if card-element container exists
+    const cardElementContainer = document.getElementById('card-element');
+    if (!cardElementContainer) {
+      console.error('Card element container not found');
+      return;
+    }
+
+    // Clear any existing content
+    cardElementContainer.innerHTML = '';
+
+    const style = {
+      base: {
+        color: '#ffffff',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        fontSize: '16px',
+        '::placeholder': {
+          color: '#64748b',
+        },
+      },
+      invalid: {
+        color: '#ef4444',
+      },
+    };
+
+    try {
+      // Create new card element
+      cardElement = elements.create('card', { style });
+      cardElement.mount('#card-element');
+
+      // Handle real-time validation errors
+      cardElement.on('change', ({ error }) => {
+        const displayError = document.getElementById('card-errors');
+        if (error) {
+          displayError.textContent = error.message;
+        } else {
+          displayError.textContent = '';
+        }
+      });
+      
+      console.log('Stripe Elements mounted successfully');
+    } catch (error) {
+      console.error('Error mounting Stripe Elements:', error);
+      const displayError = document.getElementById('card-errors');
+      if (displayError) {
+        displayError.textContent = 'Error loading payment form: ' + error.message;
+      }
+    }
+  }, 100);
 }
 
 // Payment Processing - Using Stripe Checkout for secure payment
@@ -550,7 +623,7 @@ async function handlePayment(event) {
   }
 
   submitButton.disabled = true;
-  submitButton.textContent = 'Creating checkout session...';
+  submitButton.textContent = 'Processing...';
 
   try {
     // Get pending signup data
