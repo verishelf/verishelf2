@@ -747,7 +747,7 @@ async function handlePayment(event) {
     }
 
     // Create subscription record in database
-    const locationCount = selectedPlan.locationCount || 1;
+    // locationCount is already calculated above
     const { error: subscriptionError } = await supabaseClient
       .from('subscriptions')
       .insert({
