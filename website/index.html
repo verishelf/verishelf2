@@ -723,12 +723,13 @@
         </div>
       </div>
       <form id="paymentForm" onsubmit="handlePayment(event)" class="space-y-4">
-        <div id="card-element" class="p-4 bg-slate-950 border border-slate-700 rounded-lg">
-          <!-- Stripe Elements will create form elements here -->
+        <div class="p-4 bg-slate-950 border border-slate-700 rounded-lg text-center">
+          <p class="text-slate-300 mb-2">You will be redirected to Stripe's secure checkout page to complete your payment.</p>
+          <p class="text-sm text-slate-400">Stripe handles all payment processing securely.</p>
         </div>
         <div id="card-errors" role="alert" class="text-red-400 text-sm"></div>
         <button type="submit" id="submit-button" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-lg transition-colors">
-          Subscribe Now
+          Continue to Payment
         </button>
         <p class="text-xs text-slate-500 text-center">
           Your subscription will start immediately. You can cancel anytime.

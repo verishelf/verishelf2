@@ -528,65 +528,9 @@ function openPaymentModal() {
 
   openModal('paymentModal');
 
-  // Wait for modal to be visible before mounting Stripe Elements
-  setTimeout(() => {
-    // Initialize Stripe Elements if not already done
-    if (!stripe) {
-      console.error('Stripe is not initialized. Please check your publishable key.');
-      const displayError = document.getElementById('card-errors');
-      if (displayError) {
-        displayError.textContent = 'Payment system is not available. Please refresh the page.';
-      }
-      return;
-    }
-
-    // Unmount existing element if it exists
-    if (cardElement) {
-      try {
-        cardElement.unmount();
-        cardElement = null;
-      } catch (e) {
-        console.log('No existing card element to unmount');
-      }
-    }
-
-    const style = {
-      base: {
-        color: '#ffffff',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontSize: '16px',
-        '::placeholder': {
-          color: '#64748b',
-        },
-      },
-      invalid: {
-        color: '#ef4444',
-      },
-    };
-
-    try {
-      cardElement = elements.create('card', { style });
-      cardElement.mount('#card-element');
-
-      // Handle real-time validation errors
-      cardElement.on('change', ({ error }) => {
-        const displayError = document.getElementById('card-errors');
-        if (error) {
-          displayError.textContent = error.message;
-        } else {
-          displayError.textContent = '';
-        }
-      });
-      
-      console.log('Stripe Elements mounted successfully');
-    } catch (error) {
-      console.error('Error mounting Stripe Elements:', error);
-      const displayError = document.getElementById('card-errors');
-      if (displayError) {
-        displayError.textContent = 'Error loading payment form: ' + error.message;
-      }
-    }
-  }, 100);
+  // Note: We're using Stripe Checkout which redirects to Stripe's hosted page
+  // No need to mount card elements here - the payment form is just for display
+  // The actual payment will happen on Stripe's secure checkout page
 }
 
 // Payment Processing - Using Stripe Checkout for secure payment
@@ -606,7 +550,7 @@ async function handlePayment(event) {
   }
 
   submitButton.disabled = true;
-  submitButton.textContent = 'Redirecting to payment...';
+  submitButton.textContent = 'Creating checkout session...';
 
   try {
     // Get pending signup data
