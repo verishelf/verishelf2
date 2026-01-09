@@ -26,7 +26,8 @@ export function initSupabase() {
     supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     return supabaseClient;
   } catch (e) {
-    console.error('Supabase package not found, using CDN');
+    // Supabase package not installed, will use CDN from window.supabase
+    // This is expected if using CDN version
   }
 
   return null;
