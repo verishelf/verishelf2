@@ -94,25 +94,40 @@ export async function getCurrentUserProfile() {
 // Get user subscription
 export async function getUserSubscription(userId) {
   const supabase = getSupabase();
+  
+  // First check localStorage as fallback
+  const localSubscription = JSON.parse(localStorage.getItem('verishelf_subscription') || '{}');
+  
   if (!supabase) {
-    return JSON.parse(localStorage.getItem('verishelf_subscription') || '{}');
+    return localSubscription;
   }
 
-  const { data, error } = await supabase
-    .from('subscriptions')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(); // Use maybeSingle() instead of single() to handle no results gracefully
 
-  if (error) {
-    console.error('Error fetching subscription:', error);
-    return JSON.parse(localStorage.getItem('verishelf_subscription') || '{}');
+    if (error) {
+      console.error('Error fetching subscription:', error);
+      // Return localStorage subscription if database query fails
+      return localSubscription;
+    }
+
+    // If no subscription in database but exists in localStorage, return localStorage
+    if (!data && localSubscription && localSubscription.status === 'active') {
+      return localSubscription;
+    }
+
+    return data || localSubscription;
+  } catch (error) {
+    console.error('Exception fetching subscription:', error);
+    return localSubscription;
   }
-
-  return data;
 }
 
 // Load items from Supabase

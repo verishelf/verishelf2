@@ -115,11 +115,22 @@ export default function DashboardEnhanced() {
         setSubscription(userSubscription);
 
         // Check if user has active subscription
-        if (!userSubscription || userSubscription.status !== 'active') {
+        // Also check localStorage as fallback (for users who signed up before Supabase integration)
+        const localSubscription = JSON.parse(localStorage.getItem('verishelf_subscription') || '{}');
+        const hasActiveSubscription = 
+          (userSubscription && userSubscription.status === 'active') ||
+          (localSubscription && localSubscription.status === 'active');
+
+        if (!hasActiveSubscription) {
           // No active subscription - redirect to website to sign up
           alert('Please complete your subscription to access the dashboard.');
           window.location.replace('/');
           return;
+        }
+
+        // Use subscription from database or fallback to localStorage
+        if (!userSubscription && localSubscription.status === 'active') {
+          setSubscription(localSubscription);
         }
 
         // Load items from Supabase
