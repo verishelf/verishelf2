@@ -603,13 +603,20 @@ export default function DashboardEnhanced() {
               {/* Essential buttons - responsive visibility */}
               <div 
                 className="relative flex-shrink-0"
-                onMouseEnter={() => setShowExportMenu(true)}
-                onMouseLeave={() => setShowExportMenu(false)}
+                onMouseEnter={() => {
+                  console.log('Export menu hover enter');
+                  setShowExportMenu(true);
+                }}
+                onMouseLeave={() => {
+                  console.log('Export menu hover leave');
+                  setShowExportMenu(false);
+                }}
               >
                 <button
                   onClick={handleExport}
                   className={btnClassFlex}
                   title="Export to CSV"
+                  onMouseEnter={() => setShowExportMenu(true)}
                 >
                   <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -618,9 +625,16 @@ export default function DashboardEnhanced() {
                 </button>
                 {showExportMenu && (
                   <div 
-                    className="absolute top-full left-0 mt-1 z-50"
-                    onMouseEnter={() => setShowExportMenu(true)}
-                    onMouseLeave={() => setShowExportMenu(false)}
+                    className="absolute top-full left-0 mt-1 z-[100]"
+                    style={{ display: 'block' }}
+                    onMouseEnter={() => {
+                      console.log('Export dropdown hover enter');
+                      setShowExportMenu(true);
+                    }}
+                    onMouseLeave={() => {
+                      console.log('Export dropdown hover leave');
+                      setShowExportMenu(false);
+                    }}
                   >
                     <div className={dropdownClass}>
                     <button
@@ -728,13 +742,23 @@ export default function DashboardEnhanced() {
               {/* More Menu - consolidates less essential buttons */}
               <div 
                 className="relative flex-shrink-0"
-                onMouseEnter={() => setShowMoreMenu(true)}
-                onMouseLeave={() => setShowMoreMenu(false)}
+                onMouseEnter={() => {
+                  console.log('More menu hover enter');
+                  setShowMoreMenu(true);
+                }}
+                onMouseLeave={() => {
+                  console.log('More menu hover leave');
+                  setShowMoreMenu(false);
+                }}
               >
                 <button
-                  onClick={() => setShowMoreMenu(!showMoreMenu)}
+                  onClick={() => {
+                    console.log('More button clicked');
+                    setShowMoreMenu(!showMoreMenu);
+                  }}
                   className={`${btnClassFlex} hidden xl:flex`}
                   title="More options"
+                  onMouseEnter={() => setShowMoreMenu(true)}
                 >
                   <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
@@ -743,9 +767,16 @@ export default function DashboardEnhanced() {
                 </button>
                 {showMoreMenu && (
                   <div 
-                    className="absolute top-full right-0 mt-1 z-50 w-48"
-                    onMouseEnter={() => setShowMoreMenu(true)}
-                    onMouseLeave={() => setShowMoreMenu(false)}
+                    className="absolute top-full right-0 mt-1 z-[100] w-48"
+                    style={{ display: 'block' }}
+                    onMouseEnter={() => {
+                      console.log('More dropdown hover enter');
+                      setShowMoreMenu(true);
+                    }}
+                    onMouseLeave={() => {
+                      console.log('More dropdown hover leave');
+                      setShowMoreMenu(false);
+                    }}
                   >
                     <div className={dropdownClass}>
                     <button
