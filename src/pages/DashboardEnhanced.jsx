@@ -161,6 +161,19 @@ export default function DashboardEnhanced() {
     initializeAuth();
   }, []);
 
+  // Close More menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (showMoreMenu && !event.target.closest('.more-menu-container')) {
+        setShowMoreMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMoreMenu]);
+
   // Save items to Supabase when they change
   useEffect(() => {
     if (!user || !user.id || items.length === 0) return;
@@ -702,7 +715,7 @@ export default function DashboardEnhanced() {
               </button>
               
               {/* More Menu - consolidates less essential buttons */}
-              <div className="relative flex-shrink-0">
+              <div className="relative flex-shrink-0 more-menu-container">
                 <button
                   onClick={() => setShowMoreMenu(!showMoreMenu)}
                   className={`${btnClassFlex} hidden xl:flex`}
