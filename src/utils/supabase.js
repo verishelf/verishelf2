@@ -261,3 +261,25 @@ export async function batchSaveItems(userId, items) {
   return { success: true, data };
 }
 
+// Logout user
+export async function logout() {
+  const supabase = getSupabase();
+  
+  // Clear Supabase session
+  if (supabase) {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error signing out from Supabase:', error);
+    }
+  }
+  
+  // Clear localStorage
+  localStorage.removeItem('verishelf_user');
+  localStorage.removeItem('supabase_session');
+  localStorage.removeItem('verishelf_subscription');
+  
+  // Redirect to home page
+  window.location.href = '/';
+}
+

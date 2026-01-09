@@ -42,7 +42,7 @@ import { saveSearch } from "../utils/savedSearches";
 import { t, getLanguage, setLanguage, getAvailableLanguages } from "../utils/i18n";
 import { formatCurrency, getCurrencies } from "../utils/currency";
 import { getTimezones } from "../utils/timezone";
-import { initSupabase, checkAuth, getCurrentUserProfile, getUserSubscription, loadItems, saveItem, deleteItem as deleteItemFromSupabase } from "../utils/supabase";
+import { initSupabase, checkAuth, getCurrentUserProfile, getUserSubscription, loadItems, saveItem, deleteItem as deleteItemFromSupabase, logout } from "../utils/supabase";
 
 export default function DashboardEnhanced() {
   const [user, setUser] = useState(null);
@@ -114,6 +114,14 @@ export default function DashboardEnhanced() {
         // Load subscription
         const userSubscription = await getUserSubscription(userId);
         setSubscription(userSubscription);
+
+        // Check if user has active subscription
+        if (!userSubscription || userSubscription.status !== 'active') {
+          // No active subscription - redirect to home to sign up
+          alert('Please complete your subscription to access the dashboard.');
+          window.location.href = '/';
+          return;
+        }
 
         // Load items from Supabase
         const userItems = await loadItems(userId);
@@ -541,6 +549,22 @@ export default function DashboardEnhanced() {
                   )}
                 </div>
               </div>
+              
+              {/* Logout Button */}
+              <button
+                onClick={async () => {
+                  if (window.confirm('Are you sure you want to logout?')) {
+                    await logout();
+                  }
+                }}
+                className={`${btnClassFlex} text-red-400 hover:text-red-300`}
+                title="Logout"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span className="hidden xl:inline">Logout</span>
+              </button>
               
               <div className={`hidden xl:flex items-center gap-2 text-sm ${textSecondaryClass} mr-2`}>
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse-slow"></div>
