@@ -8,14 +8,6 @@
       "headers": {
         "Cache-Control": "public, max-age=31536000, immutable"
       }
-    },
-    {
-      "src": "/style.css",
-      "dest": "/website/style.css"
-    },
-    {
-      "src": "/main.js",
-      "dest": "/website/main.js"
     }
   ],
   "rewrites": [
@@ -26,6 +18,14 @@
     {
       "source": "/dashboard",
       "destination": "/dist/index.html"
+    },
+    {
+      "source": "/style.css",
+      "destination": "/website/style.css"
+    },
+    {
+      "source": "/main.js",
+      "destination": "/website/main.js"
     },
     {
       "source": "/",
