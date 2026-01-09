@@ -11,16 +11,16 @@
       "destination": "/dist/index.html"
     },
     {
-      "source": "/",
-      "destination": "/website/index.html"
-    },
-    {
       "source": "/style.css",
       "destination": "/website/style.css"
     },
     {
       "source": "/main.js",
       "destination": "/website/main.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/website/index.html"
     }
   ],
   "routes": [
