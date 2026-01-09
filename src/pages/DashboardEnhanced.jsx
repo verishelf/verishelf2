@@ -69,6 +69,10 @@ export default function DashboardEnhanced() {
       showCostAnalysis,
       showAlerts
     });
+    // Force a re-render check
+    if (showCalendar || showCostAnalysis || showAlerts) {
+      console.log('At least one panel should be visible!');
+    }
   }, [showCalendar, showCostAnalysis, showAlerts]);
   const [showHistory, setShowHistory] = useState(null);
   const [showQRCode, setShowQRCode] = useState(null);
