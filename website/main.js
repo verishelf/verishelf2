@@ -289,11 +289,7 @@ async function handleLogin(event) {
     closeModal('loginModal');
     
     // Redirect to dashboard
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      window.location.href = '../dist/index.html';
-    } else {
-      window.location.href = '/dashboard/';
-    }
+    window.location.href = '/dashboard/';
   } catch (error) {
     alert('Login failed: ' + (error.message || 'Please check your credentials.'));
     console.error('Login error:', error);
@@ -641,12 +637,7 @@ async function handlePayment(event) {
     // Show success and redirect
     alert('Account created and subscription activated! Redirecting to dashboard...');
     // Redirect to React app dashboard
-    // For local testing: use dist folder, for production: use /dashboard/
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      window.location.href = '../dist/index.html';
-    } else {
-      window.location.href = '/dashboard/';
-    }
+    window.location.href = '/dashboard/';
 
   } catch (error) {
     console.error('Payment error:', error);
@@ -733,11 +724,7 @@ async function handlePostPurchaseSignup(event) {
     closeModal('postPurchaseModal');
     
     // Redirect to dashboard
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      window.location.href = '../dist/index.html';
-    } else {
-      window.location.href = '/dashboard/';
-    }
+    window.location.href = '/dashboard/';
   } catch (error) {
     alert('Setup failed: ' + (error.message || 'Please try again.'));
     console.error('Post-purchase signup error:', error);
@@ -883,11 +870,7 @@ window.addEventListener('load', () => {
         loginButton.textContent = user.name || user.email || 'Account';
         loginButton.onclick = () => {
           // Show account menu or redirect to dashboard
-          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            window.location.href = '../dist/index.html';
-          } else {
-            window.location.href = '/dashboard/';
-          }
+          window.location.href = '/dashboard/';
         };
       }
     }
