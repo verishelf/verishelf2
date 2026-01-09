@@ -799,9 +799,11 @@ export default function DashboardEnhanced() {
                     <div className={dropdownClass}>
                     <button
                       onClick={(e) => { 
+                        e.preventDefault();
                         e.stopPropagation();
-                        setShowCalendar(!showCalendar); 
-                        setTimeout(() => setShowMoreMenu(false), 100);
+                        console.log('Calendar clicked, current state:', showCalendar);
+                        setShowCalendar(true);
+                        setShowMoreMenu(false);
                       }}
                       className={dropdownItemClass}
                     >
@@ -812,9 +814,11 @@ export default function DashboardEnhanced() {
                     </button>
                     <button
                       onClick={(e) => { 
+                        e.preventDefault();
                         e.stopPropagation();
-                        setShowCostAnalysis(!showCostAnalysis); 
-                        setTimeout(() => setShowMoreMenu(false), 100);
+                        console.log('Cost Analysis clicked, current state:', showCostAnalysis);
+                        setShowCostAnalysis(true);
+                        setShowMoreMenu(false);
                       }}
                       className={dropdownItemClass}
                     >
@@ -825,9 +829,11 @@ export default function DashboardEnhanced() {
                     </button>
                     <button
                       onClick={(e) => { 
+                        e.preventDefault();
                         e.stopPropagation();
-                        setShowAlerts(!showAlerts); 
-                        setTimeout(() => setShowMoreMenu(false), 100);
+                        console.log('Alerts clicked, current state:', showAlerts);
+                        setShowAlerts(true);
+                        setShowMoreMenu(false);
                       }}
                       className={dropdownItemClass}
                     >
@@ -838,9 +844,10 @@ export default function DashboardEnhanced() {
                     </button>
                     <button
                       onClick={(e) => { 
+                        e.preventDefault();
                         e.stopPropagation();
                         setShowStoreManager(true); 
-                        setTimeout(() => setShowMoreMenu(false), 100);
+                        setShowMoreMenu(false);
                       }}
                       className={dropdownItemClass}
                     >
@@ -852,9 +859,10 @@ export default function DashboardEnhanced() {
                     </button>
                     <button
                       onClick={(e) => { 
+                        e.preventDefault();
                         e.stopPropagation();
                         setShowMultiLocation(true); 
-                        setTimeout(() => setShowMoreMenu(false), 100);
+                        setShowMoreMenu(false);
                       }}
                       className={dropdownItemClass}
                     >
@@ -865,9 +873,10 @@ export default function DashboardEnhanced() {
                     </button>
                     <button
                       onClick={(e) => { 
+                        e.preventDefault();
                         e.stopPropagation();
                         setShowAuditLogs(true); 
-                        setTimeout(() => setShowMoreMenu(false), 100);
+                        setShowMoreMenu(false);
                       }}
                       className={dropdownItemClass}
                     >
