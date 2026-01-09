@@ -589,49 +589,106 @@ function openPaymentModal() {
   }, 100);
 }
 
-// Payment Processing
+// Payment Processing - Using Stripe Checkout for secure payment
 async function handlePayment(event) {
   event.preventDefault();
   const submitButton = document.getElementById('submit-button');
   const cardErrors = document.getElementById('card-errors');
 
-  if (!stripe || !cardElement) {
+  if (!stripe) {
     alert('Stripe is not initialized. Please check your configuration.');
     return;
   }
 
+  if (!selectedPlan) {
+    alert('Please select a plan first');
+    return;
+  }
+
   submitButton.disabled = true;
-  submitButton.textContent = 'Processing...';
+  submitButton.textContent = 'Redirecting to payment...';
 
   try {
-    // Create payment method
-    const { paymentMethod, error } = await stripe.createPaymentMethod({
-      type: 'card',
-      card: cardElement,
-    });
-
-    if (error) {
-      cardErrors.textContent = error.message;
-      submitButton.disabled = false;
-      submitButton.textContent = 'Subscribe Now';
-      return;
-    }
-
-    // In production, send paymentMethod.id to your backend
-    // const response = await fetch(`${API_BASE_URL}/subscriptions/create`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': `Bearer ${getAuthToken()}`
-    //   },
-    //   body: JSON.stringify({
-    //     paymentMethodId: paymentMethod.id,
-    //     priceId: selectedPlan.priceId,
-    //   })
-    // });
-
     // Get pending signup data
     const pendingSignup = JSON.parse(localStorage.getItem('pending_signup') || '{}');
+    
+    // Calculate final price based on locations
+    const locationCount = selectedPlan.locationCount || getLocationCount();
+    const discount = getDiscount(locationCount);
+    const pricePerLocation = selectedPlan.basePrice * (1 - discount);
+    const finalPrice = Math.round(pricePerLocation * locationCount);
+    
+    // Store signup data with payment info for after checkout
+    const checkoutData = {
+      ...pendingSignup,
+      planKey: Object.keys(plans).find(key => plans[key].name === selectedPlan.name),
+      planName: selectedPlan.name,
+      locationCount: locationCount,
+      finalPrice: finalPrice,
+      pricePerLocation: Math.round(pricePerLocation),
+      basePrice: selectedPlan.basePrice,
+      discount: discount
+    };
+    localStorage.setItem('pending_checkout', JSON.stringify(checkoutData));
+    
+    // Create Stripe Checkout Session via your backend
+    // For now, we'll use a direct approach with Stripe.js
+    // NOTE: In production, you MUST create the checkout session on your backend server
+    // to securely handle the secret key. This is a simplified version for testing.
+    
+    // IMPORTANT: You need to create a backend endpoint that creates a Stripe Checkout Session
+    // The backend should:
+    // 1. Create a Stripe Checkout Session with the calculated amount
+    // 2. Set up a webhook to handle successful payments
+    // 3. Return the session ID to redirect the user
+    
+    // For now, we'll redirect to a payment page that uses Stripe Checkout
+    // You'll need to implement this endpoint: POST /api/create-checkout-session
+    
+    alert('Payment processing requires a backend server. Please set up a Stripe Checkout endpoint.\n\n' +
+          'The calculated amount is: $' + finalPrice + '/month for ' + locationCount + ' location(s).\n\n' +
+          'You need to create a backend API endpoint that:\n' +
+          '1. Creates a Stripe Checkout Session with amount: ' + (finalPrice * 100) + ' cents\n' +
+          '2. Sets up recurring billing (monthly)\n' +
+          '3. Handles the success redirect to /dashboard/\n' +
+          '4. Processes the webhook to create the user account');
+    
+    submitButton.disabled = false;
+    submitButton.textContent = 'Subscribe Now';
+    
+    // TODO: Uncomment this when backend is ready
+    /*
+    const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount: finalPrice * 100, // Convert to cents
+        currency: 'usd',
+        planName: selectedPlan.name,
+        locationCount: locationCount,
+        customerEmail: pendingSignup.email,
+        successUrl: window.location.origin + '/dashboard/?session_id={CHECKOUT_SESSION_ID}',
+        cancelUrl: window.location.origin + '/?canceled=true'
+      })
+    });
+    
+    const { sessionId, error } = await response.json();
+    
+    if (error) {
+      throw new Error(error);
+    }
+    
+    // Redirect to Stripe Checkout
+    const { error: redirectError } = await stripe.redirectToCheckout({
+      sessionId: sessionId
+    });
+    
+    if (redirectError) {
+      throw redirectError;
+    }
+    */
     
     if (!ensureSupabase()) {
       throw new Error('Database service is not available. Please refresh the page.');
