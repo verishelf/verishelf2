@@ -78,6 +78,7 @@ export default function DashboardEnhanced() {
   const [showAuditLogs, setShowAuditLogs] = useState(false);
   const [expiryEngineStatus, setExpiryEngineStatus] = useState(null);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem("verishelf-theme");
     return saved || "dark";
@@ -701,8 +702,9 @@ export default function DashboardEnhanced() {
               </button>
               
               {/* More Menu - consolidates less essential buttons */}
-              <div className="relative group flex-shrink-0">
+              <div className="relative flex-shrink-0">
                 <button
+                  onClick={() => setShowMoreMenu(!showMoreMenu)}
                   className={`${btnClassFlex} hidden xl:flex`}
                   title="More options"
                 >
@@ -711,10 +713,11 @@ export default function DashboardEnhanced() {
                   </svg>
                   <span className="hidden 2xl:inline">More</span>
                 </button>
-                <div className="absolute top-full right-0 mt-1 hidden group-hover:block z-50 w-48">
-                  <div className={dropdownClass}>
+                {showMoreMenu && (
+                  <div className="absolute top-full right-0 mt-1 z-50 w-48">
+                    <div className={dropdownClass}>
                     <button
-                      onClick={() => setShowCalendar(!showCalendar)}
+                      onClick={() => { setShowCalendar(!showCalendar); setShowMoreMenu(false); }}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -723,7 +726,7 @@ export default function DashboardEnhanced() {
                       Calendar
                     </button>
                     <button
-                      onClick={() => setShowCostAnalysis(!showCostAnalysis)}
+                      onClick={() => { setShowCostAnalysis(!showCostAnalysis); setShowMoreMenu(false); }}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -732,7 +735,7 @@ export default function DashboardEnhanced() {
                       Cost Analysis
                     </button>
                     <button
-                      onClick={() => setShowAlerts(!showAlerts)}
+                      onClick={() => { setShowAlerts(!showAlerts); setShowMoreMenu(false); }}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -741,7 +744,7 @@ export default function DashboardEnhanced() {
                       Alerts
                     </button>
                     <button
-                      onClick={() => setShowStoreManager(true)}
+                      onClick={() => { setShowStoreManager(true); setShowMoreMenu(false); }}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -751,7 +754,7 @@ export default function DashboardEnhanced() {
                       Stores
                     </button>
                     <button
-                      onClick={() => setShowMultiLocation(true)}
+                      onClick={() => { setShowMultiLocation(true); setShowMoreMenu(false); }}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -760,7 +763,7 @@ export default function DashboardEnhanced() {
                       Locations
                     </button>
                     <button
-                      onClick={() => setShowAuditLogs(true)}
+                      onClick={() => { setShowAuditLogs(true); setShowMoreMenu(false); }}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -769,7 +772,8 @@ export default function DashboardEnhanced() {
                       Audit Logs
                     </button>
                   </div>
-                </div>
+                  </div>
+                )}
               </div>
               
               <div className="flex-shrink-0">

@@ -558,6 +558,26 @@ async function handlePayment(event) {
     });
 
     if (signUpError) {
+      // Check if error is due to user already existing
+      const errorMessage = signUpError.message?.toLowerCase() || '';
+      if (errorMessage.includes('already registered') || 
+          errorMessage.includes('user already registered') ||
+          errorMessage.includes('email already') ||
+          signUpError.status === 422) {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Subscribe Now';
+        closeModal('paymentModal');
+        alert('An account with this email already exists. Please login instead.');
+        openModal('loginModal');
+        // Pre-fill email in login form
+        setTimeout(() => {
+          const loginEmail = document.getElementById('login-email');
+          if (loginEmail) {
+            loginEmail.value = pendingSignup.email;
+          }
+        }, 100);
+        return;
+      }
       throw new Error('Failed to create account: ' + signUpError.message);
     }
 
