@@ -1,6 +1,7 @@
 {
   "version": 2,
   "buildCommand": "npm run vercel-build",
+  "outputDirectory": ".",
   "rewrites": [
     {
       "source": "/dashboard/:path*",
@@ -20,8 +21,19 @@
       }
     },
     {
+      "src": "/style.css",
+      "dest": "/website/style.css"
+    },
+    {
+      "src": "/main.js",
+      "dest": "/website/main.js"
+    },
+    {
       "src": "/",
-      "dest": "/index.html"
+      "dest": "/website/index.html",
+      "headers": {
+        "Content-Type": "text/html"
+      }
     }
   ]
 }
