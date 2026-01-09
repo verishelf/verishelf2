@@ -650,6 +650,19 @@ async function handlePayment(event) {
     };
     localStorage.setItem('pending_checkout', JSON.stringify(checkoutData));
     
+    // Validate required data
+    if (!pendingSignup.email) {
+      throw new Error('Email is required. Please complete the signup form first.');
+    }
+    
+    console.log('Creating checkout session with:', {
+      amount: finalPrice * 100,
+      planName: selectedPlan.name,
+      locationCount: locationCount,
+      customerEmail: pendingSignup.email,
+      apiUrl: API_BASE_URL
+    });
+    
     // Create Stripe Checkout Session via backend
     const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
       method: 'POST',
@@ -670,10 +683,27 @@ async function handlePayment(event) {
       })
     });
     
-    const result = await response.json();
+    // Check if response is ok before parsing JSON
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        errorData = { error: errorText || `Server error: ${response.status} ${response.statusText}` };
+      }
+      throw new Error(errorData.error || `Server error: ${response.status} ${response.statusText}`);
+    }
     
-    if (!response.ok || result.error) {
-      throw new Error(result.error || 'Failed to create checkout session');
+    const result = await response.json();
+    console.log('Checkout session response:', result);
+    
+    if (result.error) {
+      throw new Error(result.error);
+    }
+    
+    if (!result.sessionId) {
+      throw new Error('No session ID returned from server');
     }
     
     // Redirect to Stripe Checkout
@@ -691,9 +721,31 @@ async function handlePayment(event) {
 
   } catch (error) {
     console.error('Payment error:', error);
-    cardErrors.textContent = 'An error occurred. Please try again.';
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      response: error.response
+    });
+    
+    // Show more detailed error message
+    let errorMessage = 'An error occurred. Please try again.';
+    
+    if (error.message) {
+      errorMessage = error.message;
+    } else if (error.type === 'StripeCardError') {
+      errorMessage = error.message || 'Your card was declined.';
+    } else if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
+      errorMessage = 'Cannot connect to payment server. Please make sure the backend server is running on port 3000.';
+    } else if (error.message?.includes('checkout session')) {
+      errorMessage = 'Failed to create checkout session: ' + error.message;
+    }
+    
+    cardErrors.textContent = errorMessage;
     submitButton.disabled = false;
     submitButton.textContent = 'Subscribe Now';
+    
+    // Also show alert for visibility
+    alert('Payment Error: ' + errorMessage + '\n\nCheck the browser console for more details.');
   }
 }
 
