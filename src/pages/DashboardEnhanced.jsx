@@ -79,6 +79,7 @@ export default function DashboardEnhanced() {
   const [expiryEngineStatus, setExpiryEngineStatus] = useState(null);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem("verishelf-theme");
     return saved || "dark";
@@ -600,7 +601,11 @@ export default function DashboardEnhanced() {
               </div>
               
               {/* Essential buttons - responsive visibility */}
-              <div className="relative group flex-shrink-0">
+              <div 
+                className="relative flex-shrink-0"
+                onMouseEnter={() => setShowExportMenu(true)}
+                onMouseLeave={() => setShowExportMenu(false)}
+              >
                 <button
                   onClick={handleExport}
                   className={btnClassFlex}
@@ -611,8 +616,13 @@ export default function DashboardEnhanced() {
                   </svg>
                   <span className="hidden 2xl:inline">Export</span>
                 </button>
-                <div className="absolute top-full left-0 mt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150 pointer-events-none group-hover:pointer-events-auto z-50">
-                  <div className={dropdownClass}>
+                {showExportMenu && (
+                  <div 
+                    className="absolute top-full left-0 mt-1 z-50"
+                    onMouseEnter={() => setShowExportMenu(true)}
+                    onMouseLeave={() => setShowExportMenu(false)}
+                  >
+                    <div className={dropdownClass}>
                     <button
                       onClick={() => handleExportPDF("full")}
                       className={dropdownItemClass}
@@ -632,7 +642,8 @@ export default function DashboardEnhanced() {
                       Export Expiring (PDF)
                     </button>
                   </div>
-                </div>
+                  </div>
+                )}
               </div>
               
               <button
@@ -715,7 +726,11 @@ export default function DashboardEnhanced() {
               </button>
               
               {/* More Menu - consolidates less essential buttons */}
-              <div className="relative group flex-shrink-0">
+              <div 
+                className="relative flex-shrink-0"
+                onMouseEnter={() => setShowMoreMenu(true)}
+                onMouseLeave={() => setShowMoreMenu(false)}
+              >
                 <button
                   onClick={() => setShowMoreMenu(!showMoreMenu)}
                   className={`${btnClassFlex} hidden xl:flex`}
@@ -726,8 +741,13 @@ export default function DashboardEnhanced() {
                   </svg>
                   <span className="hidden 2xl:inline">More</span>
                 </button>
-                <div className="absolute top-full right-0 mt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150 pointer-events-none group-hover:pointer-events-auto z-50 w-48">
-                  <div className={dropdownClass}>
+                {showMoreMenu && (
+                  <div 
+                    className="absolute top-full right-0 mt-1 z-50 w-48"
+                    onMouseEnter={() => setShowMoreMenu(true)}
+                    onMouseLeave={() => setShowMoreMenu(false)}
+                  >
+                    <div className={dropdownClass}>
                     <button
                       onClick={() => { setShowCalendar(!showCalendar); setShowMoreMenu(false); }}
                       className={dropdownItemClass}
