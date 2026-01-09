@@ -631,33 +631,7 @@ async function handlePayment(event) {
     };
     localStorage.setItem('pending_checkout', JSON.stringify(checkoutData));
     
-    // Create Stripe Checkout Session via your backend
-    // For now, we'll use a direct approach with Stripe.js
-    // NOTE: In production, you MUST create the checkout session on your backend server
-    // to securely handle the secret key. This is a simplified version for testing.
-    
-    // IMPORTANT: You need to create a backend endpoint that creates a Stripe Checkout Session
-    // The backend should:
-    // 1. Create a Stripe Checkout Session with the calculated amount
-    // 2. Set up a webhook to handle successful payments
-    // 3. Return the session ID to redirect the user
-    
-    // For now, we'll redirect to a payment page that uses Stripe Checkout
-    // You'll need to implement this endpoint: POST /api/create-checkout-session
-    
-    alert('Payment processing requires a backend server. Please set up a Stripe Checkout endpoint.\n\n' +
-          'The calculated amount is: $' + finalPrice + '/month for ' + locationCount + ' location(s).\n\n' +
-          'You need to create a backend API endpoint that:\n' +
-          '1. Creates a Stripe Checkout Session with amount: ' + (finalPrice * 100) + ' cents\n' +
-          '2. Sets up recurring billing (monthly)\n' +
-          '3. Handles the success redirect to /dashboard/\n' +
-          '4. Processes the webhook to create the user account');
-    
-    submitButton.disabled = false;
-    submitButton.textContent = 'Subscribe Now';
-    
-    // TODO: Uncomment this when backend is ready
-    /*
+    // Create Stripe Checkout Session via backend
     const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
       method: 'POST',
       headers: {
@@ -670,143 +644,31 @@ async function handlePayment(event) {
         locationCount: locationCount,
         customerEmail: pendingSignup.email,
         successUrl: window.location.origin + '/dashboard/?session_id={CHECKOUT_SESSION_ID}',
-        cancelUrl: window.location.origin + '/?canceled=true'
+        cancelUrl: window.location.origin + '/?canceled=true',
+        metadata: {
+          planKey: Object.keys(plans).find(key => plans[key].name === selectedPlan.name)
+        }
       })
     });
     
-    const { sessionId, error } = await response.json();
+    const result = await response.json();
     
-    if (error) {
-      throw new Error(error);
+    if (!response.ok || result.error) {
+      throw new Error(result.error || 'Failed to create checkout session');
     }
     
     // Redirect to Stripe Checkout
     const { error: redirectError } = await stripe.redirectToCheckout({
-      sessionId: sessionId
+      sessionId: result.sessionId
     });
     
     if (redirectError) {
       throw redirectError;
     }
-    */
     
-    if (!ensureSupabase()) {
-      throw new Error('Database service is not available. Please refresh the page.');
-    }
-
-    // Create user account in Supabase
-    const { data: authData, error: signUpError } = await supabaseClient.auth.signUp({
-      email: pendingSignup.email,
-      password: pendingSignup.password,
-      options: {
-        data: {
-          name: pendingSignup.name,
-          company: pendingSignup.company
-        }
-      }
-    });
-
-    if (signUpError) {
-      // Check if error is due to user already existing
-      const errorMessage = signUpError.message?.toLowerCase() || '';
-      if (errorMessage.includes('already registered') || 
-          errorMessage.includes('user already registered') ||
-          errorMessage.includes('email already') ||
-          signUpError.status === 422) {
-        submitButton.disabled = false;
-        submitButton.textContent = 'Subscribe Now';
-        closeModal('paymentModal');
-        alert('An account with this email already exists. Please login instead.');
-        openModal('loginModal');
-        // Pre-fill email in login form
-        setTimeout(() => {
-          const loginEmail = document.getElementById('login-email');
-          if (loginEmail) {
-            loginEmail.value = pendingSignup.email;
-          }
-        }, 100);
-        return;
-      }
-      throw new Error('Failed to create account: ' + signUpError.message);
-    }
-
-    // Create user profile in database
-    const { error: profileError } = await supabaseClient
-      .from('users')
-      .insert({
-        id: authData.user.id,
-        email: pendingSignup.email,
-        name: pendingSignup.name,
-        company: pendingSignup.company,
-        created_at: new Date().toISOString()
-      });
-
-    if (profileError) {
-      console.error('Error creating user profile:', profileError);
-      // Continue anyway as auth user is created
-    }
-
-    // Create subscription record in database
-    // locationCount is already calculated above
-    const { error: subscriptionError } = await supabaseClient
-      .from('subscriptions')
-      .insert({
-        user_id: authData.user.id,
-        plan: selectedPlan.name,
-        plan_key: Object.keys(plans).find(key => plans[key].name === selectedPlan.name),
-        price: selectedPlan.finalPrice || selectedPlan.price,
-        price_per_location: selectedPlan.pricePerLocation || selectedPlan.basePrice,
-        location_count: locationCount,
-        base_price: selectedPlan.basePrice,
-        discount: getDiscount(locationCount),
-        status: 'active',
-        start_date: new Date().toISOString(),
-        payment_method_id: paymentMethod.id,
-        stripe_payment_method_id: paymentMethod.id
-      });
-
-    if (subscriptionError) {
-      console.error('Error creating subscription:', subscriptionError);
-      // Continue anyway
-    }
-
-    // Store user info in localStorage
-    const user = {
-      id: authData.user.id,
-      name: pendingSignup.name,
-      email: pendingSignup.email,
-      company: pendingSignup.company,
-      loggedIn: true,
-      session: authData.session
-    };
-
-    localStorage.setItem('verishelf_user', JSON.stringify(user));
-    if (authData.session) {
-      localStorage.setItem('supabase_session', JSON.stringify(authData.session));
-    }
-    
-    // Store subscription info in localStorage
-    localStorage.setItem('verishelf_subscription', JSON.stringify({
-      plan: selectedPlan.name,
-      price: selectedPlan.finalPrice || selectedPlan.price,
-      locationCount: locationCount,
-      basePrice: selectedPlan.basePrice,
-      discount: getDiscount(locationCount),
-      status: 'active',
-      startDate: new Date().toISOString(),
-      paymentMethodId: paymentMethod.id
-    }));
-
-    // Clear pending signup
-    localStorage.removeItem('pending_signup');
-
-    // Close payment modal
-    closeModal('paymentModal');
-
-    // Show success and redirect
-    alert('Account created and subscription activated! Redirecting to dashboard...');
-    // Redirect to React app dashboard
-    window.location.href = '/dashboard/';
+    // If we get here, redirect was successful (user will be redirected to Stripe)
+    // User account and subscription will be created via webhook after successful payment
+    return;
 
   } catch (error) {
     console.error('Payment error:', error);
