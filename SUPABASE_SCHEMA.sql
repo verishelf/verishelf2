@@ -31,6 +31,9 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   payment_method_id TEXT, -- Stripe payment method ID
   stripe_payment_method_id TEXT, -- Stripe payment method ID (duplicate for clarity)
   stripe_subscription_id TEXT, -- Stripe subscription ID (if using subscriptions)
+  stripe_product_id TEXT, -- Stripe product ID from Product Catalog
+  stripe_price_id TEXT, -- Stripe price ID from Product Catalog
+  stripe_customer_id TEXT, -- Stripe customer ID
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

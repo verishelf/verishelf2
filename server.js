@@ -45,21 +45,78 @@ app.post('/api/create-checkout-session', async (req, res) => {
       });
     }
 
-    // Create Stripe Checkout Session
+    // Create or retrieve Product in Stripe
+    const productName = `${planName} Plan`;
+    const productDescription = `VeriShelf ${planName} subscription plan`;
+    
+    // Search for existing product
+    let product;
+    const existingProducts = await stripe.products.search({
+      query: `name:'${productName}' AND active:'true'`,
+    });
+
+    if (existingProducts.data.length > 0) {
+      // Use existing product
+      product = existingProducts.data[0];
+      console.log('Using existing product:', product.id);
+    } else {
+      // Create new product
+      product = await stripe.products.create({
+        name: productName,
+        description: productDescription,
+        metadata: {
+          planType: planName.toLowerCase(),
+          service: 'VeriShelf'
+        }
+      });
+      console.log('Created new product:', product.id);
+    }
+
+    // Create or retrieve Price for this specific location count
+    const priceKey = `${product.id}_${locationCount}_${amount}`;
+    let price;
+    
+    // Search for existing price with matching amount and recurring interval
+    const existingPrices = await stripe.prices.list({
+      product: product.id,
+      active: true,
+      type: 'recurring',
+    });
+
+    // Find price with matching amount and location count in metadata
+    const matchingPrice = existingPrices.data.find(p => 
+      p.unit_amount === amount && 
+      p.recurring?.interval === 'month' &&
+      p.metadata?.locationCount === locationCount.toString()
+    );
+
+    if (matchingPrice) {
+      price = matchingPrice;
+      console.log('Using existing price:', price.id);
+    } else {
+      // Create new price
+      price = await stripe.prices.create({
+        product: product.id,
+        unit_amount: amount, // Amount in cents
+        currency: currency,
+        recurring: {
+          interval: 'month',
+        },
+        metadata: {
+          locationCount: locationCount.toString(),
+          planName: planName,
+          planType: planName.toLowerCase(),
+        },
+        nickname: `${planName} - ${locationCount} location(s) - $${(amount / 100).toFixed(2)}/month`,
+      });
+      console.log('Created new price:', price.id, 'for', locationCount, 'locations');
+    }
+
+    // Create Stripe Checkout Session using the Price ID
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
-        price_data: {
-          currency: currency,
-          product_data: {
-            name: `${planName} Plan - ${locationCount} Location(s)`,
-            description: `Monthly subscription for ${locationCount} location(s)`,
-          },
-          recurring: {
-            interval: 'month',
-          },
-          unit_amount: amount, // Amount in cents
-        },
+        price: price.id, // Use the Price ID instead of inline price_data
         quantity: 1,
       }],
       mode: 'subscription', // For recurring monthly payments
@@ -70,11 +127,19 @@ app.post('/api/create-checkout-session', async (req, res) => {
         planName: planName,
         locationCount: locationCount.toString(),
         customerEmail: customerEmail,
+        productId: product.id,
+        priceId: price.id,
         ...metadata
       },
     });
 
-    res.json({ sessionId: session.id });
+    console.log('Checkout session created:', session.id, 'with product:', product.id, 'and price:', price.id);
+
+    res.json({ 
+      sessionId: session.id,
+      productId: product.id,
+      priceId: price.id
+    });
   } catch (error) {
     console.error('Error creating checkout session:', error);
     res.status(500).json({ error: error.message });
