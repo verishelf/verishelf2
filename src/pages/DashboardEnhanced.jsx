@@ -785,18 +785,24 @@ export default function DashboardEnhanced() {
                     }}
                     onMouseEnter={(e) => {
                       e.stopPropagation();
-                      console.log('More dropdown hover enter');
                       setShowMoreMenu(true);
                     }}
                     onMouseLeave={(e) => {
-                      e.stopPropagation();
-                      console.log('More dropdown hover leave');
-                      setShowMoreMenu(false);
+                      // Don't close immediately - allow time for click
+                      setTimeout(() => {
+                        if (!e.currentTarget.matches(':hover')) {
+                          setShowMoreMenu(false);
+                        }
+                      }, 100);
                     }}
                   >
                     <div className={dropdownClass}>
                     <button
-                      onClick={() => { setShowCalendar(!showCalendar); setShowMoreMenu(false); }}
+                      onClick={(e) => { 
+                        e.stopPropagation();
+                        setShowCalendar(!showCalendar); 
+                        setTimeout(() => setShowMoreMenu(false), 100);
+                      }}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -805,7 +811,11 @@ export default function DashboardEnhanced() {
                       Calendar
                     </button>
                     <button
-                      onClick={() => { setShowCostAnalysis(!showCostAnalysis); setShowMoreMenu(false); }}
+                      onClick={(e) => { 
+                        e.stopPropagation();
+                        setShowCostAnalysis(!showCostAnalysis); 
+                        setTimeout(() => setShowMoreMenu(false), 100);
+                      }}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -814,7 +824,11 @@ export default function DashboardEnhanced() {
                       Cost Analysis
                     </button>
                     <button
-                      onClick={() => { setShowAlerts(!showAlerts); setShowMoreMenu(false); }}
+                      onClick={(e) => { 
+                        e.stopPropagation();
+                        setShowAlerts(!showAlerts); 
+                        setTimeout(() => setShowMoreMenu(false), 100);
+                      }}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -823,7 +837,11 @@ export default function DashboardEnhanced() {
                       Alerts
                     </button>
                     <button
-                      onClick={() => { setShowStoreManager(true); setShowMoreMenu(false); }}
+                      onClick={(e) => { 
+                        e.stopPropagation();
+                        setShowStoreManager(true); 
+                        setTimeout(() => setShowMoreMenu(false), 100);
+                      }}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -833,7 +851,11 @@ export default function DashboardEnhanced() {
                       Stores
                     </button>
                     <button
-                      onClick={() => { setShowMultiLocation(true); setShowMoreMenu(false); }}
+                      onClick={(e) => { 
+                        e.stopPropagation();
+                        setShowMultiLocation(true); 
+                        setTimeout(() => setShowMoreMenu(false), 100);
+                      }}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -842,7 +864,11 @@ export default function DashboardEnhanced() {
                       Locations
                     </button>
                     <button
-                      onClick={() => { setShowAuditLogs(true); setShowMoreMenu(false); }}
+                      onClick={(e) => { 
+                        e.stopPropagation();
+                        setShowAuditLogs(true); 
+                        setTimeout(() => setShowMoreMenu(false), 100);
+                      }}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
