@@ -29,3 +29,8 @@ deploy_to_dreamhost/server/.env
 *.njsproj
 *.sln
 *.sw?
+
+# Generated files for Vercel (copied from website/ during build)
+/main.js
+/style.css
+/index.html

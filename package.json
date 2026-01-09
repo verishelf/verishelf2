@@ -8,7 +8,9 @@
     "start": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "vercel-build": "npm run build && node copy-website.js",
+    "copy-website": "node copy-website.js"
   },
   "dependencies": {
     "@stripe/stripe-js": "^8.6.0",

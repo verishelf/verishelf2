@@ -886,7 +886,7 @@ window.addEventListener('load', () => {
           if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
             window.location.href = '../dist/index.html';
           } else {
-            window.location.href = '/app/';
+            window.location.href = '/dashboard/';
           }
         };
       }
