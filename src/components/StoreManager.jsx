@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { getStores, saveStores, addStore, deleteStore, updateStore } from "../utils/stores";
 
-export default function StoreManager({ onClose, onStoresUpdate }) {
+export default function StoreManager({ onClose, onStoresUpdate, maxLocations }) {
   const [stores, setStores] = useState(getStores());
   const [newStoreName, setNewStoreName] = useState("");
   const [editingStore, setEditingStore] = useState(null);
   const [editValue, setEditValue] = useState("");
+  const [showUpgradeMessage, setShowUpgradeMessage] = useState(false);
 
   useEffect(() => {
     setStores(getStores());
@@ -13,12 +14,25 @@ export default function StoreManager({ onClose, onStoresUpdate }) {
 
   const handleAddStore = () => {
     const name = newStoreName.trim();
-    if (name && !stores.some(s => (typeof s === 'string' ? s : s.name) === name)) {
-      const updated = addStore(name);
-      setStores(updated);
-      setNewStoreName("");
-      onStoresUpdate?.(updated);
+    if (!name) return;
+    
+    // Check if store name already exists
+    if (stores.some(s => (typeof s === 'string' ? s : s.name) === name)) {
+      alert('Store name already exists');
+      return;
     }
+    
+    // Check location limit
+    const currentLocationCount = stores.length;
+    if (maxLocations && currentLocationCount >= maxLocations) {
+      setShowUpgradeMessage(true);
+      return;
+    }
+    
+    const updated = addStore(name);
+    setStores(updated);
+    setNewStoreName("");
+    onStoresUpdate?.(updated);
   };
 
   const handleDeleteStore = (store) => {
@@ -76,6 +90,61 @@ export default function StoreManager({ onClose, onStoresUpdate }) {
         </div>
 
         <div className="p-6 space-y-4">
+          {/* Location Limit Info */}
+          {maxLocations && (
+            <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-300">
+                    <span className="font-semibold text-white">{stores.length}</span> of <span className="font-semibold text-emerald-400">{maxLocations}</span> locations used
+                  </p>
+                  {stores.length >= maxLocations && (
+                    <p className="text-xs text-red-400 mt-1">You've reached your location limit</p>
+                  )}
+                </div>
+                {stores.length >= maxLocations && (
+                  <button
+                    onClick={() => {
+                      window.location.href = '/';
+                    }}
+                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-colors text-sm"
+                  >
+                    Upgrade Plan
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Upgrade Message Modal */}
+          {showUpgradeMessage && (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+              <div className="bg-slate-900 rounded-2xl border border-slate-800 max-w-md w-full mx-4 p-6">
+                <h3 className="text-xl font-bold text-white mb-4">Location Limit Reached</h3>
+                <p className="text-slate-300 mb-6">
+                  You've reached your maximum of <span className="font-semibold text-emerald-400">{maxLocations} locations</span> on your current plan.
+                  Upgrade your plan to add more locations.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      window.location.href = '/';
+                    }}
+                    className="flex-1 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-colors"
+                  >
+                    Upgrade Plan
+                  </button>
+                  <button
+                    onClick={() => setShowUpgradeMessage(false)}
+                    className="flex-1 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Add New Store */}
           <div className="flex gap-2">
             <input
@@ -85,10 +154,12 @@ export default function StoreManager({ onClose, onStoresUpdate }) {
               onKeyPress={(e) => e.key === "Enter" && handleAddStore()}
               placeholder="Enter store name (e.g., Store #001, Main Branch)"
               className="flex-1 px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white placeholder-slate-500"
+              disabled={maxLocations && stores.length >= maxLocations}
             />
             <button
               onClick={handleAddStore}
-              className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-lg transition-colors flex items-center gap-2"
+              disabled={maxLocations && stores.length >= maxLocations}
+              className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />

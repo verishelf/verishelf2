@@ -1256,6 +1256,7 @@ export default function DashboardEnhanced() {
           onStoresUpdate={(updatedStores) => {
             setStores(updatedStores);
           }}
+          maxLocations={subscription?.location_count || subscription?.locationCount || null}
         />
       )}
 
