@@ -539,24 +539,24 @@ export default function DashboardEnhanced() {
           ? "bg-white/95 border-gray-300 supports-[backdrop-filter]:bg-white/80 shadow-sm"
           : "bg-slate-950/95 border-slate-800 supports-[backdrop-filter]:bg-slate-950/80"
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="text-xl sm:text-2xl font-bold">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4">
+          <div className="flex justify-between items-center gap-2 sm:gap-4 min-w-0">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold flex-shrink-0">
               <span className="gradient-text">VeriShelf</span>
             </div>
             
             {/* Desktop Menu */}
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-1 xl:gap-2 justify-end flex-shrink min-w-0 overflow-x-auto">
               {/* User Info */}
-              <div className={`hidden xl:flex items-center gap-3 text-sm ${textSecondaryClass} mr-4 px-3 py-1.5 rounded-lg ${
+              <div className={`hidden 2xl:flex items-center gap-2 text-xs xl:text-sm ${textSecondaryClass} mr-2 xl:mr-4 px-2 xl:px-3 py-1 xl:py-1.5 rounded-lg flex-shrink-0 ${
                 theme === "light" ? "bg-gray-100" : "bg-slate-800"
               }`}>
-                <div className="flex flex-col items-end">
-                  <span className={`font-semibold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
+                <div className="flex flex-col items-end min-w-0">
+                  <span className={`font-semibold truncate max-w-[120px] xl:max-w-none ${theme === "light" ? "text-gray-900" : "text-white"}`}>
                     {user.name || user.email}
                   </span>
                   {user.company && (
-                    <span className="text-xs">{user.company}</span>
+                    <span className="text-xs truncate max-w-[120px] xl:max-w-none">{user.company}</span>
                   )}
                   {subscription && (
                     <span className="text-xs text-emerald-400">{subscription.plan} Plan</span>
@@ -571,31 +571,31 @@ export default function DashboardEnhanced() {
                     await logout();
                   }
                 }}
-                className={`${btnClassFlex} text-red-400 hover:text-red-300`}
+                className={`${btnClassFlex} text-red-400 hover:text-red-300 flex-shrink-0`}
                 title="Logout"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span className="hidden xl:inline">Logout</span>
+                <span className="hidden 2xl:inline">Logout</span>
               </button>
               
-              <div className={`hidden xl:flex items-center gap-2 text-sm ${textSecondaryClass} mr-2`}>
+              <div className={`hidden 2xl:flex items-center gap-2 text-xs xl:text-sm ${textSecondaryClass} mr-2 flex-shrink-0`}>
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse-slow"></div>
                 <span>24/7 Monitoring</span>
               </div>
               
-              {/* Essential buttons - always visible on desktop */}
-              <div className="relative group">
+              {/* Essential buttons - responsive visibility */}
+              <div className="relative group flex-shrink-0">
                 <button
                   onClick={handleExport}
                   className={btnClassFlex}
                   title="Export to CSV"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <span className="hidden xl:inline">Export</span>
+                  <span className="hidden 2xl:inline">Export</span>
                 </button>
                 <div className="absolute top-full left-0 mt-1 hidden group-hover:block z-10">
                   <div className={dropdownClass}>
@@ -626,97 +626,100 @@ export default function DashboardEnhanced() {
                 className={btnClassFlex}
                 title="Import CSV"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
-                <span className="hidden xl:inline">Import</span>
+                <span className="hidden 2xl:inline">Import</span>
               </button>
               
+              {/* Secondary buttons - hide on smaller screens */}
               <button
                 onClick={() => setShowCalendar(!showCalendar)}
-                className={btnClassFlex}
+                className={`${btnClassFlex} hidden xl:flex`}
                 title="Calendar"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span className="hidden xl:inline">Calendar</span>
+                <span className="hidden 2xl:inline">Calendar</span>
               </button>
               
               <button
                 onClick={() => setShowCostAnalysis(!showCostAnalysis)}
-                className={btnClassFlex}
+                className={`${btnClassFlex} hidden xl:flex`}
                 title="Cost Analysis"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="hidden xl:inline">Cost</span>
+                <span className="hidden 2xl:inline">Cost</span>
               </button>
               
               <button
                 onClick={() => setShowAlerts(!showAlerts)}
-                className={`${btnClassFlex} relative`}
+                className={`${btnClassFlex} relative hidden xl:flex`}
                 title="Alerts"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
-                <span className="hidden xl:inline">Alerts</span>
+                <span className="hidden 2xl:inline">Alerts</span>
               </button>
               
               <button
                 onClick={() => setShowStoreManager(true)}
-                className={btnClassFlex}
+                className={`${btnClassFlex} hidden xl:flex`}
                 title="Stores"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span className="hidden xl:inline">Stores</span>
+                <span className="hidden 2xl:inline">Stores</span>
               </button>
               
               <button
                 onClick={() => setShowBarcodeScanner(true)}
-                className="px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-sm transition-colors flex items-center gap-1.5"
+                className="px-2 xl:px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-sm transition-colors flex items-center gap-1.5 flex-shrink-0"
                 title="Scan"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                 </svg>
-                <span className="hidden xl:inline">Scan</span>
+                <span className="hidden 2xl:inline">Scan</span>
               </button>
               
               <button
                 onClick={() => setShowMultiLocation(true)}
-                className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg text-sm transition-colors flex items-center gap-1.5"
+                className="px-2 xl:px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg text-sm transition-colors flex items-center gap-1.5 flex-shrink-0 hidden xl:flex"
                 title="Locations"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                <span className="hidden xl:inline">Locations</span>
+                <span className="hidden 2xl:inline">Locations</span>
               </button>
               
               <button
                 onClick={() => setShowAuditLogs(true)}
-                className="px-3 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg text-sm transition-colors flex items-center gap-1.5"
+                className="px-2 xl:px-3 py-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg text-sm transition-colors flex items-center gap-1.5 flex-shrink-0 hidden xl:flex"
                 title="Audit"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <span className="hidden xl:inline">Audit</span>
+                <span className="hidden 2xl:inline">Audit</span>
               </button>
               
-              <ThemeToggle />
+              <div className="flex-shrink-0">
+                <ThemeToggle />
+              </div>
               <button
                 onClick={() => setShowSettings(true)}
-                className={btnClass}
+                className={`${btnClass} flex-shrink-0`}
                 title="Settings"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 xl:w-5 xl:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
