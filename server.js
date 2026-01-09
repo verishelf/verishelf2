@@ -9,6 +9,15 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Validate Stripe secret key is set
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.error('❌ ERROR: STRIPE_SECRET_KEY is not set in .env file!');
+  console.error('Please create a .env file with: STRIPE_SECRET_KEY=sk_test_...');
+  process.exit(1);
+}
+
+console.log('✅ Stripe Secret Key loaded:', process.env.STRIPE_SECRET_KEY.substring(0, 12) + '...');
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
