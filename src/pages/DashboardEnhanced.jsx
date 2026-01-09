@@ -611,7 +611,7 @@ export default function DashboardEnhanced() {
                   </svg>
                   <span className="hidden 2xl:inline">Export</span>
                 </button>
-                <div className="absolute top-full left-0 mt-1 hidden group-hover:block z-10">
+                <div className="absolute top-full left-0 mt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150 pointer-events-none group-hover:pointer-events-auto z-50">
                   <div className={dropdownClass}>
                     <button
                       onClick={() => handleExportPDF("full")}
@@ -726,7 +726,7 @@ export default function DashboardEnhanced() {
                   </svg>
                   <span className="hidden 2xl:inline">More</span>
                 </button>
-                <div className="absolute top-full right-0 mt-1 hidden group-hover:block z-50 w-48">
+                <div className="absolute top-full right-0 mt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-150 pointer-events-none group-hover:pointer-events-auto z-50 w-48">
                   <div className={dropdownClass}>
                     <button
                       onClick={() => { setShowCalendar(!showCalendar); setShowMoreMenu(false); }}
