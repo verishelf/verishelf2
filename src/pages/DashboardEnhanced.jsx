@@ -1110,7 +1110,7 @@ export default function DashboardEnhanced() {
 
         {/* Alerts Panel */}
         {showAlerts && (
-          <div className="mb-8">
+          <div className="mb-8" key="alerts-panel">
             <AlertsPanel
               items={items}
               settings={settings}
@@ -1121,7 +1121,7 @@ export default function DashboardEnhanced() {
 
         {/* Cost Analysis */}
         {showCostAnalysis && (
-          <div className="mb-8">
+          <div className="mb-8" key="cost-analysis-panel">
             <h2 className="text-2xl font-bold text-white mb-4">Cost Analysis</h2>
             <CostAnalysis items={items} />
           </div>
@@ -1129,7 +1129,7 @@ export default function DashboardEnhanced() {
 
         {/* Calendar View */}
         {showCalendar && (
-          <div className="mb-8">
+          <div className="mb-8" key="calendar-panel">
             <ExpiryCalendar items={items} onDateClick={handleDateClick} />
           </div>
         )}
