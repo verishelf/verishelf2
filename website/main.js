@@ -225,6 +225,9 @@ function openSignupModal() {
     proceedBtn.classList.remove('bg-emerald-500', 'text-black', 'hover:bg-emerald-600');
   }
   
+  // Update prices based on current location count
+  updatePricing();
+  
   openModal('signupModal');
 }
 
