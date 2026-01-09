@@ -653,7 +653,7 @@ export default function DashboardEnhanced() {
                       setShowExportMenu(false);
                     }}
                   >
-                    <div className={dropdownClass}>
+                  <div className={dropdownClass}>
                     <button
                       onClick={() => handleExportPDF("full")}
                       className={dropdownItemClass}
@@ -673,7 +673,7 @@ export default function DashboardEnhanced() {
                       Export Expiring (PDF)
                     </button>
                   </div>
-                  </div>
+                </div>
                 )}
               </div>
               
@@ -758,24 +758,27 @@ export default function DashboardEnhanced() {
               
               {/* More Menu - consolidates less essential buttons */}
               <div 
-                className="relative flex-shrink-0"
+                className="relative flex-shrink-0 more-menu-container"
                 onMouseEnter={() => {
                   console.log('More menu hover enter');
                   setShowMoreMenu(true);
                 }}
-                onMouseLeave={() => {
-                  console.log('More menu hover leave');
-                  setShowMoreMenu(false);
+                onMouseLeave={(e) => {
+                  // Only close if we're actually leaving the container (not moving to dropdown)
+                  const relatedTarget = e.relatedTarget;
+                  if (!relatedTarget || !e.currentTarget.contains(relatedTarget)) {
+                    console.log('More menu hover leave');
+                    setTimeout(() => setShowMoreMenu(false), 150);
+                  }
                 }}
               >
-                <button
+              <button
                   onClick={() => {
                     console.log('More button clicked');
                     setShowMoreMenu(!showMoreMenu);
                   }}
                   className={`${btnClassFlex} hidden xl:flex`}
                   title="More options"
-                  onMouseEnter={() => setShowMoreMenu(true)}
                 >
                   <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
@@ -785,10 +788,17 @@ export default function DashboardEnhanced() {
                 {showMoreMenu && (
                   <div 
                     className="absolute top-full right-0 mt-1 z-[100] w-48"
-                    onMouseEnter={() => setShowMoreMenu(true)}
-                    onMouseLeave={() => {
-                      // Delay closing to allow clicks to register
-                      setTimeout(() => setShowMoreMenu(false), 200);
+                    onMouseEnter={() => {
+                      console.log('Dropdown hover enter');
+                      setShowMoreMenu(true);
+                    }}
+                    onMouseLeave={(e) => {
+                      // Only close if we're actually leaving the dropdown
+                      const relatedTarget = e.relatedTarget;
+                      if (!relatedTarget || !e.currentTarget.contains(relatedTarget)) {
+                        console.log('Dropdown hover leave');
+                        setTimeout(() => setShowMoreMenu(false), 150);
+                      }
                     }}
                   >
                     <div className={dropdownClass}>
@@ -798,15 +808,12 @@ export default function DashboardEnhanced() {
                         e.preventDefault();
                         e.stopPropagation();
                         console.log('Calendar clicked, current state:', showCalendar);
-                        // Use functional update to ensure state change
-                        setShowCalendar(prev => {
-                          console.log('Setting Calendar to true, previous:', prev);
-                          return true;
-                        });
-                        // Close menu after a brief delay to ensure click registers
-                        setTimeout(() => {
-                          setShowMoreMenu(false);
-                        }, 50);
+                        // Immediately set state
+                        setShowCalendar(true);
+                        // Force a re-render by updating a dummy state
+                        console.log('Calendar state set to true');
+                        // Close menu immediately
+                        setShowMoreMenu(false);
                       }}
                       className={dropdownItemClass}
                     >
@@ -821,13 +828,9 @@ export default function DashboardEnhanced() {
                         e.preventDefault();
                         e.stopPropagation();
                         console.log('Cost Analysis clicked, current state:', showCostAnalysis);
-                        setShowCostAnalysis(prev => {
-                          console.log('Setting Cost Analysis to true, previous:', prev);
-                          return true;
-                        });
-                        setTimeout(() => {
-                          setShowMoreMenu(false);
-                        }, 50);
+                        setShowCostAnalysis(true);
+                        console.log('Cost Analysis state set to true');
+                        setShowMoreMenu(false);
                       }}
                       className={dropdownItemClass}
                     >
@@ -842,13 +845,9 @@ export default function DashboardEnhanced() {
                         e.preventDefault();
                         e.stopPropagation();
                         console.log('Alerts clicked, current state:', showAlerts);
-                        setShowAlerts(prev => {
-                          console.log('Setting Alerts to true, previous:', prev);
-                          return true;
-                        });
-                        setTimeout(() => {
-                          setShowMoreMenu(false);
-                        }, 50);
+                        setShowAlerts(true);
+                        console.log('Alerts state set to true');
+                        setShowMoreMenu(false);
                       }}
                       className={dropdownItemClass}
                     >
@@ -908,17 +907,17 @@ export default function DashboardEnhanced() {
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
                       Audit Logs
-                    </button>
+              </button>
                   </div>
                 </div>
                 )}
               </div>
               
               <div className="flex-shrink-0">
-                <ThemeToggle />
+              <ThemeToggle />
               </div>
               <button
                 onClick={() => setShowSettings(true)}
