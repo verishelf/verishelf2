@@ -279,7 +279,8 @@ export async function logout() {
   localStorage.removeItem('supabase_session');
   localStorage.removeItem('verishelf_subscription');
   
-  // Redirect to home page
-  window.location.href = '/';
+  // Redirect to website (index.html)
+  // Use window.location.replace to prevent back button from going to dashboard
+  window.location.replace('/');
 }
 

@@ -94,16 +94,15 @@ export default function DashboardEnhanced() {
         // Check authentication
         const authData = await checkAuth();
         if (!authData || !authData.user) {
-          // Not authenticated - redirect to login
-          const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-          window.location.href = isLocalhost ? '/' : '/';
+          // Not authenticated - redirect to website (index.html)
+          window.location.replace('/');
           return;
         }
 
         // Get user ID
         const userId = authData.user.id || authData.user?.id || JSON.parse(localStorage.getItem('verishelf_user') || '{}').id;
         if (!userId) {
-          window.location.href = '/';
+          window.location.replace('/');
           return;
         }
 
@@ -117,9 +116,9 @@ export default function DashboardEnhanced() {
 
         // Check if user has active subscription
         if (!userSubscription || userSubscription.status !== 'active') {
-          // No active subscription - redirect to home to sign up
+          // No active subscription - redirect to website to sign up
           alert('Please complete your subscription to access the dashboard.');
-          window.location.href = '/';
+          window.location.replace('/');
           return;
         }
 
@@ -137,7 +136,7 @@ export default function DashboardEnhanced() {
           const saved = localStorage.getItem('verishelf-items');
           setItems(saved ? JSON.parse(saved) : []);
         } else {
-          window.location.href = '/';
+          window.location.replace('/');
         }
         setLoading(false);
       }
