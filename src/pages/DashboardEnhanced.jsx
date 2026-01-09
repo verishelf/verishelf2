@@ -715,7 +715,11 @@ export default function DashboardEnhanced() {
               </button>
               
               {/* More Menu - consolidates less essential buttons */}
-              <div className="relative flex-shrink-0 more-menu-container group">
+              <div 
+                className="relative flex-shrink-0 more-menu-container group"
+                onMouseEnter={() => setShowMoreMenu(true)}
+                onMouseLeave={() => setShowMoreMenu(false)}
+              >
                 <button
                   onClick={() => setShowMoreMenu(!showMoreMenu)}
                   className={`${btnClassFlex} hidden xl:flex`}
@@ -726,8 +730,13 @@ export default function DashboardEnhanced() {
                   </svg>
                   <span className="hidden 2xl:inline">More</span>
                 </button>
-                <div className="absolute top-full right-0 mt-1 z-50 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto">
-                  <div className={dropdownClass}>
+                {showMoreMenu && (
+                  <div 
+                    className="absolute top-full right-0 mt-1 z-50 w-48"
+                    onMouseEnter={() => setShowMoreMenu(true)}
+                    onMouseLeave={() => setShowMoreMenu(false)}
+                  >
+                    <div className={dropdownClass}>
                     <button
                       onClick={() => { setShowCalendar(!showCalendar); setShowMoreMenu(false); }}
                       className={dropdownItemClass}
