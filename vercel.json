@@ -1,6 +1,23 @@
 {
   "version": 2,
   "buildCommand": "npm run vercel-build",
+  "routes": [
+    {
+      "src": "/dashboard/assets/(.*)",
+      "dest": "/dist/assets/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/style.css",
+      "dest": "/website/style.css"
+    },
+    {
+      "src": "/main.js",
+      "dest": "/website/main.js"
+    }
+  ],
   "rewrites": [
     {
       "source": "/dashboard/:path*",
@@ -11,25 +28,8 @@
       "destination": "/dist/index.html"
     },
     {
-      "source": "/style.css",
-      "destination": "/website/style.css"
-    },
-    {
-      "source": "/main.js",
-      "destination": "/website/main.js"
-    },
-    {
-      "source": "/(.*)",
+      "source": "/",
       "destination": "/website/index.html"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/dashboard/assets/(.*)",
-      "dest": "/dist/assets/$1",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
-      }
     }
   ]
 }
