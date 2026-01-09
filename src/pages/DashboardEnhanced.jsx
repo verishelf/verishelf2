@@ -61,6 +61,15 @@ export default function DashboardEnhanced() {
   const [showCalendar, setShowCalendar] = useState(false);
   const [showCostAnalysis, setShowCostAnalysis] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
+
+  // Debug: Log state changes for panels
+  useEffect(() => {
+    console.log('Panel states changed:', {
+      showCalendar,
+      showCostAnalysis,
+      showAlerts
+    });
+  }, [showCalendar, showCostAnalysis, showAlerts]);
   const [showHistory, setShowHistory] = useState(null);
   const [showQRCode, setShowQRCode] = useState(null);
   const [comparingItems, setComparingItems] = useState([]);
@@ -788,11 +797,17 @@ export default function DashboardEnhanced() {
                       onClick={(e) => { 
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log('Calendar clicked, setting to true');
-                        setShowCalendar(true);
-                        setShowMoreMenu(false);
+                        console.log('Calendar clicked, current state:', showCalendar);
+                        // Use functional update to ensure state change
+                        setShowCalendar(prev => {
+                          console.log('Setting Calendar to true, previous:', prev);
+                          return true;
+                        });
+                        // Close menu after a brief delay to ensure click registers
+                        setTimeout(() => {
+                          setShowMoreMenu(false);
+                        }, 50);
                       }}
-                      onMouseDown={(e) => e.preventDefault()}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -805,11 +820,15 @@ export default function DashboardEnhanced() {
                       onClick={(e) => { 
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log('Cost Analysis clicked, setting to true');
-                        setShowCostAnalysis(true);
-                        setShowMoreMenu(false);
+                        console.log('Cost Analysis clicked, current state:', showCostAnalysis);
+                        setShowCostAnalysis(prev => {
+                          console.log('Setting Cost Analysis to true, previous:', prev);
+                          return true;
+                        });
+                        setTimeout(() => {
+                          setShowMoreMenu(false);
+                        }, 50);
                       }}
-                      onMouseDown={(e) => e.preventDefault()}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -822,11 +841,15 @@ export default function DashboardEnhanced() {
                       onClick={(e) => { 
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log('Alerts clicked, setting to true');
-                        setShowAlerts(true);
-                        setShowMoreMenu(false);
+                        console.log('Alerts clicked, current state:', showAlerts);
+                        setShowAlerts(prev => {
+                          console.log('Setting Alerts to true, previous:', prev);
+                          return true;
+                        });
+                        setTimeout(() => {
+                          setShowMoreMenu(false);
+                        }, 50);
                       }}
-                      onMouseDown={(e) => e.preventDefault()}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -841,9 +864,10 @@ export default function DashboardEnhanced() {
                         e.stopPropagation();
                         console.log('Stores clicked');
                         setShowStoreManager(true); 
-                        setShowMoreMenu(false);
+                        setTimeout(() => {
+                          setShowMoreMenu(false);
+                        }, 50);
                       }}
-                      onMouseDown={(e) => e.preventDefault()}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -859,9 +883,10 @@ export default function DashboardEnhanced() {
                         e.stopPropagation();
                         console.log('Locations clicked');
                         setShowMultiLocation(true); 
-                        setShowMoreMenu(false);
+                        setTimeout(() => {
+                          setShowMoreMenu(false);
+                        }, 50);
                       }}
-                      onMouseDown={(e) => e.preventDefault()}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -876,9 +901,10 @@ export default function DashboardEnhanced() {
                         e.stopPropagation();
                         console.log('Audit Logs clicked');
                         setShowAuditLogs(true); 
-                        setShowMoreMenu(false);
+                        setTimeout(() => {
+                          setShowMoreMenu(false);
+                        }, 50);
                       }}
-                      onMouseDown={(e) => e.preventDefault()}
                       className={dropdownItemClass}
                     >
                       <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
