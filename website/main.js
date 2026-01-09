@@ -85,22 +85,45 @@ function updatePricing() {
     ? `$${Math.round(enterpriseTotal).toLocaleString()}/month total` 
     : '';
   
-  // Update signup modal plan buttons if modal is open
+  // Update signup modal plan buttons if modal is open - show TOTAL price
   const professionalBtn = document.getElementById('plan-btn-professional');
   const enterpriseBtn = document.getElementById('plan-btn-enterprise');
   
   if (professionalBtn) {
     const priceEl = professionalBtn.querySelector('.text-2xl');
+    const subtitleEl = professionalBtn.querySelector('.text-xs');
     if (priceEl) {
-      priceEl.textContent = `$${Math.round(professionalPrice)}`;
+      // Show total price, not per location
+      priceEl.textContent = `$${Math.round(professionalTotal).toLocaleString()}`;
+    }
+    if (subtitleEl) {
+      if (locationCount > 1) {
+        subtitleEl.textContent = `$${Math.round(professionalPrice)}/location${discount > 0 ? ` (${discountPercent}% off)` : ''} • ${locationCount} locations`;
+      } else {
+        subtitleEl.textContent = `$${Math.round(professionalPrice)}/location${discount > 0 ? ` (${discountPercent}% off)` : ''}`;
+      }
     }
   }
   
   if (enterpriseBtn) {
     const priceEl = enterpriseBtn.querySelector('.text-2xl');
+    const subtitleEl = enterpriseBtn.querySelector('.text-xs');
     if (priceEl) {
-      priceEl.textContent = `$${Math.round(enterprisePrice)}`;
+      // Show total price, not per location
+      priceEl.textContent = `$${Math.round(enterpriseTotal).toLocaleString()}`;
     }
+    if (subtitleEl) {
+      if (locationCount > 1) {
+        subtitleEl.textContent = `$${Math.round(enterprisePrice)}/location${discount > 0 ? ` (${discountPercent}% off)` : ''} • ${locationCount} locations`;
+      } else {
+        subtitleEl.textContent = `$${Math.round(enterprisePrice)}/location${discount > 0 ? ` (${discountPercent}% off)` : ''}`;
+      }
+    }
+  }
+  
+  // Update signup step 2 price if visible
+  if (selectedPlan && document.getElementById('signup-step-2') && !document.getElementById('signup-step-2').classList.contains('hidden')) {
+    updateSignupStep2Price();
   }
   
   // Update discount info
@@ -296,6 +319,39 @@ async function handleLogin(event) {
   }
 }
 
+// Update plan prices in signup modal based on location count
+function updateSignupPlanPrices() {
+  const locationCount = getLocationCount();
+  const discount = getDiscount(locationCount);
+  const discountPercent = Math.round(discount * 100);
+  
+  // Update both plan buttons
+  Object.keys(plans).forEach(planKey => {
+    const plan = plans[planKey];
+    const btn = document.getElementById(`plan-btn-${planKey}`);
+    if (btn) {
+      const pricePerLocation = plan.basePrice * (1 - discount);
+      const totalPrice = pricePerLocation * locationCount;
+      
+      // Update price display
+      const priceElement = btn.querySelector('.text-2xl');
+      if (priceElement) {
+        priceElement.textContent = `$${Math.round(totalPrice).toLocaleString()}`;
+      }
+      
+      // Update subtitle to show per location price and discount
+      const subtitleElement = btn.querySelector('.text-xs');
+      if (subtitleElement) {
+        if (locationCount > 1) {
+          subtitleElement.textContent = `$${Math.round(pricePerLocation)}/location${discount > 0 ? ` (${discountPercent}% off)` : ''} • ${locationCount} locations`;
+        } else {
+          subtitleElement.textContent = `$${Math.round(pricePerLocation)}/location${discount > 0 ? ` (${discountPercent}% off)` : ''}`;
+        }
+      }
+    }
+  });
+}
+
 // Plan selection in signup modal
 function selectSignupPlan(planKey) {
   selectedPlan = plans[planKey];
@@ -316,14 +372,8 @@ function selectSignupPlan(planKey) {
     selectedBtn.classList.add('border-emerald-500', 'bg-emerald-500/10');
     selectedBtn.classList.remove('border-slate-700');
     
-    // Update price display in signup modal
-    const locationCount = getLocationCount();
-    const discount = getDiscount(locationCount);
-    const discountedPrice = selectedPlan.basePrice * (1 - discount);
-    const priceElement = selectedBtn.querySelector('.text-2xl');
-    if (priceElement) {
-      priceElement.textContent = `$${Math.round(discountedPrice)}`;
-    }
+    // Update price display
+    updateSignupPlanPrices();
   }
 
   // Enable proceed button
@@ -332,6 +382,42 @@ function selectSignupPlan(planKey) {
     proceedBtn.disabled = false;
     proceedBtn.classList.remove('bg-slate-700', 'text-slate-400', 'cursor-not-allowed');
     proceedBtn.classList.add('bg-emerald-500', 'text-black', 'hover:bg-emerald-600');
+  }
+}
+
+// Update price display in signup step 2
+function updateSignupStep2Price() {
+  if (!selectedPlan) return;
+  
+  const locationCount = getLocationCount();
+  const discount = getDiscount(locationCount);
+  const pricePerLocation = selectedPlan.basePrice * (1 - discount);
+  const totalPrice = pricePerLocation * locationCount;
+  const discountPercent = Math.round(discount * 100);
+  
+  // Update price display in step 2
+  const priceDisplay = document.getElementById('signup-step-2-price');
+  if (priceDisplay) {
+    priceDisplay.innerHTML = `
+      <div class="p-4 bg-slate-800 rounded-lg mb-4">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-slate-300">Plan:</span>
+          <span class="text-white font-semibold">${selectedPlan.name}</span>
+        </div>
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-slate-300">Locations:</span>
+          <span class="text-white font-semibold">${locationCount}</span>
+        </div>
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-slate-300">Price per location:</span>
+          <span class="text-emerald-400 font-semibold">$${Math.round(pricePerLocation)}${discount > 0 ? ` <span class="text-xs">(${discountPercent}% off)</span>` : ''}</span>
+        </div>
+        <div class="flex justify-between items-center pt-2 border-t border-slate-700">
+          <span class="text-slate-300 font-semibold">Total monthly:</span>
+          <span class="text-emerald-400 font-bold text-xl">$${Math.round(totalPrice).toLocaleString()}</span>
+        </div>
+      </div>
+    `;
   }
 }
 
@@ -344,6 +430,9 @@ function proceedToSignupForm() {
   // Hide step 1, show step 2
   document.getElementById('signup-step-1').classList.add('hidden');
   document.getElementById('signup-step-2').classList.remove('hidden');
+  
+  // Update price display in step 2
+  updateSignupStep2Price();
 }
 
 function goBackToPlanSelection() {
