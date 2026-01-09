@@ -413,11 +413,11 @@ function updateSignupStep2Price() {
         </div>
         <div class="flex justify-between items-center mb-2">
           <span class="text-slate-300">Price per location:</span>
-          <span class="text-emerald-400 font-semibold">$${Math.round(pricePerLocation)}${discount > 0 ? ` <span class="text-xs">(${discountPercent}% off)</span>` : ''}</span>
+          <span class="text-emerald-400 font-semibold">$${Math.round(pricePerLocation)}/month${discount > 0 ? ` <span class="text-xs">(${discountPercent}% off)</span>` : ''}</span>
         </div>
         <div class="flex justify-between items-center pt-2 border-t border-slate-700">
           <span class="text-slate-300 font-semibold">Total monthly:</span>
-          <span class="text-emerald-400 font-bold text-xl">$${Math.round(totalPrice).toLocaleString()}</span>
+          <span class="text-emerald-400 font-bold text-xl">$${Math.round(totalPrice).toLocaleString()}/month</span>
         </div>
       </div>
     `;
@@ -518,7 +518,7 @@ function openPaymentModal() {
   // Update payment info
   document.getElementById('selectedPlanName').textContent = selectedPlan.name;
   document.getElementById('selectedPlanLocations').textContent = `${locationCount} location${locationCount > 1 ? 's' : ''}`;
-  document.getElementById('selectedPlanPricePerLocation').textContent = `$${Math.round(pricePerLocation)}${discount > 0 ? ` (${discountPercent}% off)` : ''}`;
+  document.getElementById('selectedPlanPricePerLocation').textContent = `$${Math.round(pricePerLocation)}/month${discount > 0 ? ` (${discountPercent}% off)` : ''}`;
   document.getElementById('selectedPlanPrice').textContent = `$${Math.round(finalPrice).toLocaleString()}/month`;
   
   // Store location count for payment processing
