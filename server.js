@@ -415,9 +415,12 @@ app.get('/api/health', (req, res) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 VeriShelf Payment Server running on port ${PORT}`);
-  console.log(`📝 Make sure to set STRIPE_SECRET_KEY environment variable`);
-  if (!process.env.STRIPE_SECRET_KEY) {
-    console.warn('⚠️  STRIPE_SECRET_KEY not set! Payments will not work.');
+  if (process.env.STRIPE_SECRET_KEY) {
+    const keyPreview = process.env.STRIPE_SECRET_KEY.substring(0, 20) + '...';
+    console.log(`✅ Stripe Secret Key loaded: ${keyPreview}`);
+  } else {
+    console.error('❌ STRIPE_SECRET_KEY not set! Payments will not work.');
+    console.error('Create a .env file with: STRIPE_SECRET_KEY=sk_test_...');
   }
 });
 
