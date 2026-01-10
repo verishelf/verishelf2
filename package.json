@@ -3,17 +3,20 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "scripts": {
     "dev": "vite",
-    "start": "vite",
+    "start": "node server.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "vercel-build": "npm run build && node copy-website.js",
     "copy-website": "node copy-website.js",
     "server": "node server.js",
-    "server:dev": "node --watch server.js",
-    "heroku-postbuild": "npm install --include=optional --legacy-peer-deps || npm install --legacy-peer-deps"
+    "server:dev": "node --watch server.js"
   },
   "dependencies": {
     "@stripe/stripe-js": "^8.6.0",
