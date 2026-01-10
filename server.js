@@ -24,7 +24,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+// CORS configuration - allow requests from verishelf.com
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://www.verishelf.com',
+    'https://verishelf.com',
+    'https://api.verishelf.com' // If using subdomain
+  ],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.raw({ type: 'application/json' })); // For webhook signature verification
 
@@ -407,6 +417,20 @@ function calculateDiscount(locationCount) {
   return 0;
 }
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'VeriShelf Payment API',
+    status: 'running',
+    endpoints: {
+      health: '/api/health',
+      createCheckout: '/api/create-checkout-session',
+      webhook: '/api/webhook'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -421,6 +445,15 @@ app.listen(PORT, () => {
   } else {
     console.error('❌ STRIPE_SECRET_KEY not set! Payments will not work.');
     console.error('Create a .env file with: STRIPE_SECRET_KEY=sk_test_...');
+  }
+  
+  if (process.env.STRIPE_WEBHOOK_SECRET) {
+    const webhookPreview = process.env.STRIPE_WEBHOOK_SECRET.substring(0, 12) + '...';
+    console.log(`✅ Webhook Secret loaded: ${webhookPreview}`);
+    console.log(`📡 Webhook endpoint: http://localhost:${PORT}/api/webhook`);
+  } else {
+    console.warn('⚠️  STRIPE_WEBHOOK_SECRET not set. Webhook signature verification disabled.');
+    console.warn('   For production, add STRIPE_WEBHOOK_SECRET to .env');
   }
 });
 
