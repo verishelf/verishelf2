@@ -25,21 +25,35 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 // CORS configuration - allow requests from verishelf.com
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://www.verishelf.com',
-    'https://verishelf.com',
-    'http://www.verishelf.com',
-    'http://verishelf.com',
-    'https://api.verishelf.com',
-    /^https?:\/\/(www\.)?verishelf\.com$/ // Allow both www and non-www
-  ],
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow localhost for development
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return callback(null, true);
+    }
+    
+    // Allow verishelf.com domains
+    if (origin.includes('verishelf.com')) {
+      return callback(null, true);
+    }
+    
+    callback(null, true); // Allow all origins for now (can restrict later)
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
+
 app.use(express.json());
 app.use(express.raw({ type: 'application/json' })); // For webhook signature verification
 
