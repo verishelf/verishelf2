@@ -31,9 +31,14 @@ app.use(cors({
     'http://localhost:3000',
     'https://www.verishelf.com',
     'https://verishelf.com',
-    'https://api.verishelf.com' // If using subdomain
+    'http://www.verishelf.com',
+    'http://verishelf.com',
+    'https://api.verishelf.com',
+    /^https?:\/\/(www\.)?verishelf\.com$/ // Allow both www and non-www
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json());
 app.use(express.raw({ type: 'application/json' })); // For webhook signature verification
