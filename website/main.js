@@ -183,32 +183,11 @@ function decrementLocations() {
   }
 }
 
-// Signup modal location functions
-function incrementSignupLocations() {
-  const input = document.getElementById('signup-location-count');
-  if (input) {
-    input.value = parseInt(input.value || 1) + 1;
-    updateSignupLocationPricing();
-  }
-}
-
-function decrementSignupLocations() {
-  const input = document.getElementById('signup-location-count');
-  if (input) {
-    const current = parseInt(input.value || 1);
-    if (current > 1) {
-      input.value = current - 1;
-      updateSignupLocationPricing();
-    }
-  }
-}
-
-// Update pricing in signup modal based on location count
+// Update pricing in signup modal based on location count (uses main page location input)
 function updateSignupLocationPricing() {
   if (!selectedPlan) return;
   
-  const locationInput = document.getElementById('signup-location-count');
-  const locationCount = Math.max(1, parseInt(locationInput?.value || 1) || 1);
+  const locationCount = getLocationCount();
   const discount = getDiscount(locationCount);
   const pricePerLocation = selectedPlan.basePrice * (1 - discount);
   const totalPrice = pricePerLocation * locationCount;
@@ -237,20 +216,6 @@ function updateSignupLocationPricing() {
         </div>
       </div>
     `;
-  }
-  
-  // Update discount message
-  const discountMsg = document.getElementById('signup-location-discount');
-  if (discountMsg) {
-    if (discount > 0) {
-      discountMsg.textContent = `${discountPercent}% volume discount applied`;
-      discountMsg.classList.remove('text-slate-400');
-      discountMsg.classList.add('text-emerald-400', 'font-semibold');
-    } else {
-      discountMsg.textContent = 'Enter 6+ locations for volume discounts';
-      discountMsg.classList.remove('text-emerald-400', 'font-semibold');
-      discountMsg.classList.add('text-slate-400');
-    }
   }
 }
 
@@ -510,16 +475,7 @@ function proceedToSignupForm() {
   document.getElementById('signup-step-1').classList.add('hidden');
   document.getElementById('signup-step-2').classList.remove('hidden');
   
-  // Initialize signup location input with current location count from main page
-  const signupLocationInput = document.getElementById('signup-location-count');
-  const mainLocationInput = document.getElementById('location-count');
-  if (signupLocationInput && mainLocationInput) {
-    signupLocationInput.value = mainLocationInput.value || 1;
-  } else if (signupLocationInput) {
-    signupLocationInput.value = 1;
-  }
-  
-  // Update price display in step 2
+  // Update price display in step 2 (uses main page location input)
   updateSignupStep2Price();
 }
 
@@ -593,9 +549,8 @@ function openPaymentModal() {
     return;
   }
 
-  // Get location count from signup modal input if available, otherwise from main page
-  const signupLocationInput = document.getElementById('signup-location-count');
-  const locationCount = signupLocationInput ? Math.max(1, parseInt(signupLocationInput.value || 1) || 1) : getLocationCount();
+  // Get location count from main page input
+  const locationCount = getLocationCount();
   const discount = getDiscount(locationCount);
   const pricePerLocation = selectedPlan.basePrice * (1 - discount);
   const finalPrice = pricePerLocation * locationCount;
