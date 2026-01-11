@@ -440,14 +440,15 @@ export default function DashboardEnhanced() {
     }
   };
 
-  const handleBulkDelete = () => {
-    if (selectedItems.length === 0) return;
+  const handleBulkDelete = async () => {
+    if (selectedItems.length === 0 || !user || !user.id) return;
     if (window.confirm(`Permanently delete ${selectedItems.length} item(s)? This action cannot be undone.`)) {
-      // Delete all selected items at once, skipping individual confirmations
+      // Delete all selected items from Supabase
       const itemsToDelete = items.filter((i) => selectedItems.includes(i.id));
-      itemsToDelete.forEach((item) => {
+      for (const item of itemsToDelete) {
+        await deleteItemFromSupabase(user.id, item.id);
         addHistoryEntry("deleted", item.id, item.name || "");
-      });
+      }
       setItems(items.filter((i) => !selectedItems.includes(i.id)));
       setSelectedItems([]);
     }
