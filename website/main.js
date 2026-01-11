@@ -183,6 +183,77 @@ function decrementLocations() {
   }
 }
 
+// Signup modal location functions
+function incrementSignupLocations() {
+  const input = document.getElementById('signup-location-count');
+  if (input) {
+    input.value = parseInt(input.value || 1) + 1;
+    updateSignupLocationPricing();
+  }
+}
+
+function decrementSignupLocations() {
+  const input = document.getElementById('signup-location-count');
+  if (input) {
+    const current = parseInt(input.value || 1);
+    if (current > 1) {
+      input.value = current - 1;
+      updateSignupLocationPricing();
+    }
+  }
+}
+
+// Update pricing in signup modal based on location count
+function updateSignupLocationPricing() {
+  if (!selectedPlan) return;
+  
+  const locationInput = document.getElementById('signup-location-count');
+  const locationCount = Math.max(1, parseInt(locationInput?.value || 1) || 1);
+  const discount = getDiscount(locationCount);
+  const pricePerLocation = selectedPlan.basePrice * (1 - discount);
+  const totalPrice = pricePerLocation * locationCount;
+  const discountPercent = Math.round(discount * 100);
+  
+  // Update price display in step 2
+  const priceDisplay = document.getElementById('signup-step-2-price');
+  if (priceDisplay) {
+    priceDisplay.innerHTML = `
+      <div class="mb-4 p-4 bg-slate-900/50 rounded-lg border border-slate-800">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-slate-300">Plan:</span>
+          <span class="text-white font-semibold">${selectedPlan.name}</span>
+        </div>
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-slate-300">Locations:</span>
+          <span class="text-white font-semibold">${locationCount}</span>
+        </div>
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-slate-300">Price per location:</span>
+          <span class="text-emerald-400 font-semibold">$${Math.round(pricePerLocation)}/month${discount > 0 ? ` <span class="text-xs">(${discountPercent}% off)</span>` : ''}</span>
+        </div>
+        <div class="flex justify-between items-center pt-2 border-t border-slate-700">
+          <span class="text-slate-300 font-semibold">Total monthly:</span>
+          <span class="text-emerald-400 font-bold text-xl">$${Math.round(totalPrice).toLocaleString()}/month</span>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Update discount message
+  const discountMsg = document.getElementById('signup-location-discount');
+  if (discountMsg) {
+    if (discount > 0) {
+      discountMsg.textContent = `${discountPercent}% volume discount applied`;
+      discountMsg.classList.remove('text-slate-400');
+      discountMsg.classList.add('text-emerald-400', 'font-semibold');
+    } else {
+      discountMsg.textContent = 'Enter 6+ locations for volume discounts';
+      discountMsg.classList.remove('text-emerald-400', 'font-semibold');
+      discountMsg.classList.add('text-slate-400');
+    }
+  }
+}
+
 // Modal Management
 function openModal(modalId) {
   const modal = document.getElementById(modalId);
@@ -438,6 +509,15 @@ function proceedToSignupForm() {
   // Hide step 1, show step 2
   document.getElementById('signup-step-1').classList.add('hidden');
   document.getElementById('signup-step-2').classList.remove('hidden');
+  
+  // Initialize signup location input with current location count from main page
+  const signupLocationInput = document.getElementById('signup-location-count');
+  const mainLocationInput = document.getElementById('location-count');
+  if (signupLocationInput && mainLocationInput) {
+    signupLocationInput.value = mainLocationInput.value || 1;
+  } else if (signupLocationInput) {
+    signupLocationInput.value = 1;
+  }
   
   // Update price display in step 2
   updateSignupStep2Price();
