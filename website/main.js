@@ -8,7 +8,7 @@ const STRIPE_PUBLISHABLE_KEY = 'pk_test_51SkhdR9ELeRLvDS57hteUCEnMzmsWIGbY5VECFe
 // API Base URL - automatically switches between dev and production
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:3000/api'  // Local development
-  : 'https://verishelf.herokuapp.com/api'; // Production API (using Heroku directly until DNS is configured)
+  : 'https://verishelf-e0b90033152c.herokuapp.com/api'; // Production API (Heroku)
 
 // Supabase Configuration
 const SUPABASE_URL = 'https://bblwhwobkthawkbyhiwb.supabase.co';
