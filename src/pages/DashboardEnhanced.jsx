@@ -364,11 +364,24 @@ export default function DashboardEnhanced() {
     setEditingItem(null);
   };
 
-  const removeItem = (id) => {
+  const removeItem = async (id) => {
+    if (!user || !user.id) return;
+    
     const item = items.find((i) => i.id === id);
+    const updatedItem = {
+      ...item,
+      removed: true,
+      removedAt: new Date().toISOString()
+    };
+    
+    // Save to Supabase
+    if (user.id) {
+      await saveItem(user.id, updatedItem);
+    }
+    
     setItems(
       items.map((i) =>
-        i.id === id ? { ...i, removed: true, removedAt: new Date().toISOString() } : i
+        i.id === id ? updatedItem : i
       )
     );
     addHistoryEntry("removed", id, item?.name || "");
@@ -393,7 +406,9 @@ export default function DashboardEnhanced() {
     addHistoryEntry("deleted", id, item?.name || "");
   };
 
-  const duplicateItem = (id) => {
+  const duplicateItem = async (id) => {
+    if (!user || !user.id) return;
+    
     const item = items.find((i) => i.id === id);
     if (item) {
       const duplicated = {
@@ -403,6 +418,15 @@ export default function DashboardEnhanced() {
         addedAt: new Date().toISOString(),
         removed: false,
       };
+      
+      // Save to Supabase
+      if (user.id) {
+        const result = await saveItem(user.id, duplicated);
+        if (result.success && result.data) {
+          duplicated.id = result.data.id; // Use database ID
+        }
+      }
+      
       setItems([...items, duplicated]);
       addHistoryEntry("added", duplicated.id, duplicated.name, { duplicated: true });
     }
