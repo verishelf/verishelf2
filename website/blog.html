@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="VeriShelf Blog - Insights on retail technology, expiry management, and industry best practices.">
+  <title>Blog — VeriShelf</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.3s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    .gradient-text {
+      background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-white antialiased">
+  
+  <nav class="fixed w-full bg-slate-950/95 backdrop-blur-lg z-50 border-b border-slate-800 supports-[backdrop-filter]:bg-slate-950/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+      <div class="text-2xl font-bold">
+        <a href="index.html" class="gradient-text">VeriShelf</a>
+      </div>
+      
+      <button id="mobile-menu-button" class="md:hidden p-2 rounded-lg hover:bg-slate-800 transition-colors" aria-label="Toggle menu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      
+      <div id="nav-menu" class="hidden md:flex items-center space-x-8">
+        <a href="index.html#features" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Features</a>
+        <a href="index.html#value" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Value</a>
+        <a href="index.html#pricing" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Pricing</a>
+        <a href="index.html" onclick="openLoginModal(); return false;" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Login</a>
+        <a href="index.html" onclick="openSignupModal(); return false;" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-all duration-200">
+          Get Started
+        </a>
+      </div>
+    </div>
+    
+    <div id="mobile-menu" class="hidden md:hidden px-4 pb-4 border-t border-slate-800">
+      <div class="flex flex-col space-y-4 pt-4">
+        <a href="index.html#features" class="text-slate-300 hover:text-white py-2">Features</a>
+        <a href="index.html#value" class="text-slate-300 hover:text-white py-2">Value</a>
+        <a href="index.html#pricing" class="text-slate-300 hover:text-white py-2">Pricing</a>
+        <a href="index.html" onclick="openLoginModal(); return false;" class="text-slate-300 hover:text-white py-2 text-left">Login</a>
+        <a href="index.html" onclick="openSignupModal(); return false;" class="px-4 py-2.5 bg-emerald-500 text-black font-semibold rounded-lg text-center">
+          Get Started
+        </a>
+      </div>
+    </div>
+  </nav>
+  
+  <section class="pt-32 pb-24 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="animate-fade-in">
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">
+          VeriShelf <span class="gradient-text">Blog</span>
+        </h1>
+        
+        <p class="text-lg text-slate-300 leading-relaxed mb-12">
+          Insights on retail technology, expiry management best practices, and industry trends.
+        </p>
+        
+        <div class="space-y-8">
+          <article class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800 hover:border-emerald-500/30 transition-all">
+            <div class="text-sm text-emerald-400 mb-2">January 15, 2025</div>
+            <h2 class="text-2xl font-bold text-white mb-3">
+              <a href="#" class="hover:text-emerald-300 transition-colors">
+                How Automated Expiry Tracking Saves Retail Chains Millions
+              </a>
+            </h2>
+            <p class="text-slate-300 mb-4">
+              Learn how major retail chains are using automated expiry tracking to reduce waste, 
+              improve compliance, and boost profitability across hundreds of locations.
+            </p>
+            <a href="#" class="text-emerald-400 hover:text-emerald-300 transition-colors">Read more →</a>
+          </article>
+          
+          <article class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800 hover:border-emerald-500/30 transition-all">
+            <div class="text-sm text-emerald-400 mb-2">January 8, 2025</div>
+            <h2 class="text-2xl font-bold text-white mb-3">
+              <a href="#" class="hover:text-emerald-300 transition-colors">
+                Compliance Best Practices for Retail Expiry Management
+              </a>
+            </h2>
+            <p class="text-slate-300 mb-4">
+              A comprehensive guide to maintaining regulatory compliance in retail operations, 
+              including audit trails, documentation requirements, and industry standards.
+            </p>
+            <a href="#" class="text-emerald-400 hover:text-emerald-300 transition-colors">Read more →</a>
+          </article>
+          
+          <article class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800 hover:border-emerald-500/30 transition-all">
+            <div class="text-sm text-emerald-400 mb-2">December 20, 2024</div>
+            <h2 class="text-2xl font-bold text-white mb-3">
+              <a href="#" class="hover:text-emerald-300 transition-colors">
+                The Future of Retail Inventory Management
+              </a>
+            </h2>
+            <p class="text-slate-300 mb-4">
+              Exploring emerging technologies and trends that are reshaping how retail chains 
+              manage inventory, from AI-powered predictions to real-time tracking systems.
+            </p>
+            <a href="#" class="text-emerald-400 hover:text-emerald-300 transition-colors">Read more →</a>
+          </article>
+          
+          <article class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800 hover:border-emerald-500/30 transition-all">
+            <div class="text-sm text-emerald-400 mb-2">December 5, 2024</div>
+            <h2 class="text-2xl font-bold text-white mb-3">
+              <a href="#" class="hover:text-emerald-300 transition-colors">
+                Case Study: Reducing Waste by 92% with VeriShelf
+              </a>
+            </h2>
+            <p class="text-slate-300 mb-4">
+              A detailed look at how a national grocery chain implemented VeriShelf and achieved 
+              dramatic reductions in expired product waste while improving operational efficiency.
+            </p>
+            <a href="#" class="text-emerald-400 hover:text-emerald-300 transition-colors">Read more →</a>
+          </article>
+        </div>
+        
+        <div class="mt-12 p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800 text-center">
+          <h3 class="text-xl font-bold text-white mb-4">Stay Updated</h3>
+          <p class="text-slate-300 mb-4">
+            Subscribe to our newsletter for the latest insights on retail technology and expiry management.
+          </p>
+          <form class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+            <input 
+              type="email" 
+              placeholder="your@email.com" 
+              class="flex-1 px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white focus:border-emerald-500 outline-none"
+            />
+            <button type="submit" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-colors">
+              Subscribe
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <footer class="py-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="text-2xl font-bold gradient-text mb-4">VeriShelf</div>
+          <p class="text-slate-400 text-sm">Enterprise shelf expiry management for retail chains.</p>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4">Product</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="index.html#features" class="text-slate-400 hover:text-emerald-300 transition-colors">Features</a></li>
+            <li><a href="index.html#pricing" class="text-slate-400 hover:text-emerald-300 transition-colors">Pricing</a></li>
+            <li><a href="api-docs.html" class="text-slate-400 hover:text-emerald-300 transition-colors">API Documentation</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4">Company</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="about.html" class="text-slate-400 hover:text-emerald-300 transition-colors">About</a></li>
+            <li><a href="careers.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Careers</a></li>
+            <li><a href="blog.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Blog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4">Contact</h4>
+          <ul class="space-y-2 text-sm">
+            <li class="text-slate-400">sales@verishelf.com</li>
+            <li class="text-slate-400">+1 (555) 123-4567</li>
+            <li class="text-slate-400">San Francisco, CA</li>
+          </ul>
+        </div>
+      </div>
+      <div class="pt-8 border-t border-slate-800 text-center">
+        <p class="text-slate-500 text-sm">
+          © 2025 VeriShelf. All rights reserved. | 
+          <a href="privacy.html" class="hover:text-emerald-300 transition-colors">Privacy Policy</a> | 
+          <a href="terms.html" class="hover:text-emerald-300 transition-colors">Terms of Service</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('mobile-menu-button')?.addEventListener('click', () => {
+      const menu = document.getElementById('mobile-menu');
+      menu?.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html>

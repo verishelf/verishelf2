@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="VeriShelf Privacy Policy - How we protect and use your data.">
+  <title>Privacy Policy — VeriShelf</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    .gradient-text {
+      background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-white antialiased">
+  
+  <nav class="fixed w-full bg-slate-950/95 backdrop-blur-lg z-50 border-b border-slate-800 supports-[backdrop-filter]:bg-slate-950/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+      <div class="text-2xl font-bold">
+        <a href="index.html" class="gradient-text">VeriShelf</a>
+      </div>
+      
+      <button id="mobile-menu-button" class="md:hidden p-2 rounded-lg hover:bg-slate-800 transition-colors" aria-label="Toggle menu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      
+      <div id="nav-menu" class="hidden md:flex items-center space-x-8">
+        <a href="index.html#features" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Features</a>
+        <a href="index.html#value" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Value</a>
+        <a href="index.html#pricing" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Pricing</a>
+        <a href="index.html" onclick="openLoginModal(); return false;" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Login</a>
+        <a href="index.html" onclick="openSignupModal(); return false;" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-all duration-200">
+          Get Started
+        </a>
+      </div>
+    </div>
+    
+    <div id="mobile-menu" class="hidden md:hidden px-4 pb-4 border-t border-slate-800">
+      <div class="flex flex-col space-y-4 pt-4">
+        <a href="index.html#features" class="text-slate-300 hover:text-white py-2">Features</a>
+        <a href="index.html#value" class="text-slate-300 hover:text-white py-2">Value</a>
+        <a href="index.html#pricing" class="text-slate-300 hover:text-white py-2">Pricing</a>
+        <a href="index.html" onclick="openLoginModal(); return false;" class="text-slate-300 hover:text-white py-2 text-left">Login</a>
+        <a href="index.html" onclick="openSignupModal(); return false;" class="px-4 py-2.5 bg-emerald-500 text-black font-semibold rounded-lg text-center">
+          Get Started
+        </a>
+      </div>
+    </div>
+  </nav>
+  
+  <section class="pt-32 pb-24 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="animate-fade-in">
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">
+          Privacy <span class="gradient-text">Policy</span>
+        </h1>
+        
+        <p class="text-sm text-slate-400 mb-12">Last updated: January 2025</p>
+        
+        <div class="prose prose-invert max-w-none space-y-8">
+          <section>
+            <h2 class="text-2xl font-bold text-white mt-8 mb-4">1. Introduction</h2>
+            <p class="text-slate-300 leading-relaxed">
+              VeriShelf ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy 
+              explains how we collect, use, disclose, and safeguard your information when you use our service.
+            </p>
+          </section>
+          
+          <section>
+            <h2 class="text-2xl font-bold text-white mt-8 mb-4">2. Information We Collect</h2>
+            <h3 class="text-xl font-bold text-white mt-6 mb-3">2.1 Account Information</h3>
+            <p class="text-slate-300 leading-relaxed mb-4">
+              When you create an account, we collect:
+            </p>
+            <ul class="list-disc list-inside text-slate-300 space-y-2 ml-4 mb-4">
+              <li>Name and email address</li>
+              <li>Company name and contact information</li>
+              <li>Payment and billing information (processed securely through Stripe)</li>
+            </ul>
+            
+            <h3 class="text-xl font-bold text-white mt-6 mb-3">2.2 Product Data</h3>
+            <p class="text-slate-300 leading-relaxed mb-4">
+              We store product information you provide, including:
+            </p>
+            <ul class="list-disc list-inside text-slate-300 space-y-2 ml-4 mb-4">
+              <li>Product names, barcodes, and descriptions</li>
+              <li>Expiry dates and locations</li>
+              <li>Quantity and inventory status</li>
+            </ul>
+            
+            <h3 class="text-xl font-bold text-white mt-6 mb-3">2.3 Usage Data</h3>
+            <p class="text-slate-300 leading-relaxed mb-4">
+              We automatically collect information about how you use our service, including:
+            </p>
+            <ul class="list-disc list-inside text-slate-300 space-y-2 ml-4">
+              <li>Login times and session duration</li>
+              <li>Features accessed and actions taken</li>
+              <li>Device information and IP addresses</li>
+            </ul>
+          </section>
+          
+          <section>
+            <h2 class="text-2xl font-bold text-white mt-8 mb-4">3. How We Use Your Information</h2>
+            <p class="text-slate-300 leading-relaxed mb-4">
+              We use the information we collect to:
+            </p>
+            <ul class="list-disc list-inside text-slate-300 space-y-2 ml-4 mb-4">
+              <li>Provide, maintain, and improve our services</li>
+              <li>Process transactions and send related information</li>
+              <li>Send you technical notices and support messages</li>
+              <li>Respond to your comments and questions</li>
+              <li>Monitor and analyze usage patterns</li>
+              <li>Detect, prevent, and address technical issues</li>
+            </ul>
+          </section>
+          
+          <section>
+            <h2 class="text-2xl font-bold text-white mt-8 mb-4">4. Data Security</h2>
+            <p class="text-slate-300 leading-relaxed mb-4">
+              We implement industry-standard security measures to protect your data:
+            </p>
+            <ul class="list-disc list-inside text-slate-300 space-y-2 ml-4 mb-4">
+              <li>Encryption in transit (TLS/SSL) and at rest</li>
+              <li>SOC 2 Type II compliance</li>
+              <li>Regular security audits and penetration testing</li>
+              <li>Access controls and authentication</li>
+              <li>Secure data centers with redundant backups</li>
+            </ul>
+          </section>
+          
+          <section>
+            <h2 class="text-2xl font-bold text-white mt-8 mb-4">5. Data Sharing</h2>
+            <p class="text-slate-300 leading-relaxed mb-4">
+              We do not sell your personal information. We may share data only in the following circumstances:
+            </p>
+            <ul class="list-disc list-inside text-slate-300 space-y-2 ml-4 mb-4">
+              <li><strong>Service Providers:</strong> With trusted third-party services (e.g., Stripe for payments, Supabase for hosting)</li>
+              <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
+              <li><strong>Business Transfers:</strong> In connection with a merger, acquisition, or sale of assets</li>
+            </ul>
+          </section>
+          
+          <section>
+            <h2 class="text-2xl font-bold text-white mt-8 mb-4">6. Your Rights</h2>
+            <p class="text-slate-300 leading-relaxed mb-4">
+              You have the right to:
+            </p>
+            <ul class="list-disc list-inside text-slate-300 space-y-2 ml-4 mb-4">
+              <li>Access and receive a copy of your personal data</li>
+              <li>Correct inaccurate or incomplete data</li>
+              <li>Request deletion of your data</li>
+              <li>Object to processing of your data</li>
+              <li>Export your data in a portable format</li>
+            </ul>
+            <p class="text-slate-300 leading-relaxed">
+              To exercise these rights, contact us at <a href="mailto:privacy@verishelf.com" class="text-emerald-400 hover:text-emerald-300">privacy@verishelf.com</a>.
+            </p>
+          </section>
+          
+          <section>
+            <h2 class="text-2xl font-bold text-white mt-8 mb-4">7. Data Retention</h2>
+            <p class="text-slate-300 leading-relaxed">
+              We retain your data for as long as your account is active or as needed to provide services. 
+              After account termination, we may retain certain data for legal, regulatory, or business purposes.
+            </p>
+          </section>
+          
+          <section>
+            <h2 class="text-2xl font-bold text-white mt-8 mb-4">8. Changes to This Policy</h2>
+            <p class="text-slate-300 leading-relaxed">
+              We may update this Privacy Policy from time to time. We will notify you of any changes by 
+              posting the new policy on this page and updating the "Last updated" date.
+            </p>
+          </section>
+          
+          <section>
+            <h2 class="text-2xl font-bold text-white mt-8 mb-4">9. Contact Us</h2>
+            <p class="text-slate-300 leading-relaxed mb-4">
+              If you have questions about this Privacy Policy, please contact us:
+            </p>
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+              <p class="text-slate-300 mb-2"><strong class="text-white">Email:</strong> privacy@verishelf.com</p>
+              <p class="text-slate-300 mb-2"><strong class="text-white">Address:</strong> VeriShelf, San Francisco, CA</p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <footer class="py-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="text-2xl font-bold gradient-text mb-4">VeriShelf</div>
+          <p class="text-slate-400 text-sm">Enterprise shelf expiry management for retail chains.</p>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4">Product</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="index.html#features" class="text-slate-400 hover:text-emerald-300 transition-colors">Features</a></li>
+            <li><a href="index.html#pricing" class="text-slate-400 hover:text-emerald-300 transition-colors">Pricing</a></li>
+            <li><a href="api-docs.html" class="text-slate-400 hover:text-emerald-300 transition-colors">API Documentation</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4">Company</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="about.html" class="text-slate-400 hover:text-emerald-300 transition-colors">About</a></li>
+            <li><a href="careers.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Careers</a></li>
+            <li><a href="blog.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Blog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4">Contact</h4>
+          <ul class="space-y-2 text-sm">
+            <li class="text-slate-400">sales@verishelf.com</li>
+            <li class="text-slate-400">+1 (555) 123-4567</li>
+            <li class="text-slate-400">San Francisco, CA</li>
+          </ul>
+        </div>
+      </div>
+      <div class="pt-8 border-t border-slate-800 text-center">
+        <p class="text-slate-500 text-sm">
+          © 2025 VeriShelf. All rights reserved. | 
+          <a href="privacy.html" class="hover:text-emerald-300 transition-colors">Privacy Policy</a> | 
+          <a href="terms.html" class="hover:text-emerald-300 transition-colors">Terms of Service</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('mobile-menu-button')?.addEventListener('click', () => {
+      const menu = document.getElementById('mobile-menu');
+      menu?.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html>

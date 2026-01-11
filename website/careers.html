@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Join the VeriShelf team - Build the future of retail technology.">
+  <title>Careers — VeriShelf</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.3s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    .gradient-text {
+      background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-white antialiased">
+  
+  <nav class="fixed w-full bg-slate-950/95 backdrop-blur-lg z-50 border-b border-slate-800 supports-[backdrop-filter]:bg-slate-950/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+      <div class="text-2xl font-bold">
+        <a href="index.html" class="gradient-text">VeriShelf</a>
+      </div>
+      
+      <button id="mobile-menu-button" class="md:hidden p-2 rounded-lg hover:bg-slate-800 transition-colors" aria-label="Toggle menu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      
+      <div id="nav-menu" class="hidden md:flex items-center space-x-8">
+        <a href="index.html#features" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Features</a>
+        <a href="index.html#value" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Value</a>
+        <a href="index.html#pricing" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Pricing</a>
+        <a href="index.html" onclick="openLoginModal(); return false;" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Login</a>
+        <a href="index.html" onclick="openSignupModal(); return false;" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-all duration-200">
+          Get Started
+        </a>
+      </div>
+    </div>
+    
+    <div id="mobile-menu" class="hidden md:hidden px-4 pb-4 border-t border-slate-800">
+      <div class="flex flex-col space-y-4 pt-4">
+        <a href="index.html#features" class="text-slate-300 hover:text-white py-2">Features</a>
+        <a href="index.html#value" class="text-slate-300 hover:text-white py-2">Value</a>
+        <a href="index.html#pricing" class="text-slate-300 hover:text-white py-2">Pricing</a>
+        <a href="index.html" onclick="openLoginModal(); return false;" class="text-slate-300 hover:text-white py-2 text-left">Login</a>
+        <a href="index.html" onclick="openSignupModal(); return false;" class="px-4 py-2.5 bg-emerald-500 text-black font-semibold rounded-lg text-center">
+          Get Started
+        </a>
+      </div>
+    </div>
+  </nav>
+  
+  <section class="pt-32 pb-24 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="animate-fade-in">
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">
+          Join the <span class="gradient-text">VeriShelf</span> Team
+        </h1>
+        
+        <p class="text-lg text-slate-300 leading-relaxed mb-12">
+          We're building the future of retail technology. Join us in eliminating waste, improving compliance, 
+          and transforming how retail chains manage product expiry across hundreds of locations.
+        </p>
+        
+        <h2 class="text-2xl font-bold text-white mt-12 mb-6">Open Positions</h2>
+        
+        <div class="space-y-6 mb-12">
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800 hover:border-emerald-500/30 transition-all">
+            <h3 class="text-xl font-bold text-white mb-2">Senior Full-Stack Engineer</h3>
+            <p class="text-slate-400 mb-4">San Francisco, CA / Remote</p>
+            <p class="text-slate-300 mb-4">
+              Build scalable backend systems and intuitive frontend experiences. Work with React, Node.js, 
+              PostgreSQL, and cloud infrastructure to deliver enterprise-grade solutions.
+            </p>
+            <a href="mailto:careers@verishelf.com?subject=Senior Full-Stack Engineer" class="inline-block px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-colors">
+              Apply Now
+            </a>
+          </div>
+          
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800 hover:border-emerald-500/30 transition-all">
+            <h3 class="text-xl font-bold text-white mb-2">Product Designer</h3>
+            <p class="text-slate-400 mb-4">San Francisco, CA / Remote</p>
+            <p class="text-slate-300 mb-4">
+              Design beautiful, functional interfaces for enterprise users. Create design systems, 
+              user flows, and prototypes that make complex retail operations simple and intuitive.
+            </p>
+            <a href="mailto:careers@verishelf.com?subject=Product Designer" class="inline-block px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-colors">
+              Apply Now
+            </a>
+          </div>
+          
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800 hover:border-emerald-500/30 transition-all">
+            <h3 class="text-xl font-bold text-white mb-2">Enterprise Sales Manager</h3>
+            <p class="text-slate-400 mb-4">San Francisco, CA / Remote</p>
+            <p class="text-slate-300 mb-4">
+              Help retail chains discover how VeriShelf can transform their operations. Build relationships 
+              with enterprise clients and guide them through the sales process.
+            </p>
+            <a href="mailto:careers@verishelf.com?subject=Enterprise Sales Manager" class="inline-block px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-colors">
+              Apply Now
+            </a>
+          </div>
+        </div>
+        
+        <h2 class="text-2xl font-bold text-white mt-12 mb-6">Why Work at VeriShelf?</h2>
+        <div class="grid md:grid-cols-2 gap-6 mb-12">
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-bold text-white mb-3">Impact</h3>
+            <p class="text-slate-300">Your work directly helps reduce waste and improve operations for major retail chains.</p>
+          </div>
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-bold text-white mb-3">Growth</h3>
+            <p class="text-slate-300">Fast-paced startup environment with opportunities to take on significant responsibility.</p>
+          </div>
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-bold text-white mb-3">Flexibility</h3>
+            <p class="text-slate-300">Remote-friendly culture with flexible hours and competitive benefits.</p>
+          </div>
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-bold text-white mb-3">Technology</h3>
+            <p class="text-slate-300">Work with modern tech stack and best practices in a supportive team environment.</p>
+          </div>
+        </div>
+        
+        <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+          <h3 class="text-xl font-bold text-white mb-4">Don't see a role that fits?</h3>
+          <p class="text-slate-300 mb-4">
+            We're always looking for talented people. Send us your resume and let us know how you'd like to contribute.
+          </p>
+          <a href="mailto:careers@verishelf.com" class="inline-block px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-colors">
+            Get in Touch
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <footer class="py-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="text-2xl font-bold gradient-text mb-4">VeriShelf</div>
+          <p class="text-slate-400 text-sm">Enterprise shelf expiry management for retail chains.</p>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4">Product</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="index.html#features" class="text-slate-400 hover:text-emerald-300 transition-colors">Features</a></li>
+            <li><a href="index.html#pricing" class="text-slate-400 hover:text-emerald-300 transition-colors">Pricing</a></li>
+            <li><a href="api-docs.html" class="text-slate-400 hover:text-emerald-300 transition-colors">API Documentation</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4">Company</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="about.html" class="text-slate-400 hover:text-emerald-300 transition-colors">About</a></li>
+            <li><a href="careers.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Careers</a></li>
+            <li><a href="blog.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Blog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4">Contact</h4>
+          <ul class="space-y-2 text-sm">
+            <li class="text-slate-400">sales@verishelf.com</li>
+            <li class="text-slate-400">+1 (555) 123-4567</li>
+            <li class="text-slate-400">San Francisco, CA</li>
+          </ul>
+        </div>
+      </div>
+      <div class="pt-8 border-t border-slate-800 text-center">
+        <p class="text-slate-500 text-sm">
+          © 2025 VeriShelf. All rights reserved. | 
+          <a href="privacy.html" class="hover:text-emerald-300 transition-colors">Privacy Policy</a> | 
+          <a href="terms.html" class="hover:text-emerald-300 transition-colors">Terms of Service</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('mobile-menu-button')?.addEventListener('click', () => {
+      const menu = document.getElementById('mobile-menu');
+      menu?.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html>
