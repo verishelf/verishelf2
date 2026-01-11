@@ -593,8 +593,9 @@ function openPaymentModal() {
     return;
   }
 
-  // Get location count and calculate final price
-  const locationCount = getLocationCount();
+  // Get location count from signup modal input if available, otherwise from main page
+  const signupLocationInput = document.getElementById('signup-location-count');
+  const locationCount = signupLocationInput ? Math.max(1, parseInt(signupLocationInput.value || 1) || 1) : getLocationCount();
   const discount = getDiscount(locationCount);
   const pricePerLocation = selectedPlan.basePrice * (1 - discount);
   const finalPrice = pricePerLocation * locationCount;
