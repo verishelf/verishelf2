@@ -1,9 +1,8 @@
 // VeriShelf Website - Authentication & Stripe Integration
 
 // Configuration
-// TEST KEYS (for testing) - Switch to live keys for production
-const STRIPE_PUBLISHABLE_KEY = 'pk_test_51SkhdR9ELeRLvDS57hteUCEnMzmsWIGbY5VECFeRHLKShcU6j9144UwCsO6o2TIgDdMWJ7uCKu37Djo5ceTXdd8J00kdAi7eNV';
-// LIVE KEY (for production): pk_live_51SkhdB8bUD7YcCS8A420PTsRBsaXAWTPkGTpBgcE2k9VpfBqp4Ezts85jBFrcZb5G32uGXAU4vl38J6EqeaiGeYa00f4hOxTiR
+// LIVE KEYS (for production)
+const STRIPE_PUBLISHABLE_KEY = 'pk_live_51SkhdB8bUD7YcCS8A420PTsRBsaXAWTPkGTpBgcE2k9VpfBqp4Ezts85jBFrcZb5G32uGXAU4vl38J6EqeaiGeYa00f4hOxTiR';
 
 // API Base URL - automatically switches between dev and production
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
