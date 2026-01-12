@@ -62,10 +62,22 @@ function getDiscount(locationCount) {
   return 0; // No discount
 }
 
-// Get number of locations from input
+// Get number of locations from input (check both mobile and desktop inputs)
 function getLocationCount() {
   const input = document.getElementById('location-count');
-  return Math.max(1, parseInt(input?.value || 1) || 1);
+  const inputDesktop = document.getElementById('location-count-desktop');
+  const value = input?.value || inputDesktop?.value || 1;
+  return Math.max(1, parseInt(value) || 1);
+}
+
+// Sync location inputs when one changes
+function syncLocationInputs() {
+  const input = document.getElementById('location-count');
+  const inputDesktop = document.getElementById('location-count-desktop');
+  const value = getLocationCount();
+  
+  if (input) input.value = value;
+  if (inputDesktop) inputDesktop.value = value;
 }
 
 // Update pricing based on location count
@@ -166,20 +178,25 @@ function updatePricing() {
 // Increment/Decrement location count
 function incrementLocations() {
   const input = document.getElementById('location-count');
-  if (input) {
-    input.value = parseInt(input.value || 1) + 1;
-    updatePricing();
-  }
+  const inputDesktop = document.getElementById('location-count-desktop');
+  const currentValue = parseInt(input?.value || inputDesktop?.value || 1);
+  const newValue = currentValue + 1;
+  
+  if (input) input.value = newValue;
+  if (inputDesktop) inputDesktop.value = newValue;
+  updatePricing();
 }
 
 function decrementLocations() {
   const input = document.getElementById('location-count');
-  if (input) {
-    const current = parseInt(input.value || 1);
-    if (current > 1) {
-      input.value = current - 1;
-      updatePricing();
-    }
+  const inputDesktop = document.getElementById('location-count-desktop');
+  const currentValue = parseInt(input?.value || inputDesktop?.value || 1);
+  
+  if (currentValue > 1) {
+    const newValue = currentValue - 1;
+    if (input) input.value = newValue;
+    if (inputDesktop) inputDesktop.value = newValue;
+    updatePricing();
   }
 }
 

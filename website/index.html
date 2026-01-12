@@ -547,22 +547,48 @@
           <label class="block text-sm font-medium text-slate-300 mb-3 text-center">
             Number of Locations
           </label>
-          <!-- Input field - full width on mobile -->
-          <div class="mb-3 md:mb-0">
+          <!-- Mobile: Stacked layout (input on top, buttons below) -->
+          <div class="flex flex-col md:hidden gap-3">
             <input 
               type="number" 
               id="location-count" 
               min="1" 
               value="1" 
-              class="w-full md:flex-1 px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white text-center text-xl font-bold focus:border-emerald-500 outline-none"
-              oninput="updatePricing()"
+              class="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white text-center text-xl font-bold focus:border-emerald-500 outline-none"
+              oninput="syncLocationInputs(); updatePricing()"
             />
+            <div class="flex items-center justify-center gap-4">
+              <button 
+                onclick="decrementLocations()" 
+                class="w-12 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors flex items-center justify-center"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                </svg>
+              </button>
+              <button 
+                onclick="incrementLocations()" 
+                class="w-12 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors flex items-center justify-center"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+              </button>
+            </div>
           </div>
-          <!-- Buttons - below on mobile, beside on desktop -->
-          <div class="flex items-center justify-center gap-4 md:flex-row md:justify-start">
+          <!-- Desktop: Side-by-side layout -->
+          <div class="hidden md:flex items-center gap-4">
+            <input 
+              type="number" 
+              id="location-count-desktop" 
+              min="1" 
+              value="1" 
+              class="flex-1 px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg text-white text-center text-xl font-bold focus:border-emerald-500 outline-none"
+              oninput="syncLocationInputs(); updatePricing()"
+            />
             <button 
               onclick="decrementLocations()" 
-              class="w-12 h-12 md:w-10 md:h-10 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors flex items-center justify-center flex-shrink-0"
+              class="w-10 h-10 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors flex items-center justify-center flex-shrink-0"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
@@ -570,7 +596,7 @@
             </button>
             <button 
               onclick="incrementLocations()" 
-              class="w-12 h-12 md:w-10 md:h-10 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors flex items-center justify-center flex-shrink-0"
+              class="w-10 h-10 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors flex items-center justify-center flex-shrink-0"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
