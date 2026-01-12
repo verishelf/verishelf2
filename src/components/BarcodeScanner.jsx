@@ -36,6 +36,17 @@ export default function BarcodeScanner({ onScan, onClose }) {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
+        
+        // Ensure video plays
+        try {
+          await videoRef.current.play();
+        } catch (playError) {
+          console.error("Video play error:", playError);
+          // Try with muted if autoplay fails
+          videoRef.current.muted = true;
+          await videoRef.current.play();
+        }
+        
         setScanning(true);
       }
     } catch (err) {
@@ -130,7 +141,9 @@ export default function BarcodeScanner({ onScan, onClose }) {
                 ref={videoRef}
                 autoPlay
                 playsInline
+                muted
                 className="w-full h-full object-cover"
+                style={{ transform: 'scaleX(-1)' }} // Mirror the video for better UX
               />
             ) : (
               <div className="flex items-center justify-center h-full">
