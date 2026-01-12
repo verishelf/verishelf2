@@ -123,7 +123,19 @@ export default function DashboardEnhanced() {
 
         // Load user profile
         const userProfile = await getCurrentUserProfile();
-        setUser(userProfile);
+        // If profile creation failed, create a fallback user object from auth data
+        if (!userProfile) {
+          console.warn('User profile not found, creating fallback user object');
+          const fallbackUser = {
+            id: userId,
+            email: authData.user.email || '',
+            name: authData.user.user_metadata?.name || authData.user.email?.split('@')[0] || 'User',
+            company: authData.user.user_metadata?.company || '',
+          };
+          setUser(fallbackUser);
+        } else {
+          setUser(userProfile);
+        }
 
         // Load subscription
         const userSubscription = await getUserSubscription(userId);
@@ -743,7 +755,14 @@ export default function DashboardEnhanced() {
 
   // Redirect if not authenticated (shouldn't happen due to useEffect, but safety check)
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-400">Authenticating...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

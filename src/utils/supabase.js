@@ -102,7 +102,12 @@ export async function getCurrentUserProfile() {
 
       if (createError) {
         console.error('Error creating user profile:', createError);
+        // If it's an RLS policy error, provide helpful message
+        if (createError.code === '42501') {
+          console.error('RLS Policy Error: Users table INSERT policy is missing. Please run FIX_USERS_RLS_POLICY.sql in Supabase SQL Editor.');
+        }
         // Return fallback user object even if creation fails
+        // This allows the dashboard to still work
         return {
           id: user.id,
           email: user.email,
