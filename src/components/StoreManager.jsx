@@ -146,7 +146,7 @@ export default function StoreManager({ onClose, onStoresUpdate, maxLocations }) 
           )}
 
           {/* Add New Store */}
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="text"
               value={newStoreName}
@@ -159,7 +159,7 @@ export default function StoreManager({ onClose, onStoresUpdate, maxLocations }) 
             <button
               onClick={handleAddStore}
               disabled={maxLocations && stores.length >= maxLocations}
-              className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
