@@ -101,13 +101,17 @@ export default function DashboardEnhanced() {
 
   // Initialize Supabase and check authentication on mount
   useEffect(() => {
+    console.log('Dashboard useEffect triggered - starting initialization');
     async function initializeAuth() {
       try {
+        console.log('Initializing Supabase...');
         // Initialize Supabase
         initSupabase();
         
+        console.log('Checking authentication...');
         // Check authentication
         const authData = await checkAuth();
+        console.log('Auth data received:', authData ? 'User found' : 'No user');
         if (!authData || !authData.user) {
           // Not authenticated - redirect to website (index.html)
           console.log('No auth data, redirecting to /');
@@ -715,19 +719,30 @@ export default function DashboardEnhanced() {
 
   // Show loading state
   if (loading) {
+    console.log('Dashboard is in loading state');
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-400">Loading your dashboard...</p>
+          <p className="text-slate-500 text-sm mt-2">If this takes too long, check the browser console</p>
         </div>
       </div>
     );
   }
+  
+  console.log('Dashboard rendering - loading complete, user:', user ? user.email : 'none');
 
   // Redirect if not authenticated (shouldn't happen due to useEffect, but safety check)
   if (!user) {
-    return null;
+    console.log('No user found, returning null');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950">
+        <div className="text-center">
+          <p className="text-slate-400">No user found. Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
