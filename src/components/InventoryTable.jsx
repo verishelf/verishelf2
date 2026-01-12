@@ -286,12 +286,12 @@ export default function InventoryTable({
                 <td className="px-2 py-2 whitespace-nowrap">
                   <div className="text-xs text-slate-400">{item.location || "Store #001"}</div>
                 </td>
-                <td className="px-2 py-2 whitespace-nowrap">
-                  <div className="flex items-center gap-1 flex-wrap">
+                <td className="px-2 py-2">
+                  <div className="flex items-center gap-1 flex-wrap max-w-full">
                     {onEdit && (
                       <button
                         onClick={() => onEdit(item)}
-                        className="p-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded transition-all duration-200 hover:scale-105"
+                        className="p-1.5 sm:p-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded transition-all duration-200 hover:scale-105 flex-shrink-0"
                         title="Edit"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -302,7 +302,7 @@ export default function InventoryTable({
                     {onDuplicate && (
                       <button
                         onClick={() => onDuplicate(item.id)}
-                        className="p-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded transition-all duration-200 hover:scale-105"
+                        className="p-1.5 sm:p-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded transition-all duration-200 hover:scale-105 flex-shrink-0"
                         title="Duplicate"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,7 +313,7 @@ export default function InventoryTable({
                     {onShowQR && (
                       <button
                         onClick={() => onShowQR(item)}
-                        className="p-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 rounded transition-all duration-200 hover:scale-105"
+                        className="p-1.5 sm:p-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 rounded transition-all duration-200 hover:scale-105 flex-shrink-0"
                         title="QR Code"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -323,7 +323,7 @@ export default function InventoryTable({
                     )}
                     <button
                       onClick={() => printLabel(item)}
-                      className="p-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 rounded transition-all duration-200 hover:scale-105"
+                      className="p-1.5 sm:p-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 rounded transition-all duration-200 hover:scale-105 flex-shrink-0"
                       title="Print"
                     >
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -333,7 +333,7 @@ export default function InventoryTable({
                     {onShowHistory && (
                       <button
                         onClick={() => onShowHistory(item)}
-                        className="p-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded transition-all duration-200 hover:scale-105"
+                        className="p-1.5 sm:p-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded transition-all duration-200 hover:scale-105 flex-shrink-0"
                         title="History"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -344,7 +344,7 @@ export default function InventoryTable({
                     <RemoveButton removed={item.removed} onRemove={() => onRemove(item.id)} />
                     <button
                       onClick={() => onDelete(item.id)}
-                      className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded transition-all duration-200 hover:scale-105"
+                      className="p-1.5 sm:p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded transition-all duration-200 hover:scale-105 flex-shrink-0"
                       title="Delete"
                     >
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

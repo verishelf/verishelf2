@@ -1316,27 +1316,29 @@ export default function DashboardEnhanced() {
         </div>
 
         <div className="card-gradient rounded-2xl p-6 card-gradient-hover">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <h2 className="text-2xl font-bold text-white">Inventory</h2>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
               <div className="text-sm text-slate-400">
                 Showing <span className="text-emerald-400 font-semibold">{filteredItems.length}</span> items •{" "}
                 <span className="text-emerald-400 font-semibold">{stats.total}</span> active
               </div>
-              <button
-                onClick={() => setShowAnalytics(!showAnalytics)}
-                className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm transition-colors"
-                title="View Analytics"
-              >
-                {showAnalytics ? "Hide" : "Show"} Analytics
-              </button>
-              <button
-                onClick={handleBackup}
-                className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm transition-colors"
-                title="Backup data"
-              >
-                Backup
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowAnalytics(!showAnalytics)}
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
+                  title="View Analytics"
+                >
+                  {showAnalytics ? "Hide" : "Show"} Analytics
+                </button>
+                <button
+                  onClick={handleBackup}
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
+                  title="Backup data"
+                >
+                  Backup
+                </button>
+              </div>
             </div>
           </div>
           <InventoryTable
