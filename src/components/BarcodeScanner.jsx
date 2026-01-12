@@ -37,17 +37,29 @@ export default function BarcodeScanner({ onScan, onClose }) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
         
-        // Ensure video plays
-        try {
-          await videoRef.current.play();
-        } catch (playError) {
-          console.error("Video play error:", playError);
-          // Try with muted if autoplay fails
-          videoRef.current.muted = true;
-          await videoRef.current.play();
-        }
-        
-        setScanning(true);
+        // Wait for video to be ready
+        videoRef.current.onloadedmetadata = () => {
+          // Ensure video plays
+          videoRef.current.play()
+            .then(() => {
+              console.log("Video started playing");
+              setScanning(true);
+            })
+            .catch((playError) => {
+              console.error("Video play error:", playError);
+              // Try with muted if autoplay fails
+              videoRef.current.muted = true;
+              videoRef.current.play()
+                .then(() => {
+                  console.log("Video started playing (muted)");
+                  setScanning(true);
+                })
+                .catch((err) => {
+                  console.error("Video play error (muted):", err);
+                  setError("Unable to start camera preview. Please try again.");
+                });
+            });
+        };
       }
     } catch (err) {
       setError("Unable to access camera. Please check permissions.");
@@ -136,17 +148,16 @@ export default function BarcodeScanner({ onScan, onClose }) {
 
           {/* Camera View */}
           <div className="relative bg-black rounded-lg overflow-hidden aspect-video">
-            {scanning ? (
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full h-full object-cover"
-                style={{ transform: 'scaleX(-1)' }} // Mirror the video for better UX
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className={`w-full h-full object-cover ${scanning ? 'block' : 'hidden'}`}
+              style={{ transform: 'scaleX(-1)' }} // Mirror the video for better UX
+            />
+            {!scanning && (
+              <div className="flex items-center justify-center h-full absolute inset-0">
                 <div className="text-center">
                   <svg className="w-16 h-16 text-slate-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
