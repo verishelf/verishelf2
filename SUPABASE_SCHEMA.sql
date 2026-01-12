@@ -52,6 +52,10 @@ ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own profile" ON users
   FOR SELECT USING (auth.uid() = id);
 
+-- Users can insert their own profile
+CREATE POLICY "Users can create own profile" ON users
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
 -- Users can update their own data
 CREATE POLICY "Users can update own profile" ON users
   FOR UPDATE USING (auth.uid() = id);
