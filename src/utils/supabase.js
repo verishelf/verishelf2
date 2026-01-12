@@ -177,12 +177,44 @@ export async function saveItem(userId, item) {
     return { success: false, error: 'Supabase not initialized' };
   }
 
+  // Ensure required fields are present
+  if (!item.name || item.name.trim() === '') {
+    return { success: false, error: { message: 'Product name is required', code: 'VALIDATION_ERROR' } };
+  }
+
+  if (!item.expiryDate && !item.expiry_date && !item.expiry) {
+    return { success: false, error: { message: 'Expiry date is required', code: 'VALIDATION_ERROR' } };
+  }
+
+  // Location is required in database schema - use default if not provided
+  const location = item.location || 'Default Location';
+
+  // Format expiry date - ensure it's a valid date string
+  let expiryDate = item.expiryDate || item.expiry_date || item.expiry;
+  if (expiryDate) {
+    // If it's a Date object, convert to ISO string and extract date part
+    if (expiryDate instanceof Date) {
+      expiryDate = expiryDate.toISOString().split('T')[0];
+    }
+    // If it's already a string, ensure it's in YYYY-MM-DD format
+    else if (typeof expiryDate === 'string') {
+      // If it's in a different format, try to parse it
+      const dateObj = new Date(expiryDate);
+      if (isNaN(dateObj.getTime())) {
+        return { success: false, error: { message: 'Invalid expiry date format', code: 'VALIDATION_ERROR' } };
+      }
+      expiryDate = dateObj.toISOString().split('T')[0];
+    }
+  } else {
+    return { success: false, error: { message: 'Expiry date is required', code: 'VALIDATION_ERROR' } };
+  }
+
   const itemData = {
     user_id: userId,
-    name: item.name,
+    name: item.name.trim(),
     barcode: item.barcode || null,
-    location: item.location || null,
-    expiry_date: item.expiryDate || item.expiry_date || item.expiry || null,
+    location: location, // Required field - never null
+    expiry_date: expiryDate, // Required field - never null
     quantity: item.quantity || 1,
     category: item.category || null,
     cost: item.cost || item.price || null,
@@ -221,7 +253,7 @@ export async function saveItem(userId, item) {
   }
   
   // Insert new item (either no ID, or ID doesn't exist in database)
-  // Validate required fields before insert
+  // Additional validation (already validated above, but double-check)
   if (!itemData.name || itemData.name.trim() === '') {
     console.error('Error: Item name is required');
     return { success: false, error: { message: 'Product name is required', code: 'VALIDATION_ERROR' } };
@@ -230,6 +262,16 @@ export async function saveItem(userId, item) {
   if (!itemData.user_id) {
     console.error('Error: User ID is required');
     return { success: false, error: { message: 'User ID is required', code: 'VALIDATION_ERROR' } };
+  }
+
+  if (!itemData.location) {
+    console.error('Error: Location is required');
+    return { success: false, error: { message: 'Location is required', code: 'VALIDATION_ERROR' } };
+  }
+
+  if (!itemData.expiry_date) {
+    console.error('Error: Expiry date is required');
+    return { success: false, error: { message: 'Expiry date is required', code: 'VALIDATION_ERROR' } };
   }
 
   console.log('Inserting item to Supabase:', { table: 'items', data: itemData });

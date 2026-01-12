@@ -343,12 +343,22 @@ export default function DashboardEnhanced() {
     }
 
     // Map fields from AddItem component to expected format
+    // Ensure location is never empty (required by database)
+    const location = selectedLocation === "All Locations" 
+      ? (stores[0]?.name || settings.defaultLocation || "Default Location")
+      : selectedLocation;
+    
+    if (!location || location.trim() === '') {
+      alert("Error: Please select a location or set a default location in settings.");
+      return;
+    }
+
     const itemToSave = {
       ...item,
       // Don't include id for new items - let database generate it
       expiryDate: item.expiry || item.expiryDate, // Map expiry to expiryDate
       cost: item.price || item.cost || 0, // Map price to cost
-      location: selectedLocation === "All Locations" ? (stores[0]?.name || settings.defaultLocation || "") : selectedLocation,
+      location: location, // Ensure location is always provided
       addedAt: new Date().toISOString(),
       removed: false,
     };
