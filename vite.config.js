@@ -12,7 +12,8 @@ export default defineConfig({
       configureServer(server) {
         // Serve website files at root for local development
         server.middlewares.use((req, res, next) => {
-          // Don't intercept /dashboard/ routes - let Vite handle the React app
+          // Don't intercept /dashboard/ routes at all - let Vite handle the React app
+          // This includes /dashboard, /dashboard/, and all /dashboard/* paths
           if (req.url.startsWith('/dashboard')) {
             next();
             return;
