@@ -181,14 +181,15 @@ export async function saveItem(userId, item) {
     user_id: userId,
     name: item.name,
     barcode: item.barcode || null,
-    location: item.location,
-    expiry_date: item.expiryDate || item.expiry_date,
+    location: item.location || null,
+    expiry_date: item.expiryDate || item.expiry_date || item.expiry || null,
     quantity: item.quantity || 1,
     category: item.category || null,
-    cost: item.cost || null,
+    cost: item.cost || item.price || null,
     notes: item.notes || null,
     removed: item.removed || false,
     removed_at: item.removedAt || item.removed_at || null,
+    added_at: item.addedAt || item.added_at || new Date().toISOString(),
   };
 
   if (item.id && typeof item.id === 'number') {

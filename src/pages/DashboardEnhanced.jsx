@@ -324,22 +324,40 @@ export default function DashboardEnhanced() {
   }, [settings.enableKeyboardShortcuts]);
 
   const addItem = async (item) => {
-    if (!user || !user.id) return;
+    if (!user || !user.id) {
+      console.error("Cannot add item: User not logged in");
+      return;
+    }
 
+    // Map fields from AddItem component to expected format
     const newItem = {
       ...item,
-      id: Date.now(),
-      location: selectedLocation === "All Locations" ? (stores[0]?.name || settings.defaultLocation) : selectedLocation,
+      id: Date.now(), // Temporary ID, will be replaced with database ID
+      expiryDate: item.expiry || item.expiryDate, // Map expiry to expiryDate
+      cost: item.price || item.cost || 0, // Map price to cost
+      location: selectedLocation === "All Locations" ? (stores[0]?.name || settings.defaultLocation || "") : selectedLocation,
       addedAt: new Date().toISOString(),
       removed: false,
     };
     
     // Save to Supabase immediately
-    if (user.id) {
+    try {
       const result = await saveItem(user.id, newItem);
       if (result.success && result.data) {
-        newItem.id = result.data.id; // Use database ID
+        // Use database ID and data
+        newItem.id = result.data.id;
+        // Update with any fields that might have been transformed by the database
+        Object.assign(newItem, {
+          expiryDate: result.data.expiry_date,
+          addedAt: result.data.added_at,
+        });
+      } else {
+        console.error("Failed to save item to Supabase:", result.error);
+        // Still add to local state but log the error
       }
+    } catch (error) {
+      console.error("Error saving item to Supabase:", error);
+      // Still add to local state but log the error
     }
     
     setItems([...items, newItem]);
