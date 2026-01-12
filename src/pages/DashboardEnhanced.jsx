@@ -103,26 +103,64 @@ export default function DashboardEnhanced() {
   useEffect(() => {
     async function initializeAuth() {
       try {
+        console.log('Initializing authentication...');
         // Initialize Supabase
-        initSupabase();
+        const supabase = initSupabase();
+        if (!supabase) {
+          console.error('Supabase initialization failed');
+          // Try to use localStorage fallback
+          const localUser = JSON.parse(localStorage.getItem('verishelf_user') || '{}');
+          if (localUser.loggedIn && localUser.id) {
+            console.log('Using localStorage user:', localUser);
+            setUser(localUser);
+            const saved = localStorage.getItem('verishelf-items');
+            setItems(saved ? JSON.parse(saved) : []);
+            setLoading(false);
+            return;
+          } else {
+            window.location.replace('/');
+            return;
+          }
+        }
         
         // Check authentication
+        console.log('Checking authentication...');
         const authData = await checkAuth();
+        console.log('Auth data:', authData);
+        
         if (!authData || !authData.user) {
+          console.warn('No auth data or user, checking localStorage...');
+          // Check localStorage as fallback
+          const localUser = JSON.parse(localStorage.getItem('verishelf_user') || '{}');
+          if (localUser.loggedIn && localUser.id) {
+            console.log('Using localStorage user:', localUser);
+            setUser(localUser);
+            const saved = localStorage.getItem('verishelf-items');
+            setItems(saved ? JSON.parse(saved) : []);
+            setLoading(false);
+            return;
+          }
           // Not authenticated - redirect to website (index.html)
+          console.log('Not authenticated, redirecting to home...');
           window.location.replace('/');
           return;
         }
 
         // Get user ID
         const userId = authData.user.id || authData.user?.id || JSON.parse(localStorage.getItem('verishelf_user') || '{}').id;
+        console.log('User ID:', userId);
+        
         if (!userId) {
+          console.warn('No user ID found, redirecting...');
           window.location.replace('/');
           return;
         }
 
         // Load user profile
+        console.log('Loading user profile...');
         const userProfile = await getCurrentUserProfile();
+        console.log('User profile loaded:', userProfile);
+        
         // If profile creation failed, create a fallback user object from auth data
         if (!userProfile) {
           console.warn('User profile not found, creating fallback user object');
@@ -132,13 +170,17 @@ export default function DashboardEnhanced() {
             name: authData.user.user_metadata?.name || authData.user.email?.split('@')[0] || 'User',
             company: authData.user.user_metadata?.company || '',
           };
+          console.log('Setting fallback user:', fallbackUser);
           setUser(fallbackUser);
         } else {
+          console.log('Setting user profile:', userProfile);
           setUser(userProfile);
         }
 
         // Load subscription
+        console.log('Loading subscription...');
         const userSubscription = await getUserSubscription(userId);
+        console.log('User subscription:', userSubscription);
         
         // Also check localStorage as fallback (for users who signed up before Supabase integration)
         const localSubscription = JSON.parse(localStorage.getItem('verishelf_subscription') || '{}');
@@ -153,7 +195,8 @@ export default function DashboardEnhanced() {
         // Check if user has active subscription
         const hasActiveSubscription = 
           (finalSubscription && finalSubscription.status === 'active') ||
-          (userProfile && userProfile.id); // Allow access if user exists (for development/testing)
+          (userProfile && userProfile.id) ||
+          (userId); // Allow access if user ID exists (for development/testing)
 
         if (!hasActiveSubscription && (!finalSubscription || finalSubscription.status !== 'active')) {
           // No active subscription - show warning but allow access for now
@@ -165,9 +208,12 @@ export default function DashboardEnhanced() {
         }
 
         // Load items from Supabase
+        console.log('Loading items...');
         const userItems = await loadItems(userId);
+        console.log('Items loaded:', userItems.length);
         setItems(userItems);
 
+        console.log('Initialization complete, setting loading to false');
         setLoading(false);
       } catch (error) {
         console.error('Error initializing auth:', error);
