@@ -1,16 +1,17 @@
 // Barcode Scanner Component - Mobile camera scanning with offline support
 import { useState, useRef, useEffect } from "react";
+import { BrowserMultiFormatReader } from "@zxing/library";
 import { addToOfflineQueue, isOnline, getSyncStatus } from "../utils/offlineSync";
 import { createAuditLog } from "../utils/audit";
 
-// Note: In production, you would use a library like html5-qrcode or quaggaJS
-// This is a simplified implementation
 export default function BarcodeScanner({ onScan, onClose }) {
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState(null);
   const [lastScanned, setLastScanned] = useState(null);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const codeReaderRef = useRef(null);
+  const scanIntervalRef = useRef(null);
   const [syncStatus, setSyncStatus] = useState(getSyncStatus());
 
   useEffect(() => {
@@ -25,41 +26,63 @@ export default function BarcodeScanner({ onScan, onClose }) {
   const startScanning = async () => {
     try {
       setError(null);
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "environment", // Use back camera on mobile
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-      });
+      
+      // Initialize barcode reader
+      if (!codeReaderRef.current) {
+        codeReaderRef.current = new BrowserMultiFormatReader();
+      }
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
+      // Get available video input devices
+      let selectedDeviceId = null;
+      try {
+        const videoInputDevices = await codeReaderRef.current.listVideoInputDevices();
         
-        // Wait for video to be ready
-        videoRef.current.onloadedmetadata = () => {
-          // Ensure video plays
-          videoRef.current.play()
-            .then(() => {
-              console.log("Video started playing");
-              setScanning(true);
-            })
-            .catch((playError) => {
-              console.error("Video play error:", playError);
-              // Try with muted if autoplay fails
-              videoRef.current.muted = true;
-              videoRef.current.play()
-                .then(() => {
-                  console.log("Video started playing (muted)");
-                  setScanning(true);
-                })
-                .catch((err) => {
-                  console.error("Video play error (muted):", err);
-                  setError("Unable to start camera preview. Please try again.");
-                });
-            });
-        };
+        // Prefer back camera on mobile
+        const backCamera = videoInputDevices.find(device => 
+          device.label.toLowerCase().includes('back') || 
+          device.label.toLowerCase().includes('rear') ||
+          device.label.toLowerCase().includes('environment')
+        );
+        
+        if (backCamera) {
+          selectedDeviceId = backCamera.deviceId;
+        } else if (videoInputDevices.length > 0) {
+          selectedDeviceId = videoInputDevices[videoInputDevices.length - 1].deviceId; // Use last device (usually back camera)
+        }
+      } catch (deviceError) {
+        console.warn('Could not list devices, using default:', deviceError);
+        // Continue with default device
+      }
+
+      // Start decoding from video
+      if (videoRef.current) {
+        try {
+          codeReaderRef.current.decodeFromVideoDevice(
+            selectedDeviceId,
+            videoRef.current,
+            (result, error) => {
+              if (result) {
+                // Barcode detected!
+                const barcode = result.getText();
+                console.log('Barcode scanned:', barcode);
+                handleBarcodeScanned(barcode);
+                // Stop scanning after successful scan
+                stopScanning();
+              }
+              if (error) {
+                // NotFoundException is normal - it means no barcode found yet
+                if (error.name !== 'NotFoundException' && error.name !== 'NoQRCodeFoundException') {
+                  console.error('Scanning error:', error);
+                }
+              }
+            }
+          );
+          
+          setScanning(true);
+        } catch (decodeError) {
+          console.error('Decode error:', decodeError);
+          setError("Unable to start barcode scanning. Please try again.");
+        }
       }
     } catch (err) {
       setError("Unable to access camera. Please check permissions.");
@@ -68,13 +91,27 @@ export default function BarcodeScanner({ onScan, onClose }) {
   };
 
   const stopScanning = () => {
+    // Stop barcode reader
+    if (codeReaderRef.current) {
+      codeReaderRef.current.reset();
+    }
+    
+    // Stop media stream
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
+    
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    
+    // Clear scan interval
+    if (scanIntervalRef.current) {
+      clearInterval(scanIntervalRef.current);
+      scanIntervalRef.current = null;
+    }
+    
     setScanning(false);
   };
 
@@ -109,6 +146,11 @@ export default function BarcodeScanner({ onScan, onClose }) {
   useEffect(() => {
     return () => {
       stopScanning();
+      // Cleanup barcode reader
+      if (codeReaderRef.current) {
+        codeReaderRef.current.reset();
+        codeReaderRef.current = null;
+      }
     };
   }, []);
 
