@@ -65,7 +65,9 @@ export default defineConfig({
       }
     }
   ],
-  base: '/',  // Use root base - website at /, dashboard will be handled by routing
+  // For local dev: base is '/' so website can be served at root
+  // For production: set VITE_BASE_PATH=/dashboard/ when building
+  base: process.env.VITE_BASE_PATH || (process.env.NODE_ENV === 'production' ? '/dashboard/' : '/'),
   build: {
     outDir: 'dist',
     // Ensure assets are correctly referenced
