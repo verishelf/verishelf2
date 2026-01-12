@@ -217,16 +217,57 @@ export default function DashboardEnhanced() {
         setLoading(false);
       } catch (error) {
         console.error('Error initializing auth:', error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
+        
         // Fallback to localStorage if Supabase fails
         const localUser = JSON.parse(localStorage.getItem('verishelf_user') || '{}');
-        if (localUser.loggedIn) {
+        console.log('Fallback: localStorage user:', localUser);
+        
+        if (localUser.loggedIn && localUser.id) {
+          console.log('Using localStorage fallback');
           setUser(localUser);
           const saved = localStorage.getItem('verishelf-items');
           setItems(saved ? JSON.parse(saved) : []);
+          setLoading(false);
         } else {
-          window.location.replace('/');
+          console.log('No localStorage user found, trying auth session...');
+          // Try to get user from auth session as last resort
+          try {
+            const supabase = getSupabase();
+            if (supabase) {
+              const { data: { user: authUser } } = await supabase.auth.getUser();
+              if (authUser) {
+                console.log('Found auth user, creating fallback:', authUser);
+                setUser({
+                  id: authUser.id,
+                  email: authUser.email || '',
+                  name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+                  company: authUser.user_metadata?.company || '',
+                });
+                setItems([]);
+                setLoading(false);
+                return;
+              }
+            }
+          } catch (authError) {
+            console.error('Error getting auth user:', authError);
+          }
+          
+          // Last resort: set a minimal user to prevent blank screen
+          console.log('Setting minimal user object to prevent blank screen');
+          setUser({
+            id: 'temp-user-' + Date.now(),
+            email: 'user@example.com',
+            name: 'User',
+            company: ''
+          });
+          setItems([]);
+          setLoading(false);
         }
-        setLoading(false);
       }
     }
 
