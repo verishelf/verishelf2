@@ -103,84 +103,34 @@ export default function DashboardEnhanced() {
   useEffect(() => {
     async function initializeAuth() {
       try {
-        console.log('Initializing authentication...');
         // Initialize Supabase
-        const supabase = initSupabase();
-        if (!supabase) {
-          console.error('Supabase initialization failed');
-          // Try to use localStorage fallback
-          const localUser = JSON.parse(localStorage.getItem('verishelf_user') || '{}');
-          if (localUser.loggedIn && localUser.id) {
-            console.log('Using localStorage user:', localUser);
-            setUser(localUser);
-            const saved = localStorage.getItem('verishelf-items');
-            setItems(saved ? JSON.parse(saved) : []);
-            setLoading(false);
-            return;
-          } else {
-            window.location.replace('/');
-            return;
-          }
-        }
+        initSupabase();
         
         // Check authentication
-        console.log('Checking authentication...');
         const authData = await checkAuth();
-        console.log('Auth data:', authData);
-        
         if (!authData || !authData.user) {
-          console.warn('No auth data or user, checking localStorage...');
-          // Check localStorage as fallback
-          const localUser = JSON.parse(localStorage.getItem('verishelf_user') || '{}');
-          if (localUser.loggedIn && localUser.id) {
-            console.log('Using localStorage user:', localUser);
-            setUser(localUser);
-            const saved = localStorage.getItem('verishelf-items');
-            setItems(saved ? JSON.parse(saved) : []);
-            setLoading(false);
-            return;
-          }
           // Not authenticated - redirect to website (index.html)
-          console.log('Not authenticated, redirecting to home...');
+          console.log('No auth data, redirecting to /');
           window.location.replace('/');
           return;
         }
 
         // Get user ID
         const userId = authData.user.id || authData.user?.id || JSON.parse(localStorage.getItem('verishelf_user') || '{}').id;
-        console.log('User ID:', userId);
-        
         if (!userId) {
-          console.warn('No user ID found, redirecting...');
+          console.log('No user ID, redirecting to /');
           window.location.replace('/');
           return;
         }
+        
+        console.log('Dashboard initializing for user:', userId);
 
         // Load user profile
-        console.log('Loading user profile...');
         const userProfile = await getCurrentUserProfile();
-        console.log('User profile loaded:', userProfile);
-        
-        // If profile creation failed, create a fallback user object from auth data
-        if (!userProfile) {
-          console.warn('User profile not found, creating fallback user object');
-          const fallbackUser = {
-            id: userId,
-            email: authData.user.email || '',
-            name: authData.user.user_metadata?.name || authData.user.email?.split('@')[0] || 'User',
-            company: authData.user.user_metadata?.company || '',
-          };
-          console.log('Setting fallback user:', fallbackUser);
-          setUser(fallbackUser);
-        } else {
-          console.log('Setting user profile:', userProfile);
-          setUser(userProfile);
-        }
+        setUser(userProfile);
 
         // Load subscription
-        console.log('Loading subscription...');
         const userSubscription = await getUserSubscription(userId);
-        console.log('User subscription:', userSubscription);
         
         // Also check localStorage as fallback (for users who signed up before Supabase integration)
         const localSubscription = JSON.parse(localStorage.getItem('verishelf_subscription') || '{}');
@@ -195,8 +145,7 @@ export default function DashboardEnhanced() {
         // Check if user has active subscription
         const hasActiveSubscription = 
           (finalSubscription && finalSubscription.status === 'active') ||
-          (userProfile && userProfile.id) ||
-          (userId); // Allow access if user ID exists (for development/testing)
+          (userProfile && userProfile.id); // Allow access if user exists (for development/testing)
 
         if (!hasActiveSubscription && (!finalSubscription || finalSubscription.status !== 'active')) {
           // No active subscription - show warning but allow access for now
@@ -208,66 +157,24 @@ export default function DashboardEnhanced() {
         }
 
         // Load items from Supabase
-        console.log('Loading items...');
         const userItems = await loadItems(userId);
-        console.log('Items loaded:', userItems.length);
+        console.log('Loaded items:', userItems.length);
         setItems(userItems);
 
-        console.log('Initialization complete, setting loading to false');
         setLoading(false);
+        console.log('Dashboard loaded successfully');
       } catch (error) {
         console.error('Error initializing auth:', error);
-        console.error('Error details:', {
-          message: error.message,
-          stack: error.stack,
-          name: error.name
-        });
-        
         // Fallback to localStorage if Supabase fails
         const localUser = JSON.parse(localStorage.getItem('verishelf_user') || '{}');
-        console.log('Fallback: localStorage user:', localUser);
-        
-        if (localUser.loggedIn && localUser.id) {
-          console.log('Using localStorage fallback');
+        if (localUser.loggedIn) {
           setUser(localUser);
           const saved = localStorage.getItem('verishelf-items');
           setItems(saved ? JSON.parse(saved) : []);
-          setLoading(false);
         } else {
-          console.log('No localStorage user found, trying auth session...');
-          // Try to get user from auth session as last resort
-          try {
-            const supabase = getSupabase();
-            if (supabase) {
-              const { data: { user: authUser } } = await supabase.auth.getUser();
-              if (authUser) {
-                console.log('Found auth user, creating fallback:', authUser);
-                setUser({
-                  id: authUser.id,
-                  email: authUser.email || '',
-                  name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
-                  company: authUser.user_metadata?.company || '',
-                });
-                setItems([]);
-                setLoading(false);
-                return;
-              }
-            }
-          } catch (authError) {
-            console.error('Error getting auth user:', authError);
-          }
-          
-          // Last resort: set a minimal user to prevent blank screen
-          console.log('Setting minimal user object to prevent blank screen');
-          setUser({
-            id: 'temp-user-' + Date.now(),
-            email: 'user@example.com',
-            name: 'User',
-            company: ''
-          });
-          setItems([]);
-          setLoading(false);
+          window.location.replace('/');
         }
+        setLoading(false);
       }
     }
 
@@ -442,38 +349,19 @@ export default function DashboardEnhanced() {
     }
 
     // Map fields from AddItem component to expected format
-    // Ensure location is never empty (required by database)
-    const location = selectedLocation === "All Locations" 
-      ? (stores[0]?.name || settings.defaultLocation || "Default Location")
-      : selectedLocation;
-    
-    if (!location || location.trim() === '') {
-      alert("Error: Please select a location or set a default location in settings.");
-      return;
-    }
-
     const itemToSave = {
       ...item,
       // Don't include id for new items - let database generate it
       expiryDate: item.expiry || item.expiryDate, // Map expiry to expiryDate
       cost: item.price || item.cost || 0, // Map price to cost
-      location: location, // Ensure location is always provided
+      location: selectedLocation === "All Locations" ? (stores[0]?.name || settings.defaultLocation || "") : selectedLocation,
       addedAt: new Date().toISOString(),
       removed: false,
     };
     
-    // Validate required fields
-    if (!itemToSave.name || itemToSave.name.trim() === '') {
-      alert("Error: Product name is required.");
-      return;
-    }
-
     // Save to Supabase immediately - don't add to state until save succeeds
     try {
-      console.log("Attempting to save item:", { userId: user.id, item: itemToSave });
       const result = await saveItem(user.id, itemToSave);
-      console.log("Save result:", result);
-      
       if (result.success && result.data) {
         // Map database fields back to app format
         const savedItem = {
@@ -503,14 +391,11 @@ export default function DashboardEnhanced() {
         sendWebhookEvent("item_added", savedItem);
       } else {
         console.error("Failed to save item to Supabase:", result.error);
-        // Show more detailed error message
-        const errorMessage = result.error?.message || result.error?.code || JSON.stringify(result.error) || "Unknown error";
-        alert(`Error: Failed to save item. ${errorMessage}\n\nPlease check the browser console for more details.`);
+        alert("Error: Failed to save item. Please try again.");
       }
     } catch (error) {
       console.error("Error saving item to Supabase:", error);
-      const errorMessage = error.message || JSON.stringify(error) || "Unknown error";
-      alert(`Error: Failed to save item. ${errorMessage}\n\nPlease check the browser console for more details.`);
+      alert("Error: Failed to save item. Please try again.");
     }
   };
 
@@ -840,26 +725,9 @@ export default function DashboardEnhanced() {
     );
   }
 
-  // Always render something - never return null or blank screen
+  // Redirect if not authenticated (shouldn't happen due to useEffect, but safety check)
   if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950">
-        <div className="text-center max-w-md mx-auto p-8">
-          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-400 text-lg mb-2">Authenticating...</p>
-          <p className="text-slate-500 text-sm mb-4">Loading: {loading ? 'Yes' : 'No'}</p>
-          <p className="text-slate-500 text-sm mb-4">User: {user ? 'Set' : 'Not Set'}</p>
-          <div className="mt-6 p-4 bg-slate-800 rounded-lg">
-            <p className="text-slate-300 text-sm mb-2">If this screen persists, check:</p>
-            <ul className="text-slate-400 text-xs text-left space-y-1">
-              <li>1. Browser console for errors (F12)</li>
-              <li>2. Network tab for failed requests</li>
-              <li>3. Supabase RLS policies are set correctly</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

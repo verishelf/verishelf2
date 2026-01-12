@@ -11,9 +11,11 @@ export default defineConfig({
       name: 'serve-website-at-root',
       configureServer(server) {
         // Serve website files at root for local development
+        // IMPORTANT: This middleware runs BEFORE Vite's middleware
+        // So we need to be careful not to interfere with Vite's handling
         server.middlewares.use((req, res, next) => {
-          // Don't intercept /dashboard/ routes at all - let Vite handle the React app
-          // This includes /dashboard, /dashboard/, and all /dashboard/* paths
+          // Let Vite handle ALL /dashboard/ routes (including assets, HMR, etc.)
+          // Vite will serve the React app HTML and transform paths correctly
           if (req.url.startsWith('/dashboard')) {
             next();
             return;
