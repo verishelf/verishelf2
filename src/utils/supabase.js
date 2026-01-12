@@ -221,6 +221,18 @@ export async function saveItem(userId, item) {
   }
   
   // Insert new item (either no ID, or ID doesn't exist in database)
+  // Validate required fields before insert
+  if (!itemData.name || itemData.name.trim() === '') {
+    console.error('Error: Item name is required');
+    return { success: false, error: { message: 'Product name is required', code: 'VALIDATION_ERROR' } };
+  }
+
+  if (!itemData.user_id) {
+    console.error('Error: User ID is required');
+    return { success: false, error: { message: 'User ID is required', code: 'VALIDATION_ERROR' } };
+  }
+
+  console.log('Inserting item to Supabase:', { table: 'items', data: itemData });
   const { data, error } = await supabase
     .from('items')
     .insert(itemData)
@@ -228,9 +240,18 @@ export async function saveItem(userId, item) {
     .single();
 
   if (error) {
-    console.error('Error creating item:', error);
+    console.error('Error creating item in Supabase:', {
+      error,
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+      itemData
+    });
     return { success: false, error };
   }
+  
+  console.log('Successfully created item:', data);
   return { success: true, data };
 }
 

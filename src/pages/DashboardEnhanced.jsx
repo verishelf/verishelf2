@@ -353,9 +353,18 @@ export default function DashboardEnhanced() {
       removed: false,
     };
     
+    // Validate required fields
+    if (!itemToSave.name || itemToSave.name.trim() === '') {
+      alert("Error: Product name is required.");
+      return;
+    }
+
     // Save to Supabase immediately - don't add to state until save succeeds
     try {
+      console.log("Attempting to save item:", { userId: user.id, item: itemToSave });
       const result = await saveItem(user.id, itemToSave);
+      console.log("Save result:", result);
+      
       if (result.success && result.data) {
         // Map database fields back to app format
         const savedItem = {
@@ -385,11 +394,14 @@ export default function DashboardEnhanced() {
         sendWebhookEvent("item_added", savedItem);
       } else {
         console.error("Failed to save item to Supabase:", result.error);
-        alert("Error: Failed to save item. Please try again.");
+        // Show more detailed error message
+        const errorMessage = result.error?.message || result.error?.code || JSON.stringify(result.error) || "Unknown error";
+        alert(`Error: Failed to save item. ${errorMessage}\n\nPlease check the browser console for more details.`);
       }
     } catch (error) {
       console.error("Error saving item to Supabase:", error);
-      alert("Error: Failed to save item. Please try again.");
+      const errorMessage = error.message || JSON.stringify(error) || "Unknown error";
+      alert(`Error: Failed to save item. ${errorMessage}\n\nPlease check the browser console for more details.`);
     }
   };
 
