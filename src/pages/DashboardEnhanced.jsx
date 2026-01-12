@@ -806,6 +806,8 @@ export default function DashboardEnhanced() {
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-400">Authenticating...</p>
+          <p className="text-slate-500 text-sm mt-2">Loading: {loading ? 'Yes' : 'No'}</p>
+          <p className="text-slate-500 text-sm">User: {user ? 'Set' : 'Not Set'}</p>
         </div>
       </div>
     );
