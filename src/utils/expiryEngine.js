@@ -41,9 +41,28 @@ export function performExpiryCheck(items, settings) {
   items
     .filter((item) => !item.removed)
     .forEach((item) => {
+      // Skip items without expiry date or with invalid dates
+      if (!item.expiry && !item.expiryDate) {
+        return;
+      }
+      
       // Convert item expiry to timezone-aware date
-      const expiryDate = new Date(item.expiry);
+      const expiryValue = item.expiry || item.expiryDate;
+      const expiryDate = new Date(expiryValue);
+      
+      // Check if date is valid
+      if (isNaN(expiryDate.getTime())) {
+        console.warn('Invalid expiry date for item:', item.name, expiryValue);
+        return;
+      }
+      
       const expiryInTimezone = convertToTimezone(expiryDate, timezone);
+      
+      // Check if converted date is valid
+      if (isNaN(expiryInTimezone.getTime())) {
+        console.warn('Invalid timezone conversion for item:', item.name);
+        return;
+      }
       
       const daysUntil = Math.ceil((expiryInTimezone - now) / (1000 * 60 * 60 * 24));
       
