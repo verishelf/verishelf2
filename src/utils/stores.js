@@ -1,9 +1,5 @@
 // Store management
-const DEFAULT_STORES = [
-  { id: 1, name: "Store #001" },
-  { id: 2, name: "Store #002" },
-  { id: 3, name: "Store #003" }
-];
+const DEFAULT_STORES = []; // Start with empty stores - users add their own
 
 export function getStores() {
   const saved = localStorage.getItem("verishelf-stores");

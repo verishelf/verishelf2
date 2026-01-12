@@ -1,7 +1,7 @@
 // Settings management
 const DEFAULT_SETTINGS = {
   warningDays: 3,
-  defaultLocation: "Store #001",
+  defaultLocation: "",
   currency: "USD",
   dateFormat: "MM/DD/YYYY",
   enableNotifications: true,
