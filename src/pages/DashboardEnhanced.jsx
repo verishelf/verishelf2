@@ -799,15 +799,23 @@ export default function DashboardEnhanced() {
     );
   }
 
-  // Redirect if not authenticated (shouldn't happen due to useEffect, but safety check)
+  // Always render something - never return null or blank screen
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950">
-        <div className="text-center">
+        <div className="text-center max-w-md mx-auto p-8">
           <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-400">Authenticating...</p>
-          <p className="text-slate-500 text-sm mt-2">Loading: {loading ? 'Yes' : 'No'}</p>
-          <p className="text-slate-500 text-sm">User: {user ? 'Set' : 'Not Set'}</p>
+          <p className="text-slate-400 text-lg mb-2">Authenticating...</p>
+          <p className="text-slate-500 text-sm mb-4">Loading: {loading ? 'Yes' : 'No'}</p>
+          <p className="text-slate-500 text-sm mb-4">User: {user ? 'Set' : 'Not Set'}</p>
+          <div className="mt-6 p-4 bg-slate-800 rounded-lg">
+            <p className="text-slate-300 text-sm mb-2">If this screen persists, check:</p>
+            <ul className="text-slate-400 text-xs text-left space-y-1">
+              <li>1. Browser console for errors (F12)</li>
+              <li>2. Network tab for failed requests</li>
+              <li>3. Supabase RLS policies are set correctly</li>
+            </ul>
+          </div>
         </div>
       </div>
     );
