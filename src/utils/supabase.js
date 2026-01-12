@@ -81,6 +81,41 @@ export async function getCurrentUserProfile() {
 
   if (profileError) {
     console.error('Error fetching user profile:', profileError);
+    
+    // If user doesn't exist in users table, create them
+    if (profileError.code === 'PGRST116' || profileError.message?.includes('No rows')) {
+      console.log('User not found in users table, creating profile...');
+      
+      const newUser = {
+        id: user.id,
+        email: user.email || '',
+        name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+        company: user.user_metadata?.company || '',
+        created_at: new Date().toISOString(),
+      };
+
+      const { data: createdProfile, error: createError } = await supabase
+        .from('users')
+        .insert(newUser)
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('Error creating user profile:', createError);
+        // Return fallback user object even if creation fails
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+          company: user.user_metadata?.company || '',
+        };
+      }
+
+      console.log('User profile created successfully:', createdProfile);
+      return createdProfile;
+    }
+    
+    // For other errors, return fallback
     return {
       id: user.id,
       email: user.email,
