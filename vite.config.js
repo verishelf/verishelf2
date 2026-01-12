@@ -12,6 +12,12 @@ export default defineConfig({
       configureServer(server) {
         // Serve website files at root for local development
         server.middlewares.use((req, res, next) => {
+          // Don't intercept /dashboard/ routes - let Vite handle the React app
+          if (req.url.startsWith('/dashboard')) {
+            next();
+            return;
+          }
+          
           // If requesting root, serve website index.html
           if (req.url === '/' || req.url === '/index.html') {
             try {
@@ -25,7 +31,7 @@ export default defineConfig({
           }
           
           // Serve other website HTML pages
-          if (req.url.startsWith('/') && req.url.endsWith('.html') && !req.url.startsWith('/dashboard')) {
+          if (req.url.startsWith('/') && req.url.endsWith('.html')) {
             try {
               const pageName = req.url === '/' ? 'index.html' : req.url.substring(1);
               const websiteHtml = readFileSync(join(__dirname, 'website', pageName), 'utf-8');
@@ -65,9 +71,9 @@ export default defineConfig({
       }
     }
   ],
-  // For local dev: base is '/' so website can be served at root
-  // For production: set VITE_BASE_PATH=/dashboard/ when building
-  base: process.env.VITE_BASE_PATH || (process.env.NODE_ENV === 'production' ? '/dashboard/' : '/'),
+  // For local dev: use '/dashboard/' so React app is at /dashboard/ and website at root
+  // For production: also use '/dashboard/' when building
+  base: process.env.VITE_BASE_PATH || '/dashboard/',
   build: {
     outDir: 'dist',
     // Ensure assets are correctly referenced
