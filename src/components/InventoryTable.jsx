@@ -287,7 +287,7 @@ export default function InventoryTable({
                   <div className="text-xs text-slate-400">{item.location || "Store #001"}</div>
                 </td>
                 <td className="px-2 py-2">
-                  <div className="flex items-center gap-1 flex-wrap max-w-full">
+                  <div className="flex items-center gap-1 flex-wrap justify-end sm:justify-start max-w-full">
                     {onEdit && (
                       <button
                         onClick={() => onEdit(item)}
