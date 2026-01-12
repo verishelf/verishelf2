@@ -188,16 +188,28 @@ export default function DashboardEnhanced() {
     };
   }, [showMoreMenu]);
 
-  // Save items to Supabase when they change
+  // Save items to Supabase when they change (backup mechanism)
+  // Note: Individual operations (add, update, remove, delete) save immediately
+  // This is a backup to catch any missed saves
   useEffect(() => {
-    if (!user || !user.id || items.length === 0) return;
+    if (!user || !user.id) return;
+
+    // Only save if we have items and user is loaded
+    // Skip if items array is empty (initial load)
+    if (items.length === 0) {
+      return;
+    }
 
     // Debounce saves to avoid too many API calls
     const timeoutId = setTimeout(async () => {
       try {
-        // Save each item to Supabase
+        // Save each item to Supabase (upsert - will update if exists, insert if new)
         for (const item of items) {
-          await saveItem(user.id, item);
+          // Only save items that have a database ID (not temporary IDs)
+          // Items with temporary IDs should be saved via addItem/updateItem functions
+          if (item.id && typeof item.id === 'number' && item.id < 10000000000000) {
+            await saveItem(user.id, item);
+          }
         }
         // Also keep localStorage as backup
         localStorage.setItem("verishelf-items", JSON.stringify(items));
@@ -206,7 +218,7 @@ export default function DashboardEnhanced() {
         // Fallback to localStorage
         localStorage.setItem("verishelf-items", JSON.stringify(items));
       }
-    }, 1000);
+    }, 2000); // Increased debounce to 2 seconds to reduce API calls
 
     return () => clearTimeout(timeoutId);
   }, [items, user]);
@@ -326,6 +338,7 @@ export default function DashboardEnhanced() {
   const addItem = async (item) => {
     if (!user || !user.id) {
       console.error("Cannot add item: User not logged in");
+      alert("Error: You must be logged in to add items.");
       return;
     }
 
@@ -340,46 +353,44 @@ export default function DashboardEnhanced() {
       removed: false,
     };
     
-    // Save to Supabase immediately
-    let savedItem = null;
+    // Save to Supabase immediately - don't add to state until save succeeds
     try {
       const result = await saveItem(user.id, itemToSave);
       if (result.success && result.data) {
-        savedItem = {
-          ...itemToSave,
+        // Map database fields back to app format
+        const savedItem = {
           id: result.data.id, // Use database ID
+          name: result.data.name,
+          barcode: result.data.barcode,
+          location: result.data.location,
           expiryDate: result.data.expiry_date,
+          expiry: result.data.expiry_date, // Keep both for compatibility
+          quantity: result.data.quantity || 1,
+          category: result.data.category,
+          cost: result.data.cost,
+          price: result.data.cost, // Keep both for compatibility
+          notes: result.data.notes,
+          removed: result.data.removed || false,
+          removedAt: result.data.removed_at,
           addedAt: result.data.added_at,
         };
+        
+        // Only add to state after successful save
+        setItems([...items, savedItem]);
+        addHistoryEntry("added", savedItem.id, savedItem.name);
+        createAuditLog("added", savedItem.id, savedItem.name, {
+          location: savedItem.location,
+          notes: "Product added via dashboard",
+        });
+        sendWebhookEvent("item_added", savedItem);
       } else {
         console.error("Failed to save item to Supabase:", result.error);
-        // Use temporary ID if save fails
-        savedItem = {
-          ...itemToSave,
-          id: Date.now(),
-        };
+        alert("Error: Failed to save item. Please try again.");
       }
     } catch (error) {
       console.error("Error saving item to Supabase:", error);
-      // Use temporary ID if save fails
-      savedItem = {
-        ...itemToSave,
-        id: Date.now(),
-      };
+      alert("Error: Failed to save item. Please try again.");
     }
-    
-    const newItem = savedItem || {
-      ...itemToSave,
-      id: Date.now(),
-    };
-    
-    setItems([...items, newItem]);
-    addHistoryEntry("added", newItem.id, newItem.name);
-    createAuditLog("added", newItem.id, newItem.name, {
-      location: newItem.location,
-      notes: "Product added via dashboard",
-    });
-    sendWebhookEvent("item_added", newItem);
   };
 
   const updateItem = async (updatedItem) => {
@@ -526,10 +537,58 @@ export default function DashboardEnhanced() {
   };
 
   const handleImport = async (file) => {
+    if (!user || !user.id) {
+      alert("Error: You must be logged in to import items.");
+      return;
+    }
+
     try {
       const importedItems = await importFromCSV(file);
-      setItems([...items, ...importedItems]);
-      alert(`Successfully imported ${importedItems.length} items`);
+      
+      // Save each imported item to Supabase
+      const savedItems = [];
+      for (const importedItem of importedItems) {
+        const itemToSave = {
+          ...importedItem,
+          expiryDate: importedItem.expiry || importedItem.expiryDate,
+          cost: importedItem.price || importedItem.cost || 0,
+          location: importedItem.location || selectedLocation === "All Locations" ? (stores[0]?.name || settings.defaultLocation || "") : selectedLocation,
+          addedAt: importedItem.addedAt || new Date().toISOString(),
+          removed: importedItem.removed || false,
+        };
+        
+        try {
+          const result = await saveItem(user.id, itemToSave);
+          if (result.success && result.data) {
+            // Map database fields back to app format
+            savedItems.push({
+              id: result.data.id,
+              name: result.data.name,
+              barcode: result.data.barcode,
+              location: result.data.location,
+              expiryDate: result.data.expiry_date,
+              expiry: result.data.expiry_date,
+              quantity: result.data.quantity || 1,
+              category: result.data.category,
+              cost: result.data.cost,
+              price: result.data.cost,
+              notes: result.data.notes,
+              removed: result.data.removed || false,
+              removedAt: result.data.removed_at,
+              addedAt: result.data.added_at,
+            });
+          }
+        } catch (error) {
+          console.error("Error saving imported item:", error);
+        }
+      }
+      
+      if (savedItems.length > 0) {
+        setItems([...items, ...savedItems]);
+        alert(`Successfully imported ${savedItems.length} of ${importedItems.length} items`);
+      } else {
+        alert("Error: Failed to import items. Please try again.");
+      }
     } catch (error) {
       alert("Error importing file: " + error.message);
     }
@@ -541,15 +600,69 @@ export default function DashboardEnhanced() {
   };
 
   const handleRestore = async (file) => {
+    if (!user || !user.id) {
+      alert("Error: You must be logged in to restore data.");
+      return;
+    }
+
     try {
       const backup = await restoreData(file);
       if (window.confirm("This will replace all current data. Continue?")) {
-        setItems(backup.items || []);
+        const itemsToRestore = backup.items || [];
+        
+        // Delete all existing items from Supabase first
+        if (items.length > 0) {
+          for (const item of items) {
+            if (item.id) {
+              await deleteItemFromSupabase(user.id, item.id);
+            }
+          }
+        }
+        
+        // Save all restored items to Supabase
+        const savedItems = [];
+        for (const item of itemsToRestore) {
+          const itemToSave = {
+            ...item,
+            expiryDate: item.expiry || item.expiryDate,
+            cost: item.price || item.cost || 0,
+            location: item.location || settings.defaultLocation || "",
+            addedAt: item.addedAt || new Date().toISOString(),
+            removed: item.removed || false,
+          };
+          
+          try {
+            const result = await saveItem(user.id, itemToSave);
+            if (result.success && result.data) {
+              // Map database fields back to app format
+              savedItems.push({
+                id: result.data.id,
+                name: result.data.name,
+                barcode: result.data.barcode,
+                location: result.data.location,
+                expiryDate: result.data.expiry_date,
+                expiry: result.data.expiry_date,
+                quantity: result.data.quantity || 1,
+                category: result.data.category,
+                cost: result.data.cost,
+                price: result.data.cost,
+                notes: result.data.notes,
+                removed: result.data.removed || false,
+                removedAt: result.data.removed_at,
+                addedAt: result.data.added_at,
+              });
+            }
+          } catch (error) {
+            console.error("Error saving restored item:", error);
+          }
+        }
+        
+        setItems(savedItems);
         if (backup.settings) {
           setSettings(backup.settings);
           saveSettings(backup.settings);
         }
-        alert("Data restored successfully");
+        alert(`Data restored successfully. ${savedItems.length} items restored.`);
       }
     } catch (error) {
       alert("Error restoring backup: " + error.message);
@@ -1508,10 +1621,58 @@ export default function DashboardEnhanced() {
       {showImportWizard && (
         <ImportWizard
           onClose={() => setShowImportWizard(false)}
-          onImport={(importedItems) => {
-            setItems([...items, ...importedItems]);
-            setShowImportWizard(false);
-            alert(`Successfully imported ${importedItems.length} items`);
+          onImport={async (importedItems) => {
+            if (!user || !user.id) {
+              alert("Error: You must be logged in to import items.");
+              setShowImportWizard(false);
+              return;
+            }
+
+            // Save each imported item to Supabase
+            const savedItems = [];
+            for (const importedItem of importedItems) {
+              const itemToSave = {
+                ...importedItem,
+                expiryDate: importedItem.expiry || importedItem.expiryDate,
+                cost: importedItem.price || importedItem.cost || 0,
+                location: importedItem.location || selectedLocation === "All Locations" ? (stores[0]?.name || settings.defaultLocation || "") : selectedLocation,
+                addedAt: importedItem.addedAt || new Date().toISOString(),
+                removed: importedItem.removed || false,
+              };
+              
+              try {
+                const result = await saveItem(user.id, itemToSave);
+                if (result.success && result.data) {
+                  // Map database fields back to app format
+                  savedItems.push({
+                    id: result.data.id,
+                    name: result.data.name,
+                    barcode: result.data.barcode,
+                    location: result.data.location,
+                    expiryDate: result.data.expiry_date,
+                    expiry: result.data.expiry_date,
+                    quantity: result.data.quantity || 1,
+                    category: result.data.category,
+                    cost: result.data.cost,
+                    price: result.data.cost,
+                    notes: result.data.notes,
+                    removed: result.data.removed || false,
+                    removedAt: result.data.removed_at,
+                    addedAt: result.data.added_at,
+                  });
+                }
+              } catch (error) {
+                console.error("Error saving imported item:", error);
+              }
+            }
+            
+            if (savedItems.length > 0) {
+              setItems([...items, ...savedItems]);
+              setShowImportWizard(false);
+              alert(`Successfully imported ${savedItems.length} of ${importedItems.length} items`);
+            } else {
+              alert("Error: Failed to import items. Please try again.");
+            }
           }}
         />
       )}
