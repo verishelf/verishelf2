@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Learn how to use VeriShelf - step-by-step tutorials for managing shelf expiry across your retail locations.">
+  <title>Tutorials — VeriShelf</title>
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BFSEZD1KE4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-BFSEZD1KE4');
+  </script>
+  
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.3s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 text-white min-h-screen">
+  <!-- NAVIGATION -->
+  <nav class="fixed w-full backdrop-blur-lg z-50 border-b border-slate-800 bg-slate-950/95 supports-[backdrop-filter]:bg-slate-950/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex justify-between items-center">
+        <a href="index.html" class="text-2xl font-bold gradient-text">VeriShelf</a>
+        <div class="hidden md:flex items-center gap-6">
+          <a href="index.html#features" class="text-slate-400 hover:text-emerald-300 transition-colors">Features</a>
+          <a href="index.html#pricing" class="text-slate-400 hover:text-emerald-300 transition-colors">Pricing</a>
+          <a href="tutorials.html" class="text-emerald-400 font-semibold">Tutorials</a>
+          <a href="api-docs.html" class="text-slate-400 hover:text-emerald-300 transition-colors">API Docs</a>
+          <a href="index.html#pricing" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-colors">Get Started</a>
+        </div>
+        <button class="md:hidden text-slate-400 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-5xl sm:text-6xl font-bold mb-6">
+        <span class="gradient-text">Tutorials</span>
+      </h1>
+      <p class="text-xl text-slate-400 mb-8">
+        Learn how to use VeriShelf to manage shelf expiry across all your retail locations
+      </p>
+    </div>
+  </section>
+
+  <!-- TUTORIALS CONTENT -->
+  <section class="py-16 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+      
+      <!-- Getting Started -->
+      <div class="mb-12">
+        <h2 class="text-3xl font-bold text-white mb-6">Getting Started</h2>
+        
+        <div class="space-y-6">
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">1. Create Your Account</h3>
+            <p class="text-slate-300 mb-4">
+              Start by creating your VeriShelf account. Choose a subscription plan that fits your number of locations, then complete the signup process.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Visit the <a href="index.html#pricing" class="text-emerald-400 hover:text-emerald-300">Pricing</a> page</li>
+              <li>Select your plan (Starter, Professional, or Enterprise)</li>
+              <li>Enter the number of locations you need to manage</li>
+              <li>Complete the checkout process</li>
+              <li>You'll be redirected to your dashboard after payment</li>
+            </ol>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">2. Set Up Your Store Locations</h3>
+            <p class="text-slate-300 mb-4">
+              Before adding products, set up your store locations. This helps organize your inventory by location.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Click the "Stores" button in the dashboard navigation</li>
+              <li>Click "Add New Store"</li>
+              <li>Enter the store name (e.g., "Store #001", "Downtown Location")</li>
+              <li>Click "Add Store" to save</li>
+              <li>Repeat for all your locations</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Adding Products -->
+      <div class="mb-12">
+        <h2 class="text-3xl font-bold text-white mb-6">Adding Products</h2>
+        
+        <div class="space-y-6">
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Manual Entry</h3>
+            <p class="text-slate-300 mb-4">
+              Add products manually by filling out the product form in your dashboard.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Navigate to the "Add Product" section in your dashboard</li>
+              <li>Enter the product name</li>
+              <li>Select or enter the expiry date</li>
+              <li>Enter quantity (default is 1)</li>
+              <li>Select the location/store where the product is located</li>
+              <li>Optionally add: barcode, category, cost, supplier, and notes</li>
+              <li>Click "Add Product" to save</li>
+            </ol>
+            <p class="text-slate-400 text-sm mt-4">
+              <strong>Tip:</strong> Products are automatically saved to your account and will persist across logins.
+            </p>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Barcode Scanner</h3>
+            <p class="text-slate-300 mb-4">
+              Use the built-in barcode scanner to quickly add products by scanning their barcodes.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Click the "Scan" button in the dashboard navigation</li>
+              <li>Allow camera access when prompted</li>
+              <li>Point your camera at the product's barcode</li>
+              <li>The barcode will be automatically detected and filled in</li>
+              <li>Complete the remaining product details</li>
+              <li>Click "Add Product" to save</li>
+            </ol>
+            <p class="text-slate-400 text-sm mt-4">
+              <strong>Note:</strong> The scanner works best in well-lit conditions. If a barcode isn't detected, try adjusting the angle or lighting.
+            </p>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">CSV Import</h3>
+            <p class="text-slate-300 mb-4">
+              Import multiple products at once using a CSV file. This is ideal for bulk product entry.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Prepare a CSV file with columns: name, expiry_date, quantity, location, barcode, category, cost, supplier, notes</li>
+              <li>Click the "Import" button in the dashboard</li>
+              <li>Select your CSV file</li>
+              <li>Review the imported items</li>
+              <li>All items will be automatically saved to your account</li>
+            </ol>
+            <p class="text-slate-400 text-sm mt-4">
+              <strong>Tip:</strong> You can export your current inventory as CSV to see the exact format needed.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Managing Products -->
+      <div class="mb-12">
+        <h2 class="text-3xl font-bold text-white mb-6">Managing Products</h2>
+        
+        <div class="space-y-6">
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Editing Products</h3>
+            <p class="text-slate-300 mb-4">
+              Update product information at any time.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Find the product in your inventory table</li>
+              <li>Click the "Edit" button (pencil icon)</li>
+              <li>Update any fields you want to change</li>
+              <li>Click "Save Changes"</li>
+            </ol>
+            <p class="text-slate-400 text-sm mt-4">
+              Changes are saved immediately to your account.
+            </p>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Removing Products</h3>
+            <p class="text-slate-300 mb-4">
+              Mark products as removed when they're taken off the shelf. This keeps a record but hides them from active inventory.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Find the product in your inventory table</li>
+              <li>Click the "Remove" button (checkmark icon)</li>
+              <li>The product will be marked as removed with a timestamp</li>
+              <li>Removed products are hidden from the main view but can be viewed in history</li>
+            </ol>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Deleting Products</h3>
+            <p class="text-slate-300 mb-4">
+              Permanently delete products from your inventory. This action cannot be undone.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Find the product in your inventory table</li>
+              <li>Click the "Delete" button (trash icon)</li>
+              <li>Confirm the deletion</li>
+              <li>The product will be permanently removed from your account</li>
+            </ol>
+            <p class="text-slate-400 text-sm mt-4">
+              <strong>Warning:</strong> Deleted products cannot be recovered. Consider removing instead if you want to keep a record.
+            </p>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Duplicating Products</h3>
+            <p class="text-slate-300 mb-4">
+              Quickly create copies of existing products with the same details.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Find the product you want to duplicate</li>
+              <li>Click the "Duplicate" button (copy icon)</li>
+              <li>A new product will be created with "(Copy)" appended to the name</li>
+              <li>Edit the duplicate to change any details as needed</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Searching and Filtering -->
+      <div class="mb-12">
+        <h2 class="text-3xl font-bold text-white mb-6">Searching and Filtering</h2>
+        
+        <div class="space-y-6">
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Search Products</h3>
+            <p class="text-slate-300 mb-4">
+              Quickly find products by searching across name, barcode, category, or supplier.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Type your search term in the search box</li>
+              <li>Results will filter in real-time as you type</li>
+              <li>Search works across product names, barcodes, categories, and suppliers</li>
+            </ol>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Filter by Status</h3>
+            <p class="text-slate-300 mb-4">
+              Filter products by their expiry status to focus on items that need attention.
+            </p>
+            <ul class="list-disc list-inside space-y-2 text-slate-300 ml-4">
+              <li><strong>All:</strong> Show all products</li>
+              <li><strong>Safe:</strong> Products that are not expiring soon</li>
+              <li><strong>Warning:</strong> Products expiring within the warning period (default: 3 days)</li>
+              <li><strong>Expired:</strong> Products that have passed their expiry date</li>
+            </ul>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Filter by Location</h3>
+            <p class="text-slate-300 mb-4">
+              View products from specific store locations or all locations at once.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Use the location dropdown selector</li>
+              <li>Select "All Locations" to see everything</li>
+              <li>Select a specific store to see only products from that location</li>
+            </ol>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Filter by Category</h3>
+            <p class="text-slate-300 mb-4">
+              Filter products by category to organize by product type.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Use the category dropdown filter</li>
+              <li>Select "All" to see all categories</li>
+              <li>Select a specific category to see only products in that category</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expiry Management -->
+      <div class="mb-12">
+        <h2 class="text-3xl font-bold text-white mb-6">Expiry Management</h2>
+        
+        <div class="space-y-6">
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Automated Expiry Engine</h3>
+            <p class="text-slate-300 mb-4">
+              VeriShelf automatically monitors your inventory for expired and expiring products every 15 minutes.
+            </p>
+            <ul class="list-disc list-inside space-y-2 text-slate-300 ml-4">
+              <li>The system checks all products every 15 minutes</li>
+              <li>Expired items are highlighted in red</li>
+              <li>Items expiring soon are highlighted in yellow</li>
+              <li>You'll see a status indicator showing when the last check occurred</li>
+            </ul>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Expiry Calendar</h3>
+            <p class="text-slate-300 mb-4">
+              View all product expiry dates in a calendar format to plan ahead.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Click the "Calendar" button in the dashboard</li>
+              <li>Browse through months to see upcoming expiries</li>
+              <li>Dates with expiring products are highlighted</li>
+              <li>Click on a date to see which products expire on that day</li>
+            </ol>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Alerts Panel</h3>
+            <p class="text-slate-300 mb-4">
+              Get a comprehensive view of all products that need attention.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Click the "Alerts" button in the dashboard</li>
+              <li>View all expired and expiring products in one place</li>
+              <li>See detailed information about each alert</li>
+              <li>Click on any product to edit or remove it</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reports and Export -->
+      <div class="mb-12">
+        <h2 class="text-3xl font-bold text-white mb-6">Reports and Export</h2>
+        
+        <div class="space-y-6">
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Export to CSV</h3>
+            <p class="text-slate-300 mb-4">
+              Export your inventory data to CSV format for external analysis or backup.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Click the "Export" button in the dashboard</li>
+              <li>Select "Export to CSV"</li>
+              <li>Your inventory will be downloaded as a CSV file</li>
+              <li>Open the file in Excel, Google Sheets, or any spreadsheet application</li>
+            </ol>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Export to PDF</h3>
+            <p class="text-slate-300 mb-4">
+              Generate professional PDF reports of your inventory.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Click the "Export" button</li>
+              <li>Select "Export Full (PDF)" for complete inventory</li>
+              <li>Or select "Export Expired (PDF)" for only expired items</li>
+              <li>Or select "Export Expiring (PDF)" for items expiring soon</li>
+              <li>The PDF will be generated and downloaded</li>
+            </ol>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Backup and Restore</h3>
+            <p class="text-slate-300 mb-4">
+              Create backups of your data and restore them when needed.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Click the "Backup" button to download a backup file</li>
+              <li>The backup includes all products, settings, and templates</li>
+              <li>To restore, use the import feature and select your backup file</li>
+              <li>Confirm the restore to replace current data with backup data</li>
+            </ol>
+            <p class="text-slate-400 text-sm mt-4">
+              <strong>Tip:</strong> Create regular backups to protect your data.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="mb-12">
+        <h2 class="text-3xl font-bold text-white mb-6">Settings</h2>
+        
+        <div class="space-y-6">
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">General Settings</h3>
+            <p class="text-slate-300 mb-4">
+              Customize VeriShelf to match your preferences and workflow.
+            </p>
+            <ul class="list-disc list-inside space-y-2 text-slate-300 ml-4">
+              <li><strong>Warning Days:</strong> Set how many days before expiry to show warnings (default: 3 days)</li>
+              <li><strong>Default Location:</strong> Set the default store location for new products</li>
+              <li><strong>Currency:</strong> Select your preferred currency for cost display</li>
+              <li><strong>Language:</strong> Choose your preferred language</li>
+              <li><strong>Time Zone:</strong> Set your time zone for accurate date/time display</li>
+            </ul>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Notifications</h3>
+            <p class="text-slate-300 mb-4">
+              Configure browser notifications for expired items.
+            </p>
+            <ol class="list-decimal list-inside space-y-2 text-slate-300 ml-4">
+              <li>Go to Settings → Notifications</li>
+              <li>Enable or disable browser notifications</li>
+              <li>Set the notification check interval (default: 60 minutes)</li>
+              <li>Allow browser notifications when prompted</li>
+            </ol>
+          </div>
+
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <h3 class="text-xl font-semibold text-white mb-3">Appearance</h3>
+            <p class="text-slate-300 mb-4">
+              Customize the look and feel of your dashboard.
+            </p>
+            <ul class="list-disc list-inside space-y-2 text-slate-300 ml-4">
+              <li><strong>Theme:</strong> Switch between dark and light mode</li>
+              <li><strong>Date Format:</strong> Choose your preferred date format (MM/DD/YYYY, DD/MM/YYYY, or YYYY-MM-DD)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tips and Best Practices -->
+      <div class="mb-12">
+        <h2 class="text-3xl font-bold text-white mb-6">Tips and Best Practices</h2>
+        
+        <div class="p-6 bg-gradient-to-br from-emerald-900/20 to-emerald-950/20 rounded-xl border border-emerald-800/50">
+          <ul class="space-y-3 text-slate-300">
+            <li class="flex items-start">
+              <span class="text-emerald-400 mr-3">✓</span>
+              <span><strong>Regular Updates:</strong> Update product quantities and expiry dates regularly to maintain accurate inventory.</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-emerald-400 mr-3">✓</span>
+              <span><strong>Use Categories:</strong> Categorize products to make searching and filtering easier.</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-emerald-400 mr-3">✓</span>
+              <span><strong>Barcode Scanning:</strong> Use the barcode scanner for faster product entry, especially during inventory counts.</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-emerald-400 mr-3">✓</span>
+              <span><strong>Check Alerts Daily:</strong> Review the Alerts panel daily to catch expiring products early.</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-emerald-400 mr-3">✓</span>
+              <span><strong>Backup Regularly:</strong> Create backups of your data on a regular schedule to protect against data loss.</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-emerald-400 mr-3">✓</span>
+              <span><strong>Use Templates:</strong> Create product templates for frequently added items to speed up data entry.</span>
+            </li>
+            <li class="flex items-start">
+              <span class="text-emerald-400 mr-3">✓</span>
+              <span><strong>Multi-Location Management:</strong> Use the location selector to manage inventory across all your stores efficiently.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Need Help Section -->
+      <div class="mb-12">
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800 text-center">
+          <h2 class="text-2xl font-bold text-white mb-4">Need More Help?</h2>
+          <p class="text-slate-300 mb-6">
+            If you have questions or need assistance, our support team is here to help.
+          </p>
+          <a href="mailto:general@verishelf.com" class="inline-block px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-colors">
+            Contact Support
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+  
+  <!-- FOOTER -->
+  <footer class="py-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="text-2xl font-bold gradient-text mb-4">VeriShelf</div>
+          <p class="text-slate-400 text-sm">
+            Enterprise shelf expiry management for retail chains.
+          </p>
+        </div>
+        
+        <div>
+          <h4 class="text-white font-semibold mb-4">Product</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="index.html#features" class="text-slate-400 hover:text-emerald-300 transition-colors">Features</a></li>
+            <li><a href="index.html#pricing" class="text-slate-400 hover:text-emerald-300 transition-colors">Pricing</a></li>
+            <li><a href="tutorials.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Tutorials</a></li>
+            <li><a href="api-docs.html" class="text-slate-400 hover:text-emerald-300 transition-colors">API Documentation</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-white font-semibold mb-4">Company</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="about.html" class="text-slate-400 hover:text-emerald-300 transition-colors">About</a></li>
+            <li><a href="careers.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Careers</a></li>
+            <li><a href="blog.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Blog</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-white font-semibold mb-4">Contact</h4>
+          <ul class="space-y-2 text-sm">
+            <li class="text-slate-400">general@verishelf.com</li>
+            <li class="text-slate-400">+1 (555) 123-4567</li>
+            <li class="text-slate-400">San Francisco, CA</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="pt-8 border-t border-slate-800 text-center">
+        <p class="text-slate-500 text-sm">
+          © 2025 VeriShelf. All rights reserved. | 
+          <a href="privacy.html" class="hover:text-emerald-300 transition-colors">Privacy Policy</a> | 
+          <a href="terms.html" class="hover:text-emerald-300 transition-colors">Terms of Service</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+  
+</body>
+</html>
