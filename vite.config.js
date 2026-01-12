@@ -12,7 +12,7 @@ export default defineConfig({
       configureServer(server) {
         // Serve website files at root for local development
         server.middlewares.use((req, res, next) => {
-          // If requesting root or website files, serve from website directory
+          // If requesting root, serve website index.html
           if (req.url === '/' || req.url === '/index.html') {
             try {
               const websiteHtml = readFileSync(join(__dirname, 'website', 'index.html'), 'utf-8');
@@ -21,6 +21,19 @@ export default defineConfig({
               return;
             } catch (e) {
               console.error('Error serving website:', e);
+            }
+          }
+          
+          // Serve other website HTML pages
+          if (req.url.startsWith('/') && req.url.endsWith('.html') && !req.url.startsWith('/dashboard')) {
+            try {
+              const pageName = req.url === '/' ? 'index.html' : req.url.substring(1);
+              const websiteHtml = readFileSync(join(__dirname, 'website', pageName), 'utf-8');
+              res.setHeader('Content-Type', 'text/html');
+              res.end(websiteHtml);
+              return;
+            } catch (e) {
+              // File doesn't exist, continue to next middleware
             }
           }
           
@@ -52,5 +65,10 @@ export default defineConfig({
       }
     }
   ],
-  base: '/dashboard/',  // Base path for deployment on verishelf.com/dashboard/
+  base: '/',  // Use root base - website at /, dashboard will be handled by routing
+  build: {
+    outDir: 'dist',
+    // Ensure assets are correctly referenced
+    assetsDir: 'assets',
+  }
 })
