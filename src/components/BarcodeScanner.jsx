@@ -154,7 +154,6 @@ export default function BarcodeScanner({ onScan, onClose }) {
               playsInline
               muted
               className={`w-full h-full object-cover ${scanning ? 'block' : 'hidden'}`}
-              style={{ transform: 'scaleX(-1)' }} // Mirror the video for better UX
             />
             {!scanning && (
               <div className="flex items-center justify-center h-full absolute inset-0">
