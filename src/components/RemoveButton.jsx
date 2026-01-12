@@ -13,7 +13,7 @@ export default function RemoveButton({ onRemove, removed }) {
   return (
     <button
       onClick={onRemove}
-      className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded transition-all duration-200 hover:scale-105"
+      className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded transition-all duration-200 hover:scale-105 flex-shrink-0"
       title="Remove"
     >
       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
