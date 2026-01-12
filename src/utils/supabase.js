@@ -192,35 +192,46 @@ export async function saveItem(userId, item) {
     added_at: item.addedAt || item.added_at || new Date().toISOString(),
   };
 
-  if (item.id && typeof item.id === 'number') {
-    // Update existing item
-    const { data, error } = await supabase
+  // Check if this is an update (item has an ID that exists in database) or insert (no ID or ID doesn't exist)
+  if (item.id && typeof item.id === 'number' && item.id < 10000000000000) {
+    // This looks like a database ID (not a timestamp), try to update
+    const { data: existingData, error: checkError } = await supabase
       .from('items')
-      .update(itemData)
+      .select('id')
       .eq('id', item.id)
       .eq('user_id', userId)
-      .select()
       .single();
 
-    if (error) {
-      console.error('Error updating item:', error);
-      return { success: false, error };
-    }
-    return { success: true, data };
-  } else {
-    // Insert new item
-    const { data, error } = await supabase
-      .from('items')
-      .insert(itemData)
-      .select()
-      .single();
+    if (!checkError && existingData) {
+      // Item exists, update it
+      const { data, error } = await supabase
+        .from('items')
+        .update(itemData)
+        .eq('id', item.id)
+        .eq('user_id', userId)
+        .select()
+        .single();
 
-    if (error) {
-      console.error('Error creating item:', error);
-      return { success: false, error };
+      if (error) {
+        console.error('Error updating item:', error);
+        return { success: false, error };
+      }
+      return { success: true, data };
     }
-    return { success: true, data };
   }
+  
+  // Insert new item (either no ID, or ID doesn't exist in database)
+  const { data, error } = await supabase
+    .from('items')
+    .insert(itemData)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating item:', error);
+    return { success: false, error };
+  }
+  return { success: true, data };
 }
 
 // Delete item from Supabase

@@ -330,9 +330,9 @@ export default function DashboardEnhanced() {
     }
 
     // Map fields from AddItem component to expected format
-    const newItem = {
+    const itemToSave = {
       ...item,
-      id: Date.now(), // Temporary ID, will be replaced with database ID
+      // Don't include id for new items - let database generate it
       expiryDate: item.expiry || item.expiryDate, // Map expiry to expiryDate
       cost: item.price || item.cost || 0, // Map price to cost
       location: selectedLocation === "All Locations" ? (stores[0]?.name || settings.defaultLocation || "") : selectedLocation,
@@ -341,24 +341,37 @@ export default function DashboardEnhanced() {
     };
     
     // Save to Supabase immediately
+    let savedItem = null;
     try {
-      const result = await saveItem(user.id, newItem);
+      const result = await saveItem(user.id, itemToSave);
       if (result.success && result.data) {
-        // Use database ID and data
-        newItem.id = result.data.id;
-        // Update with any fields that might have been transformed by the database
-        Object.assign(newItem, {
+        savedItem = {
+          ...itemToSave,
+          id: result.data.id, // Use database ID
           expiryDate: result.data.expiry_date,
           addedAt: result.data.added_at,
-        });
+        };
       } else {
         console.error("Failed to save item to Supabase:", result.error);
-        // Still add to local state but log the error
+        // Use temporary ID if save fails
+        savedItem = {
+          ...itemToSave,
+          id: Date.now(),
+        };
       }
     } catch (error) {
       console.error("Error saving item to Supabase:", error);
-      // Still add to local state but log the error
+      // Use temporary ID if save fails
+      savedItem = {
+        ...itemToSave,
+        id: Date.now(),
+      };
     }
+    
+    const newItem = savedItem || {
+      ...itemToSave,
+      id: Date.now(),
+    };
     
     setItems([...items, newItem]);
     addHistoryEntry("added", newItem.id, newItem.name);
