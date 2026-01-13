@@ -56,16 +56,16 @@ export default function InventoryTable({
         bVal = b.name.toLowerCase();
         break;
       case "expiry":
-        aVal = new Date(a.expiry);
-        bVal = new Date(b.expiry);
+        aVal = new Date(a.expiry || a.expiryDate);
+        bVal = new Date(b.expiry || b.expiryDate);
         break;
       case "quantity":
         aVal = a.quantity;
         bVal = b.quantity;
         break;
       case "status":
-        aVal = daysUntilExpiry(a.expiry);
-        bVal = daysUntilExpiry(b.expiry);
+        aVal = daysUntilExpiry(a.expiry || a.expiryDate);
+        bVal = daysUntilExpiry(b.expiry || b.expiryDate);
         break;
       default:
         return 0;
@@ -182,7 +182,8 @@ export default function InventoryTable({
         </thead>
         <tbody className="divide-y divide-slate-800">
           {sortedItems.map((item) => {
-            const days = daysUntilExpiry(item.expiry);
+            const expiryValue = item.expiry || item.expiryDate;
+            const days = expiryValue ? daysUntilExpiry(expiryValue) : null;
             return (
               <tr
                 key={item.id}
@@ -267,21 +268,21 @@ export default function InventoryTable({
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap">
                   <div className="text-xs text-white">
-                    {item.price ? `$${item.price.toFixed(2)}` : "—"}
+                    {(item.price || item.cost) ? `$${(item.price || item.cost).toFixed(2)}` : "—"}
                   </div>
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap">
                   <div className="text-xs text-white">
-                    {new Date(item.expiry).toLocaleDateString()}
+                    {(item.expiry || item.expiryDate) ? new Date(item.expiry || item.expiryDate).toLocaleDateString() : "—"}
                   </div>
-                  {days >= 0 && (
+                  {(item.expiry || item.expiryDate) && days >= 0 && (
                     <div className="text-[10px] text-slate-500 mt-0.5">
                       {days === 0 ? "Today" : `${days}d`}
                     </div>
                   )}
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap">
-                  <ExpiryBadge expiry={item.expiry} />
+                  <ExpiryBadge expiry={item.expiry || item.expiryDate} />
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap">
                   <div className="text-xs text-slate-400">{item.location || "Store #001"}</div>

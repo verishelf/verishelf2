@@ -81,46 +81,6 @@ export async function getCurrentUserProfile() {
 
   if (profileError) {
     console.error('Error fetching user profile:', profileError);
-    
-    // If user doesn't exist in users table, create them
-    if (profileError.code === 'PGRST116' || profileError.message?.includes('No rows')) {
-      console.log('User not found in users table, creating profile...');
-      
-      const newUser = {
-        id: user.id,
-        email: user.email || '',
-        name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-        company: user.user_metadata?.company || '',
-        created_at: new Date().toISOString(),
-      };
-
-      const { data: createdProfile, error: createError } = await supabase
-        .from('users')
-        .insert(newUser)
-        .select()
-        .single();
-
-      if (createError) {
-        console.error('Error creating user profile:', createError);
-        // If it's an RLS policy error, provide helpful message
-        if (createError.code === '42501') {
-          console.error('RLS Policy Error: Users table INSERT policy is missing. Please run FIX_USERS_RLS_POLICY.sql in Supabase SQL Editor.');
-        }
-        // Return fallback user object even if creation fails
-        // This allows the dashboard to still work
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-          company: user.user_metadata?.company || '',
-        };
-      }
-
-      console.log('User profile created successfully:', createdProfile);
-      return createdProfile;
-    }
-    
-    // For other errors, return fallback
     return {
       id: user.id,
       email: user.email,
@@ -200,9 +160,11 @@ export async function loadItems(userId) {
     barcode: item.barcode,
     location: item.location,
     expiryDate: item.expiry_date,
+    expiry: item.expiry_date, // Keep both for compatibility
     quantity: item.quantity || 1,
     category: item.category,
     cost: item.cost,
+    price: item.cost, // Keep both for compatibility
     notes: item.notes,
     removed: item.removed || false,
     removedAt: item.removed_at,
@@ -217,44 +179,12 @@ export async function saveItem(userId, item) {
     return { success: false, error: 'Supabase not initialized' };
   }
 
-  // Ensure required fields are present
-  if (!item.name || item.name.trim() === '') {
-    return { success: false, error: { message: 'Product name is required', code: 'VALIDATION_ERROR' } };
-  }
-
-  if (!item.expiryDate && !item.expiry_date && !item.expiry) {
-    return { success: false, error: { message: 'Expiry date is required', code: 'VALIDATION_ERROR' } };
-  }
-
-  // Location is required in database schema - use default if not provided
-  const location = item.location || 'Default Location';
-
-  // Format expiry date - ensure it's a valid date string
-  let expiryDate = item.expiryDate || item.expiry_date || item.expiry;
-  if (expiryDate) {
-    // If it's a Date object, convert to ISO string and extract date part
-    if (expiryDate instanceof Date) {
-      expiryDate = expiryDate.toISOString().split('T')[0];
-    }
-    // If it's already a string, ensure it's in YYYY-MM-DD format
-    else if (typeof expiryDate === 'string') {
-      // If it's in a different format, try to parse it
-      const dateObj = new Date(expiryDate);
-      if (isNaN(dateObj.getTime())) {
-        return { success: false, error: { message: 'Invalid expiry date format', code: 'VALIDATION_ERROR' } };
-      }
-      expiryDate = dateObj.toISOString().split('T')[0];
-    }
-  } else {
-    return { success: false, error: { message: 'Expiry date is required', code: 'VALIDATION_ERROR' } };
-  }
-
   const itemData = {
     user_id: userId,
-    name: item.name.trim(),
+    name: item.name,
     barcode: item.barcode || null,
-    location: location, // Required field - never null
-    expiry_date: expiryDate, // Required field - never null
+    location: item.location || null,
+    expiry_date: item.expiryDate || item.expiry_date || item.expiry || null,
     quantity: item.quantity || 1,
     category: item.category || null,
     cost: item.cost || item.price || null,
@@ -293,28 +223,6 @@ export async function saveItem(userId, item) {
   }
   
   // Insert new item (either no ID, or ID doesn't exist in database)
-  // Additional validation (already validated above, but double-check)
-  if (!itemData.name || itemData.name.trim() === '') {
-    console.error('Error: Item name is required');
-    return { success: false, error: { message: 'Product name is required', code: 'VALIDATION_ERROR' } };
-  }
-
-  if (!itemData.user_id) {
-    console.error('Error: User ID is required');
-    return { success: false, error: { message: 'User ID is required', code: 'VALIDATION_ERROR' } };
-  }
-
-  if (!itemData.location) {
-    console.error('Error: Location is required');
-    return { success: false, error: { message: 'Location is required', code: 'VALIDATION_ERROR' } };
-  }
-
-  if (!itemData.expiry_date) {
-    console.error('Error: Expiry date is required');
-    return { success: false, error: { message: 'Expiry date is required', code: 'VALIDATION_ERROR' } };
-  }
-
-  console.log('Inserting item to Supabase:', { table: 'items', data: itemData });
   const { data, error } = await supabase
     .from('items')
     .insert(itemData)
@@ -322,18 +230,9 @@ export async function saveItem(userId, item) {
     .single();
 
   if (error) {
-    console.error('Error creating item in Supabase:', {
-      error,
-      message: error.message,
-      code: error.code,
-      details: error.details,
-      hint: error.hint,
-      itemData
-    });
+    console.error('Error creating item:', error);
     return { success: false, error };
   }
-  
-  console.log('Successfully created item:', data);
   return { success: true, data };
 }
 
