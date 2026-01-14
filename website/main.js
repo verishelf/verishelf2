@@ -215,21 +215,21 @@ function updateSignupLocationPricing() {
   if (priceDisplay) {
     priceDisplay.innerHTML = `
       <div class="mb-4 p-4 bg-slate-900/50 rounded-lg border border-slate-800">
-        <div class="flex justify-between items-center mb-2">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1">
           <span class="text-slate-300">Plan:</span>
-          <span class="text-white font-semibold">${selectedPlan.name}</span>
+          <span class="text-white font-semibold break-words text-right sm:text-left">${selectedPlan.name}</span>
         </div>
-        <div class="flex justify-between items-center mb-2">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1">
           <span class="text-slate-300">Locations:</span>
-          <span class="text-white font-semibold">${locationCount}</span>
+          <span class="text-white font-semibold break-words text-right sm:text-left">${locationCount}</span>
         </div>
-        <div class="flex justify-between items-center mb-2">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1">
           <span class="text-slate-300">Price per location:</span>
-          <span class="text-emerald-400 font-semibold">$${Math.round(pricePerLocation)}/month${discount > 0 ? ` <span class="text-xs">(${discountPercent}% off)</span>` : ''}</span>
+          <span class="text-emerald-400 font-semibold break-words text-right sm:text-left">$${Math.round(pricePerLocation)}/month${discount > 0 ? ` <span class="text-xs">(${discountPercent}% off)</span>` : ''}</span>
         </div>
-        <div class="flex justify-between items-center pt-2 border-t border-slate-700">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-2 border-t border-slate-700 gap-1">
           <span class="text-slate-300 font-semibold">Total monthly:</span>
-          <span class="text-emerald-400 font-bold text-xl">$${Math.round(totalPrice).toLocaleString()}/month</span>
+          <span class="text-emerald-400 font-bold text-xl break-words text-right sm:text-left">$${Math.round(totalPrice).toLocaleString()}/month</span>
         </div>
       </div>
     `;
@@ -398,11 +398,13 @@ function updateSignupPlanPrices() {
       const priceElement = btn.querySelector('.text-2xl');
       if (priceElement) {
         priceElement.textContent = `$${Math.round(totalPrice).toLocaleString()}/month`;
+        priceElement.classList.add('break-words');
       }
       
       // Update subtitle to show per location price and discount
       const subtitleElement = btn.querySelector('.text-xs');
       if (subtitleElement) {
+        subtitleElement.classList.add('break-words');
         if (locationCount > 1) {
           subtitleElement.textContent = `$${Math.round(pricePerLocation)}/location${discount > 0 ? ` (${discountPercent}% off)` : ''} • ${locationCount} locations`;
         } else {

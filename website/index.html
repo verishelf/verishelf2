@@ -820,7 +820,7 @@
 
   <!-- Signup Modal -->
   <div id="signupModal" class="modal">
-    <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-content" style="max-width: 600px; width: calc(100% - 2rem);">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-white">Create Account & Subscribe</h2>
         <button onclick="closeModal('signupModal')" class="text-slate-400 hover:text-white">
@@ -833,16 +833,16 @@
       <!-- Step 1: Plan Selection -->
       <div id="signup-step-1">
         <h3 class="text-lg font-semibold text-white mb-4">Select Your Plan</h3>
-        <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <button onclick="selectSignupPlan('professional')" id="plan-btn-professional" class="p-4 bg-slate-800 hover:bg-slate-700 border-2 border-slate-700 hover:border-emerald-500 rounded-lg text-left transition-all">
             <div class="font-bold text-white mb-1">Professional</div>
-            <div class="text-2xl font-bold text-emerald-400 mb-1">$199</div>
-            <div class="text-xs text-slate-400">per location/month</div>
+            <div class="text-2xl font-bold text-emerald-400 mb-1 break-words">$199</div>
+            <div class="text-xs text-slate-400 break-words">per location/month</div>
           </button>
           <button onclick="selectSignupPlan('enterprise')" id="plan-btn-enterprise" class="p-4 bg-slate-800 hover:bg-slate-700 border-2 border-slate-700 hover:border-emerald-500 rounded-lg text-left transition-all">
             <div class="font-bold text-white mb-1">Enterprise</div>
-            <div class="text-2xl font-bold text-emerald-400 mb-1">$399</div>
-            <div class="text-xs text-slate-400">per location/month</div>
+            <div class="text-2xl font-bold text-emerald-400 mb-1 break-words">$399</div>
+            <div class="text-xs text-slate-400 break-words">per location/month</div>
           </button>
         </div>
         <button onclick="proceedToSignupForm()" id="proceed-btn" disabled class="w-full py-3 bg-slate-700 text-slate-400 font-bold rounded-lg transition-colors cursor-not-allowed">
@@ -890,7 +890,7 @@
 
   <!-- Payment Modal -->
   <div id="paymentModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 600px; width: calc(100% - 2rem);">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-white">Complete Subscription</h2>
         <button onclick="closeModal('paymentModal')" class="text-slate-400 hover:text-white">
@@ -900,21 +900,21 @@
         </button>
       </div>
       <div id="paymentInfo" class="mb-6 p-4 bg-slate-800 rounded-lg">
-        <div class="flex justify-between items-center mb-2">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1">
           <span class="text-slate-300">Plan:</span>
-          <span class="text-white font-semibold" id="selectedPlanName">-</span>
+          <span class="text-white font-semibold break-words text-right sm:text-left" id="selectedPlanName">-</span>
         </div>
-        <div class="flex justify-between items-center mb-2">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1">
           <span class="text-slate-300">Locations:</span>
-          <span class="text-white font-semibold" id="selectedPlanLocations">-</span>
+          <span class="text-white font-semibold break-words text-right sm:text-left" id="selectedPlanLocations">-</span>
         </div>
-        <div class="flex justify-between items-center mb-2">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1">
           <span class="text-slate-300">Price per location:</span>
-          <span class="text-emerald-400 font-semibold" id="selectedPlanPricePerLocation">-</span>
+          <span class="text-emerald-400 font-semibold break-words text-right sm:text-left" id="selectedPlanPricePerLocation">-</span>
         </div>
-        <div class="flex justify-between items-center pt-2 border-t border-slate-700">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-2 border-t border-slate-700 gap-1">
           <span class="text-slate-300 font-semibold">Total monthly:</span>
-          <span class="text-emerald-400 font-bold text-xl" id="selectedPlanPrice">-</span>
+          <span class="text-emerald-400 font-bold text-xl break-words text-right sm:text-left" id="selectedPlanPrice">-</span>
         </div>
       </div>
       <form id="paymentForm" onsubmit="handlePayment(event)" class="space-y-4">
