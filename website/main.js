@@ -534,6 +534,119 @@ async function handleSignup(event) {
   openPaymentModal();
 }
 
+// Handle free trial signup
+async function handleTrialSignup(event) {
+  event.preventDefault();
+  
+  if (!ensureSupabase()) {
+    alert('Database service is not available. Please refresh the page.');
+    return;
+  }
+
+  const name = document.getElementById('trial-name').value;
+  const email = document.getElementById('trial-email').value;
+  const password = document.getElementById('trial-password').value;
+  const company = document.getElementById('trial-company').value;
+
+  const submitButton = event.target.querySelector('button[type="submit"]');
+  const originalText = submitButton.textContent;
+  submitButton.disabled = true;
+  submitButton.textContent = 'Creating Account...';
+
+  try {
+    // Create user account in Supabase
+    const { data: authData, error: signUpError } = await supabaseClient.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+          company
+        }
+      }
+    });
+
+    if (signUpError) {
+      throw new Error('Failed to create account: ' + signUpError.message);
+    }
+
+    if (!authData.user) {
+      throw new Error('User account was not created');
+    }
+
+    // Create user profile in database
+    const { error: profileError } = await supabaseClient
+      .from('users')
+      .insert({
+        id: authData.user.id,
+        email,
+        name,
+        company,
+        created_at: new Date().toISOString()
+      });
+
+    if (profileError) {
+      console.error('Error creating user profile:', profileError);
+      // Continue anyway as auth user is created
+    }
+
+    // Create trial subscription (3 days, 1 location)
+    const trialExpiresAt = new Date();
+    trialExpiresAt.setDate(trialExpiresAt.getDate() + 3); // 3 days from now
+
+    const { error: subscriptionError } = await supabaseClient
+      .from('subscriptions')
+      .insert({
+        user_id: authData.user.id,
+        status: 'trial',
+        plan_name: 'Free Trial',
+        location_count: 1,
+        trial_expires_at: trialExpiresAt.toISOString(),
+        created_at: new Date().toISOString()
+      });
+
+    if (subscriptionError) {
+      console.error('Error creating trial subscription:', subscriptionError);
+      // Continue anyway - user can still access, subscription can be created later
+    }
+
+    // Store user info in localStorage
+    const user = {
+      id: authData.user.id,
+      name,
+      email,
+      company,
+      loggedIn: true,
+      session: authData.session
+    };
+
+    localStorage.setItem('verishelf_user', JSON.stringify(user));
+    if (authData.session) {
+      localStorage.setItem('supabase_session', JSON.stringify(authData.session));
+    }
+
+    // Store trial subscription info
+    const trialSubscription = {
+      status: 'trial',
+      plan_name: 'Free Trial',
+      location_count: 1,
+      trial_expires_at: trialExpiresAt.toISOString()
+    };
+    localStorage.setItem('verishelf_subscription', JSON.stringify(trialSubscription));
+
+    alert('Free trial started! Redirecting to dashboard...');
+    closeModal('signupModal');
+    
+    // Redirect to dashboard
+    window.location.href = '/dashboard/';
+  } catch (error) {
+    console.error('Trial signup error:', error);
+    alert('Failed to start trial: ' + (error.message || 'Please try again.'));
+    submitButton.disabled = false;
+    submitButton.textContent = originalText;
+  }
+}
+
 // Plan Selection (from pricing cards - redirects to signup)
 function selectPlan(planKey) {
   selectedPlan = plans[planKey];

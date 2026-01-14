@@ -104,11 +104,12 @@ export async function getUserSubscription(userId) {
   }
 
   try {
+    // Check for both 'active' and 'trial' status subscriptions
     const { data, error } = await supabase
       .from('subscriptions')
       .select('*')
       .eq('user_id', userId)
-      .eq('status', 'active')
+      .in('status', ['active', 'trial'])
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle(); // Use maybeSingle() instead of single() to handle no results gracefully
@@ -119,8 +120,30 @@ export async function getUserSubscription(userId) {
       return localSubscription;
     }
 
+    // If subscription is trial, check if it's expired
+    if (data && data.status === 'trial' && data.trial_expires_at) {
+      const expiresAt = new Date(data.trial_expires_at);
+      const now = new Date();
+      if (now > expiresAt) {
+        // Trial expired - update status
+        await supabase
+          .from('subscriptions')
+          .update({ status: 'expired' })
+          .eq('id', data.id);
+        return null; // No active subscription
+      }
+    }
+
     // If no subscription in database but exists in localStorage, return localStorage
-    if (!data && localSubscription && localSubscription.status === 'active') {
+    if (!data && localSubscription && (localSubscription.status === 'active' || localSubscription.status === 'trial')) {
+      // Check if trial expired in localStorage too
+      if (localSubscription.status === 'trial' && localSubscription.trial_expires_at) {
+        const expiresAt = new Date(localSubscription.trial_expires_at);
+        const now = new Date();
+        if (now > expiresAt) {
+          return null; // Trial expired
+        }
+      }
       return localSubscription;
     }
 
