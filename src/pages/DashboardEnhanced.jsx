@@ -777,7 +777,14 @@ export default function DashboardEnhanced() {
                     <span className="text-xs truncate max-w-[120px] xl:max-w-none">{user.company}</span>
                   )}
                   {subscription && (
-                    <span className="text-xs text-emerald-400">{subscription.plan} Plan</span>
+                    <span className="text-xs text-emerald-400">
+                      {subscription.status === 'trial' ? 'Free Trial' : (subscription.plan_name || subscription.plan || 'Plan')}
+                      {subscription.status === 'trial' && subscription.trial_expires_at && (
+                        <span className="text-slate-400 ml-1">
+                          (expires {new Date(subscription.trial_expires_at).toLocaleDateString()})
+                        </span>
+                      )}
+                    </span>
                   )}
                 </div>
               </div>

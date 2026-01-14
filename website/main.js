@@ -501,6 +501,10 @@ function proceedToSignupForm() {
 function goBackToPlanSelection() {
   // Hide step 2, show step 1
   document.getElementById('signup-step-2').classList.add('hidden');
+  const trialForm = document.getElementById('trial-signup-form');
+  if (trialForm) {
+    trialForm.classList.add('hidden');
+  }
   document.getElementById('signup-step-1').classList.remove('hidden');
 }
 
