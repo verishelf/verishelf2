@@ -146,12 +146,12 @@ export default function DashboardEnhanced() {
         
         setSubscription(finalSubscription);
 
-        // Check if user has active subscription
+        // Check if user has active subscription or trial
         const hasActiveSubscription = 
-          (finalSubscription && finalSubscription.status === 'active') ||
+          (finalSubscription && (finalSubscription.status === 'active' || finalSubscription.status === 'trial')) ||
           (userProfile && userProfile.id); // Allow access if user exists (for development/testing)
 
-        if (!hasActiveSubscription && (!finalSubscription || finalSubscription.status !== 'active')) {
+        if (!hasActiveSubscription && (!finalSubscription || (finalSubscription.status !== 'active' && finalSubscription.status !== 'trial'))) {
           // No active subscription - show warning but allow access for now
           console.warn('No active subscription found for user:', userId);
           // For now, allow access but could redirect in production
