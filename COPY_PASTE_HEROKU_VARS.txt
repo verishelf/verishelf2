@@ -1,0 +1,47 @@
+═══════════════════════════════════════════════════════════════
+  COPY & PASTE THESE INTO HEROKU DASHBOARD
+═══════════════════════════════════════════════════════════════
+
+STEP 1: Go to this URL:
+https://dashboard.heroku.com/apps/verishelf/settings
+
+STEP 2: Click "Reveal Config Vars"
+
+STEP 3: Add these 3 variables (copy each one):
+
+───────────────────────────────────────────────────────────────
+VARIABLE 1:
+───────────────────────────────────────────────────────────────
+Key:
+STRIPE_SECRET_KEY
+
+Value:
+sk_live_YOUR_LIVE_SECRET_KEY_HERE
+
+───────────────────────────────────────────────────────────────
+VARIABLE 2:
+───────────────────────────────────────────────────────────────
+Key:
+SUPABASE_URL
+
+Value:
+https://bblwhwobkthawkbyhiwb.supabase.co
+
+───────────────────────────────────────────────────────────────
+VARIABLE 3:
+───────────────────────────────────────────────────────────────
+Key:
+SUPABASE_ANON_KEY
+
+Value:
+sb_publishable_1aD8kxQVjJqLjo2LoSx7Ww_f6ucmEvS
+
+───────────────────────────────────────────────────────────────
+
+STEP 4: After adding all 3, test your app:
+https://verishelf.herokuapp.com/api/health
+
+You should see: {"status":"ok","timestamp":"..."}
+
+═══════════════════════════════════════════════════════════════
+

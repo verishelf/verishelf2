@@ -16,6 +16,7 @@ export default function InventoryTable({
   onShowHistory,
   selectedItems = [],
   onSelectionChange,
+  isInspector = false,
 }) {
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
@@ -114,7 +115,7 @@ export default function InventoryTable({
       <table className="w-full">
         <thead>
           <tr className="border-b border-slate-800">
-            {onSelectionChange && (
+            {onSelectionChange && !isInspector && (
               <th className="px-2 py-2 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider w-10">
                 <input
                   type="checkbox"
@@ -193,7 +194,7 @@ export default function InventoryTable({
                   setContextMenu({ item, position: { x: e.clientX, y: e.clientY } });
                 }}
               >
-                {onSelectionChange && (
+                {onSelectionChange && !isInspector && (
                   <td className="px-2 py-2 whitespace-nowrap">
                     {!item.removed && (
                       <input
@@ -289,7 +290,7 @@ export default function InventoryTable({
                 </td>
                 <td className="px-2 py-2">
                   <div className="flex items-center gap-1 flex-wrap justify-end sm:justify-start max-w-full">
-                    {onEdit && (
+                    {!isInspector && onEdit && (
                       <button
                         onClick={() => onEdit(item)}
                         className="p-1.5 sm:p-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded transition-all duration-200 hover:scale-105 flex-shrink-0"
@@ -300,7 +301,7 @@ export default function InventoryTable({
                         </svg>
                       </button>
                     )}
-                    {onDuplicate && (
+                    {!isInspector && onDuplicate && (
                       <button
                         onClick={() => onDuplicate(item.id)}
                         className="p-1.5 sm:p-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded transition-all duration-200 hover:scale-105 flex-shrink-0"
@@ -342,16 +343,20 @@ export default function InventoryTable({
                         </svg>
                       </button>
                     )}
-                    <RemoveButton removed={item.removed} onRemove={() => onRemove(item.id)} />
-                    <button
-                      onClick={() => onDelete(item.id)}
-                      className="p-1.5 sm:p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded transition-all duration-200 hover:scale-105 flex-shrink-0"
-                      title="Delete"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
+                    {!isInspector && (
+                      <>
+                        <RemoveButton removed={item.removed} onRemove={() => onRemove(item.id)} />
+                        <button
+                          onClick={() => onDelete(item.id)}
+                          className="p-1.5 sm:p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded transition-all duration-200 hover:scale-105 flex-shrink-0"
+                          title="Delete"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>

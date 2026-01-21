@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { getStores, saveStores, addStore, deleteStore, updateStore } from "../utils/stores";
 
-export default function StoreManager({ onClose, onStoresUpdate, maxLocations }) {
+export default function StoreManager({ onClose, onStoresUpdate, maxLocations, isInspector = false }) {
   const [stores, setStores] = useState(getStores());
   const [newStoreName, setNewStoreName] = useState("");
   const [editingStore, setEditingStore] = useState(null);
@@ -154,11 +154,11 @@ export default function StoreManager({ onClose, onStoresUpdate, maxLocations }) 
               onKeyPress={(e) => e.key === "Enter" && handleAddStore()}
               placeholder="Enter store name (e.g., Store #001, Main Branch)"
               className="flex-1 px-4 py-3 bg-slate-950 border border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 rounded-lg outline-none transition-colors text-white placeholder-slate-500"
-              disabled={maxLocations && stores.length >= maxLocations}
+              disabled={isInspector || (maxLocations && stores.length >= maxLocations)}
             />
             <button
               onClick={handleAddStore}
-              disabled={maxLocations && stores.length >= maxLocations}
+              disabled={isInspector || (maxLocations && stores.length >= maxLocations)}
               className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,18 +219,22 @@ export default function StoreManager({ onClose, onStoresUpdate, maxLocations }) 
                         </svg>
                         <span className="text-white font-medium">{storeName}</span>
                       </div>
-                      <button
-                        onClick={() => handleStartEdit(store)}
-                        className="px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg font-semibold text-sm transition-colors"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteStore(store)}
-                        className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg font-semibold text-sm transition-colors"
-                      >
-                        Delete
-                      </button>
+                      {!isInspector && (
+                        <>
+                          <button
+                            onClick={() => handleStartEdit(store)}
+                            className="px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg font-semibold text-sm transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteStore(store)}
+                            className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg font-semibold text-sm transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
                     </>
                   )}
                 </div>

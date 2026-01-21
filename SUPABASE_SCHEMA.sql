@@ -52,10 +52,6 @@ ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own profile" ON users
   FOR SELECT USING (auth.uid() = id);
 
--- Users can insert their own profile
-CREATE POLICY "Users can create own profile" ON users
-  FOR INSERT WITH CHECK (auth.uid() = id);
-
 -- Users can update their own data
 CREATE POLICY "Users can update own profile" ON users
   FOR UPDATE USING (auth.uid() = id);
@@ -143,3 +139,41 @@ CREATE TRIGGER update_items_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+-- Stores/Locations table (user-specific store locations)
+CREATE TABLE IF NOT EXISTS stores (
+  id BIGSERIAL PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, name) -- Prevent duplicate store names per user
+);
+
+-- Create index for stores table
+CREATE INDEX IF NOT EXISTS idx_stores_user_id ON stores(user_id);
+
+-- Enable RLS for stores table
+ALTER TABLE stores ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for stores table
+-- Users can view their own stores
+CREATE POLICY "Users can view own stores" ON stores
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- Users can insert their own stores
+CREATE POLICY "Users can create own stores" ON stores
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Users can update their own stores
+CREATE POLICY "Users can update own stores" ON stores
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- Users can delete their own stores
+CREATE POLICY "Users can delete own stores" ON stores
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- Trigger to update updated_at for stores
+CREATE TRIGGER update_stores_updated_at
+  BEFORE UPDATE ON stores
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();

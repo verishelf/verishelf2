@@ -1,5 +1,47 @@
 export default function StatsCards({ stats }) {
-  const cards = [
+  const cards = [];
+
+  // Executive Store Risk Score (optional, falls back gracefully if not provided)
+  if (typeof stats.riskScore === "number") {
+    let riskColor = "text-emerald-400";
+    let riskBg = "bg-emerald-500/10";
+    let subtitle = "Low compliance risk";
+
+    if (stats.riskScore >= 85) {
+      riskColor = "text-red-400";
+      riskBg = "bg-red-500/10";
+      subtitle = "Critical risk – immediate action required";
+    } else if (stats.riskScore >= 60) {
+      riskColor = "text-orange-400";
+      riskBg = "bg-orange-500/10";
+      subtitle = "High risk – address expired stock";
+    } else if (stats.riskScore >= 30) {
+      riskColor = "text-yellow-400";
+      riskBg = "bg-yellow-500/10";
+      subtitle = "Medium risk – monitor closely";
+    }
+
+    cards.push({
+      title: "Store Risk Score",
+      value: `${stats.riskScore}`,
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M12 8v4m0 4h.01M12 2a10 10 0 00-7.06 17.06A10 10 0 1012 2z"
+          />
+        </svg>
+      ),
+      bgColor: riskBg,
+      textColor: riskColor,
+      subtitle,
+      urgent: stats.riskScore >= 60,
+    });
+  }
+
+  cards.push(
     {
       title: "Total Items",
       value: stats.total,
@@ -49,7 +91,7 @@ export default function StatsCards({ stats }) {
       textColor: "text-emerald-400",
       subtitle: "Inventory value",
     },
-  ];
+  );
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

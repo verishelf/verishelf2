@@ -41,6 +41,38 @@ export function getSupabase() {
   return supabaseClient;
 }
 
+// Get current auth user with role metadata
+export async function getCurrentUserWithRole() {
+  const supabase = getSupabase();
+  if (!supabase) {
+    const localUser = JSON.parse(localStorage.getItem('verishelf_user') || '{}');
+    if (!localUser || !localUser.id) {
+      return { user: null, role: null, linkedOwnerId: null };
+    }
+    // Treat local users as owners by default
+    return {
+      user: localUser,
+      role: localUser.role || 'owner',
+      linkedOwnerId: localUser.linkedOwnerId || null,
+    };
+  }
+
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) {
+      return { user: null, role: null, linkedOwnerId: null };
+    }
+
+    const role = user.user_metadata?.role || 'owner';
+    const linkedOwnerId = user.user_metadata?.linked_owner_id || null;
+
+    return { user, role, linkedOwnerId };
+  } catch (e) {
+    console.error('Error getting current user with role:', e);
+    return { user: null, role: null, linkedOwnerId: null };
+  }
+}
+
 // Check if user is authenticated
 export async function checkAuth() {
   const supabase = getSupabase();
@@ -104,12 +136,11 @@ export async function getUserSubscription(userId) {
   }
 
   try {
-    // Check for both 'active' and 'trial' status subscriptions
     const { data, error } = await supabase
       .from('subscriptions')
       .select('*')
       .eq('user_id', userId)
-      .in('status', ['active', 'trial'])
+      .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle(); // Use maybeSingle() instead of single() to handle no results gracefully
@@ -120,30 +151,8 @@ export async function getUserSubscription(userId) {
       return localSubscription;
     }
 
-    // If subscription is trial, check if it's expired
-    if (data && data.status === 'trial' && data.trial_expires_at) {
-      const expiresAt = new Date(data.trial_expires_at);
-      const now = new Date();
-      if (now > expiresAt) {
-        // Trial expired - update status
-        await supabase
-          .from('subscriptions')
-          .update({ status: 'expired' })
-          .eq('id', data.id);
-        return null; // No active subscription
-      }
-    }
-
     // If no subscription in database but exists in localStorage, return localStorage
-    if (!data && localSubscription && (localSubscription.status === 'active' || localSubscription.status === 'trial')) {
-      // Check if trial expired in localStorage too
-      if (localSubscription.status === 'trial' && localSubscription.trial_expires_at) {
-        const expiresAt = new Date(localSubscription.trial_expires_at);
-        const now = new Date();
-        if (now > expiresAt) {
-          return null; // Trial expired
-        }
-      }
+    if (!data && localSubscription && localSubscription.status === 'active') {
       return localSubscription;
     }
 
@@ -151,6 +160,38 @@ export async function getUserSubscription(userId) {
   } catch (error) {
     console.error('Exception fetching subscription:', error);
     return localSubscription;
+  }
+}
+
+// Fetch active inspector link for an inspector user
+export async function getActiveInspectorLink(inspectorUserId) {
+  const supabase = getSupabase();
+  if (!supabase || !inspectorUserId) return null;
+
+  const now = new Date().toISOString();
+
+  try {
+    const { data, error } = await supabase
+      .from('inspector_links')
+      .select('*')
+      .eq('inspector_user_id', inspectorUserId)
+      .eq('status', 'active')
+      .or('scope_start.is.null,scope_start.lte.' + now)
+      .or('scope_end.is.null,scope_end.gte.' + now)
+      .or('expires_at.is.null,expires_at.gte.' + now)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching active inspector link:', error);
+      return null;
+    }
+
+    return data || null;
+  } catch (e) {
+    console.error('Exception fetching active inspector link:', e);
+    return null;
   }
 }
 
@@ -193,6 +234,65 @@ export async function loadItems(userId) {
     removedAt: item.removed_at,
     addedAt: item.added_at,
   }));
+}
+
+// Internal helper to map DB item to app item format
+function mapDbItemToAppItem(item) {
+  return {
+    id: item.id,
+    name: item.name,
+    barcode: item.barcode,
+    location: item.location,
+    expiryDate: item.expiry_date,
+    expiry: item.expiry_date, // Keep both for compatibility
+    quantity: item.quantity || 1,
+    category: item.category,
+    cost: item.cost,
+    price: item.cost, // Keep both for compatibility
+    notes: item.notes,
+    removed: item.removed || false,
+    removedAt: item.removed_at,
+    addedAt: item.added_at,
+  };
+}
+
+// Load items for an owner account with inspector scope applied
+export async function loadItemsForOwnerWithScope(ownerUserId, scope = {}) {
+  const supabase = getSupabase();
+  if (!supabase || !ownerUserId) {
+    return [];
+  }
+
+  try {
+    let query = supabase
+      .from('items')
+      .select('*')
+      .eq('user_id', ownerUserId)
+      .order('added_at', { ascending: false });
+
+    if (Array.isArray(scope.locations) && scope.locations.length > 0) {
+      query = query.in('location', scope.locations);
+    }
+
+    if (scope.start) {
+      query = query.gte('added_at', scope.start);
+    }
+
+    if (scope.end) {
+      query = query.lte('added_at', scope.end);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      console.error('Error loading scoped items for owner:', error);
+      return [];
+    }
+
+    return (data || []).map(mapDbItemToAppItem);
+  } catch (e) {
+    console.error('Exception loading scoped items for owner:', e);
+    return [];
+  }
 }
 
 // Save item to Supabase
@@ -312,6 +412,125 @@ export async function batchSaveItems(userId, items) {
   }
 
   return { success: true, data };
+}
+
+// Load stores for a user from Supabase (with localStorage fallback)
+export async function loadStoresForUser(userId) {
+  const supabase = getSupabase();
+  const localKey = 'verishelf-stores';
+
+  // Fallback to localStorage only if Supabase is unavailable or userId missing
+  if (!supabase || !userId) {
+    const saved = localStorage.getItem(localKey);
+    return saved ? JSON.parse(saved) : [];
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('stores')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error loading stores from Supabase:', error);
+      const saved = localStorage.getItem(localKey);
+      return saved ? JSON.parse(saved) : [];
+    }
+
+    const stores = (data || []).map((s) => ({
+      id: s.id,
+      name: s.name,
+    }));
+
+    // Keep localStorage in sync as a fallback for other parts of the app
+    localStorage.setItem(localKey, JSON.stringify(stores));
+    return stores;
+  } catch (e) {
+    console.error('Exception loading stores from Supabase:', e);
+    const saved = localStorage.getItem(localKey);
+    return saved ? JSON.parse(saved) : [];
+  }
+}
+
+// Save stores for a user to Supabase (best-effort) and mirror to localStorage
+export async function saveStoresForUser(userId, stores) {
+  const supabase = getSupabase();
+  const localKey = 'verishelf-stores';
+
+  // Always keep localStorage updated so existing code continues to work
+  try {
+    localStorage.setItem(localKey, JSON.stringify(stores || []));
+  } catch (e) {
+    console.warn('Failed to save stores to localStorage:', e);
+  }
+
+  if (!supabase || !userId) {
+    return { success: false, error: 'Supabase not initialized or missing userId' };
+  }
+
+  try {
+    // Simple approach: delete all existing stores for this user, then insert current list
+    const { error: deleteError } = await supabase
+      .from('stores')
+      .delete()
+      .eq('user_id', userId);
+
+    if (deleteError) {
+      console.error('Error clearing existing stores:', deleteError);
+      return { success: false, error: deleteError };
+    }
+
+    if (!stores || stores.length === 0) {
+      return { success: true, data: [] };
+    }
+
+    const rows = stores.map((s) => ({
+      user_id: userId,
+      name: typeof s === 'string' ? s : s.name,
+    }));
+
+    const { data, error: insertError } = await supabase
+      .from('stores')
+      .insert(rows)
+      .select();
+
+    if (insertError) {
+      console.error('Error saving stores to Supabase:', insertError);
+      return { success: false, error: insertError };
+    }
+
+    return { success: true, data };
+  } catch (e) {
+    console.error('Exception saving stores to Supabase:', e);
+    return { success: false, error: e };
+  }
+}
+
+// Log inspector event to Supabase (best-effort)
+export async function logInspectorEvent({
+  inspectorUserId,
+  ownerUserId,
+  eventType,
+  itemId,
+  location,
+  metadata,
+}) {
+  const supabase = getSupabase();
+  if (!supabase) return;
+
+  try {
+    await supabase.from('inspector_events').insert({
+      inspector_user_id: inspectorUserId,
+      owner_user_id: ownerUserId,
+      event_type: eventType,
+      item_id: itemId ?? null,
+      location: location ?? null,
+      metadata: metadata ?? null,
+    });
+  } catch (e) {
+    console.warn('Failed to log inspector event:', e);
+  }
 }
 
 // Logout user

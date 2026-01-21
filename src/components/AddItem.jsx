@@ -88,14 +88,7 @@ export default function AddItem({ onAdd, selectedLocation, template, onTemplateS
 
   const submit = (e) => {
     e.preventDefault();
-    if (!name || name.trim() === '') {
-      alert("Please enter a product name");
-      return;
-    }
-    if (!expiry) {
-      alert("Please select an expiry date");
-      return;
-    }
+    if (!name || !expiry) return;
 
     onAdd({
       name,

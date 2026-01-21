@@ -42,7 +42,9 @@ import { saveSearch } from "../utils/savedSearches";
 import { t, getLanguage, setLanguage, getAvailableLanguages } from "../utils/i18n";
 import { formatCurrency, getCurrencies } from "../utils/currency";
 import { getTimezones } from "../utils/timezone";
-import { initSupabase, checkAuth, getCurrentUserProfile, getUserSubscription, loadItems, saveItem, deleteItem as deleteItemFromSupabase, logout } from "../utils/supabase";
+import { initSupabase, checkAuth, getCurrentUserProfile, getUserSubscription, loadItems, saveItem, deleteItem as deleteItemFromSupabase, logout, getCurrentUserWithRole, getActiveInspectorLink, loadItemsForOwnerWithScope, logInspectorEvent, loadStoresForUser, saveStoresForUser } from "../utils/supabase";
+import { computeAccountRiskScore } from "../utils/riskScore";
+import InspectorBanner from "../components/InspectorBanner";
 
 export default function DashboardEnhanced() {
   const [user, setUser] = useState(null);
@@ -98,6 +100,10 @@ export default function DashboardEnhanced() {
     return saved || "dark";
   });
   const searchInputRef = useRef(null);
+  const [isInspector, setIsInspector] = useState(false);
+  const [inspectorScope, setInspectorScope] = useState(null);
+  const [ownerUserId, setOwnerUserId] = useState(null);
+  const [inspectorUserId, setInspectorUserId] = useState(null);
 
   // Initialize Supabase and check authentication on mount
   useEffect(() => {
@@ -109,7 +115,7 @@ export default function DashboardEnhanced() {
         initSupabase();
         
         console.log('Checking authentication...');
-        // Check authentication
+        // Check authentication (session)
         const authData = await checkAuth();
         console.log('Auth data received:', authData ? 'User found' : 'No user');
         if (!authData || !authData.user) {
@@ -119,22 +125,76 @@ export default function DashboardEnhanced() {
           return;
         }
 
-        // Get user ID
-        const userId = authData.user.id || authData.user?.id || JSON.parse(localStorage.getItem('verishelf_user') || '{}').id;
-        if (!userId) {
-          console.log('No user ID, redirecting to /');
+        // Get user with role metadata
+        const { user: authUser, role, linkedOwnerId } = await getCurrentUserWithRole();
+        if (!authUser) {
+          console.log('No auth user from Supabase, redirecting to /');
           window.location.replace('/');
           return;
         }
-        
-        console.log('Dashboard initializing for user:', userId);
 
-        // Load user profile
-        const userProfile = await getCurrentUserProfile();
-        setUser(userProfile);
+        let effectiveUserId = authUser.id;
+        let effectiveUserProfile = null;
+        let effectiveSubscription = null;
+        let inspectorLink = null;
 
-        // Load subscription
-        const userSubscription = await getUserSubscription(userId);
+        // Determine inspector vs owner mode
+        if (role === 'inspector') {
+          console.log('Inspector login detected for user:', authUser.id);
+          setIsInspector(true);
+          setInspectorUserId(authUser.id);
+
+          inspectorLink = await getActiveInspectorLink(authUser.id);
+          if (!inspectorLink) {
+            console.warn('No active inspector link found for inspector:', authUser.id);
+            alert('Your inspector access has expired or is not configured. Please contact the account owner.');
+            window.location.replace('/');
+            return;
+          }
+
+          const ownerId = inspectorLink.owner_user_id || linkedOwnerId;
+          if (!ownerId) {
+            console.warn('Inspector link missing owner user id');
+            alert('Inspector access is misconfigured. Please contact the account owner.');
+            window.location.replace('/');
+            return;
+          }
+
+          setOwnerUserId(ownerId);
+          setInspectorScope({
+            locations: inspectorLink.scope_locations || [],
+            start: inspectorLink.scope_start || null,
+            end: inspectorLink.scope_end || null,
+            expiresAt: inspectorLink.expires_at || null,
+          });
+
+          // Inspectors view the owner's data, not their own
+          effectiveUserId = ownerId;
+
+          // Log inspector login (best-effort)
+          try {
+            await logInspectorEvent({
+              inspectorUserId: authUser.id,
+              ownerUserId: ownerId,
+              eventType: 'login',
+              metadata: { linkId: inspectorLink.id },
+            });
+          } catch (e) {
+            console.warn('Failed to log inspector login event:', e);
+          }
+        } else {
+          setIsInspector(false);
+          setOwnerUserId(authUser.id);
+        }
+
+        console.log('Dashboard initializing for effective user (owner):', effectiveUserId);
+
+        // Load user profile (owner profile)
+        effectiveUserProfile = await getCurrentUserProfile();
+        setUser(effectiveUserProfile);
+
+        // Load subscription for owner
+        const userSubscription = await getUserSubscription(effectiveUserId);
         
         // Also check localStorage as fallback (for users who signed up before Supabase integration)
         const localSubscription = JSON.parse(localStorage.getItem('verishelf_subscription') || '{}');
@@ -146,14 +206,14 @@ export default function DashboardEnhanced() {
         
         setSubscription(finalSubscription);
 
-        // Check if user has active subscription or trial
+        // Check if user has active subscription
         const hasActiveSubscription = 
           (finalSubscription && (finalSubscription.status === 'active' || finalSubscription.status === 'trial')) ||
-          (userProfile && userProfile.id); // Allow access if user exists (for development/testing)
+          (effectiveUserProfile && effectiveUserProfile.id); // Allow access if user exists (for development/testing)
 
         if (!hasActiveSubscription && (!finalSubscription || (finalSubscription.status !== 'active' && finalSubscription.status !== 'trial'))) {
           // No active subscription - show warning but allow access for now
-          console.warn('No active subscription found for user:', userId);
+          console.warn('No active subscription found for user:', effectiveUserId);
           // For now, allow access but could redirect in production
           // alert('Please complete your subscription to access the dashboard.');
           // window.location.replace('/');
@@ -161,9 +221,28 @@ export default function DashboardEnhanced() {
         }
 
         // Load items from Supabase
-        const userItems = await loadItems(userId);
+        let userItems = [];
+        if (role === 'inspector') {
+          userItems = await loadItemsForOwnerWithScope(effectiveUserId, {
+            locations: inspectorLink?.scope_locations || [],
+            start: inspectorLink?.scope_start || null,
+            end: inspectorLink?.scope_end || null,
+          });
+        } else {
+          userItems = await loadItems(effectiveUserId);
+        }
         console.log('Loaded items:', userItems.length);
         setItems(userItems);
+
+        // Load stores for this account from Supabase (with local fallback)
+        try {
+          const loadedStores = await loadStoresForUser(effectiveUserId);
+          if (Array.isArray(loadedStores) && loadedStores.length > 0) {
+            setStores(loadedStores);
+          }
+        } catch (e) {
+          console.warn('Failed to load stores for user:', e);
+        }
 
         setLoading(false);
         console.log('Dashboard loaded successfully');
@@ -346,6 +425,10 @@ export default function DashboardEnhanced() {
   }, [settings.enableKeyboardShortcuts]);
 
   const addItem = async (item) => {
+    if (isInspector) {
+      alert("Read-only inspector access – changes are disabled.");
+      return;
+    }
     if (!user || !user.id) {
       console.error("Cannot add item: User not logged in");
       alert("Error: You must be logged in to add items.");
@@ -404,6 +487,10 @@ export default function DashboardEnhanced() {
   };
 
   const updateItem = async (updatedItem) => {
+    if (isInspector) {
+      alert("Read-only inspector access – changes are disabled.");
+      return;
+    }
     if (!user || !user.id) return;
 
     // Save to Supabase
@@ -417,6 +504,10 @@ export default function DashboardEnhanced() {
   };
 
   const removeItem = async (id) => {
+    if (isInspector) {
+      alert("Read-only inspector access – changes are disabled.");
+      return;
+    }
     if (!user || !user.id) return;
     
     const item = items.find((i) => i.id === id);
@@ -445,6 +536,10 @@ export default function DashboardEnhanced() {
   };
 
   const deleteItem = async (id, skipConfirmation = false) => {
+    if (isInspector) {
+      alert("Read-only inspector access – changes are disabled.");
+      return;
+    }
     if (!skipConfirmation && !window.confirm("Are you sure you want to permanently delete this item?")) {
       return;
     }
@@ -459,6 +554,10 @@ export default function DashboardEnhanced() {
   };
 
   const duplicateItem = async (id) => {
+    if (isInspector) {
+      alert("Read-only inspector access – changes are disabled.");
+      return;
+    }
     if (!user || !user.id) return;
     
     const item = items.find((i) => i.id === id);
@@ -485,6 +584,10 @@ export default function DashboardEnhanced() {
   };
 
   const handleBulkRemove = () => {
+    if (isInspector) {
+      alert("Read-only inspector access – changes are disabled.");
+      return;
+    }
     if (selectedItems.length === 0) return;
     if (window.confirm(`Remove ${selectedItems.length} item(s) from shelf?`)) {
       selectedItems.forEach((id) => removeItem(id));
@@ -493,6 +596,10 @@ export default function DashboardEnhanced() {
   };
 
   const handleBulkDelete = async () => {
+    if (isInspector) {
+      alert("Read-only inspector access – changes are disabled.");
+      return;
+    }
     if (selectedItems.length === 0 || !user || !user.id) return;
     if (window.confirm(`Permanently delete ${selectedItems.length} item(s)? This action cannot be undone.`)) {
       // Delete all selected items from Supabase
@@ -547,6 +654,10 @@ export default function DashboardEnhanced() {
   };
 
   const handleImport = async (file) => {
+    if (isInspector) {
+      alert("Read-only inspector access – changes are disabled.");
+      return;
+    }
     if (!user || !user.id) {
       alert("Error: You must be logged in to import items.");
       return;
@@ -610,6 +721,10 @@ export default function DashboardEnhanced() {
   };
 
   const handleRestore = async (file) => {
+    if (isInspector) {
+      alert("Read-only inspector access – changes are disabled.");
+      return;
+    }
     if (!user || !user.id) {
       alert("Error: You must be logged in to restore data.");
       return;
@@ -705,6 +820,8 @@ export default function DashboardEnhanced() {
     const safe = activeItems.filter((i) => getStatus(i.expiry) === "SAFE").length;
     const totalValue = activeItems.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
 
+    const risk = computeAccountRiskScore(items);
+
     return {
       total: activeItems.length,
       expired,
@@ -714,6 +831,9 @@ export default function DashboardEnhanced() {
       locations: [...new Set(items.map((i) => i.location))].length || 1,
       categories: [...new Set(items.map((i) => i.category).filter(Boolean))],
       stores: stores,
+      riskScore: risk.riskScore,
+      riskBand: risk.riskBand,
+      riskDrivers: risk.drivers,
     };
   }, [items]);
 
@@ -777,14 +897,7 @@ export default function DashboardEnhanced() {
                     <span className="text-xs truncate max-w-[120px] xl:max-w-none">{user.company}</span>
                   )}
                   {subscription && (
-                    <span className="text-xs text-emerald-400">
-                      {subscription.status === 'trial' ? 'Free Trial' : (subscription.plan_name || subscription.plan || 'Plan')}
-                      {subscription.status === 'trial' && subscription.trial_expires_at && (
-                        <span className="text-slate-400 ml-1">
-                          (expires {new Date(subscription.trial_expires_at).toLocaleDateString()})
-                        </span>
-                      )}
-                    </span>
+                    <span className="text-xs text-emerald-400">{subscription.plan} Plan</span>
                   )}
                 </div>
               </div>
@@ -1307,6 +1420,10 @@ export default function DashboardEnhanced() {
 
         <StatsCards stats={stats} />
 
+        {isInspector && (
+          <InspectorBanner owner={user} scope={inspectorScope} />
+        )}
+
         {/* Alerts Panel */}
         {showAlerts && (
           <div className="mb-8 relative" key="alerts-panel">
@@ -1479,12 +1596,19 @@ export default function DashboardEnhanced() {
               )}
             </div>
           </div>
-          <AddItem
-            onAdd={addItem}
-            selectedLocation={selectedLocation}
-            template={selectedTemplate}
-            onTemplateSelect={setSelectedTemplate}
-          />
+          {!isInspector && (
+            <AddItem
+              onAdd={addItem}
+              selectedLocation={selectedLocation}
+              template={selectedTemplate}
+              onTemplateSelect={setSelectedTemplate}
+            />
+          )}
+          {isInspector && (
+            <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 text-xs text-amber-100">
+              Add Product is disabled in Inspector Mode. Inspectors have read-only access to inventory data.
+            </div>
+          )}
         </div>
 
         <div className="card-gradient rounded-2xl p-6 card-gradient-hover">
@@ -1523,11 +1647,12 @@ export default function DashboardEnhanced() {
             onShowHistory={(item) => setShowHistory(item)}
             selectedItems={selectedItems}
             onSelectionChange={setSelectedItems}
+            isInspector={isInspector}
           />
         </div>
       </main>
 
-      {editingItem && (
+      {editingItem && !isInspector && (
         <EditItemModal
           item={editingItem}
           onClose={() => setEditingItem(null)}
@@ -1535,12 +1660,14 @@ export default function DashboardEnhanced() {
         />
       )}
 
-      <BulkOperations
-        selectedItems={selectedItems}
-        onBulkRemove={handleBulkRemove}
-        onBulkDelete={handleBulkDelete}
-        onClearSelection={() => setSelectedItems([])}
-      />
+      {!isInspector && (
+        <BulkOperations
+          selectedItems={selectedItems}
+          onBulkRemove={handleBulkRemove}
+          onBulkDelete={handleBulkDelete}
+          onClearSelection={() => setSelectedItems([])}
+        />
+      )}
 
       {showSettings && (
         <SettingsModal
@@ -1557,14 +1684,29 @@ export default function DashboardEnhanced() {
       {showStoreManager && (
         <StoreManager
           onClose={() => setShowStoreManager(false)}
-          onStoresUpdate={(updatedStores) => {
+          onStoresUpdate={async (updatedStores) => {
             setStores(updatedStores);
+            // Persist stores to Supabase for this account when possible
+            try {
+              const effectiveId = ownerUserId || (user && user.id);
+              if (effectiveId && !isInspector) {
+                const result = await saveStoresForUser(effectiveId, updatedStores);
+                if (result && !result.success) {
+                  console.error("Failed to save stores to Supabase:", result.error);
+                } else {
+                  console.log("Stores saved to Supabase successfully");
+                }
+              }
+            } catch (e) {
+              console.warn("Failed to persist stores for user:", e);
+            }
           }}
           maxLocations={subscription?.location_count || subscription?.locationCount || null}
+          isInspector={isInspector}
         />
       )}
 
-      {showBarcodeScanner && (
+      {showBarcodeScanner && !isInspector && (
         <BarcodeScanner
           onScan={(barcode) => {
             // Find item by barcode or create new
