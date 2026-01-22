@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="VeriShelf Whitepaper - Enterprise shelf expiry management: reducing waste, ensuring compliance, and optimizing retail operations.">
+  <title>Whitepaper — VeriShelf</title>
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BFSEZD1KE4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-BFSEZD1KE4');
+  </script>
+  
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.3s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-white antialiased">
+  
+  <!-- NAVBAR -->
+  <nav class="fixed w-full bg-slate-950/95 backdrop-blur-lg z-50 border-b border-slate-800 supports-[backdrop-filter]:bg-slate-950/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+      <div class="text-2xl font-bold">
+        <a href="index.html" class="gradient-text">VeriShelf</a>
+      </div>
+      
+      <!-- Mobile menu button -->
+      <button id="mobile-menu-button" class="md:hidden p-2 rounded-lg hover:bg-slate-800 transition-colors" aria-label="Toggle menu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      
+      <div id="nav-menu" class="hidden md:flex items-center space-x-8">
+        <a href="index.html#features" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Features</a>
+        <a href="index.html#value" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Value</a>
+        <a href="index.html#pricing" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Pricing</a>
+        <a href="index.html" onclick="if(typeof openLoginModal === 'function') { openLoginModal(); return false; }" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Login</a>
+        <a href="index.html" onclick="if(typeof openSignupModal === 'function') { openSignupModal(); return false; }" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-all duration-200">
+          Get Started
+        </a>
+      </div>
+    </div>
+    
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden md:hidden px-4 pb-4 border-t border-slate-800">
+      <div class="flex flex-col space-y-4 pt-4">
+        <a href="index.html#features" class="text-slate-300 hover:text-white py-2">Features</a>
+        <a href="index.html#value" class="text-slate-300 hover:text-white py-2">Value</a>
+        <a href="index.html#pricing" class="text-slate-300 hover:text-white py-2">Pricing</a>
+        <a href="index.html" onclick="if(typeof openLoginModal === 'function') { openLoginModal(); return false; }" class="text-slate-300 hover:text-white py-2 text-left">Login</a>
+        <a href="index.html" onclick="if(typeof openSignupModal === 'function') { openSignupModal(); return false; }" class="px-4 py-2.5 bg-emerald-500 text-black font-semibold rounded-lg text-center">
+          Get Started
+        </a>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- HERO -->
+  <section class="pt-32 pb-24 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm font-medium mb-6">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Research & Insights
+      </div>
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight mb-6">
+        Enterprise Shelf Expiry Management:
+        <span class="block mt-2 gradient-text">A Strategic Guide</span>
+      </h1>
+      <p class="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+        How leading retail chains reduce waste, ensure compliance, and optimize operations through systematic expiry management.
+      </p>
+    </div>
+  </section>
+  
+  <!-- WHITEPAPER CONTENT -->
+  <section class="py-24">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="prose prose-invert max-w-none">
+        
+        <!-- Executive Summary -->
+        <div class="mb-16 p-8 bg-gradient-to-br from-emerald-900/20 to-slate-950 rounded-2xl border border-emerald-500/20">
+          <h2 class="text-2xl font-bold text-white mb-4">Executive Summary</h2>
+          <p class="text-slate-300 leading-relaxed">
+            Retail chains with 200+ locations lose an estimated $3–5 million annually to expired inventory. Traditional manual expiry management processes are error-prone, time-consuming, and fail to scale. This whitepaper examines how systematic, technology-driven expiry management reduces waste, ensures regulatory compliance, and delivers measurable operational improvements across enterprise retail operations.
+          </p>
+        </div>
+        
+        <!-- The Problem -->
+        <div class="mb-12">
+          <h2 class="text-3xl font-bold text-white mb-6">The Problem: Scale and Complexity</h2>
+          <p class="text-slate-300 leading-relaxed mb-6">
+            Large retail operations face unique challenges in managing product expiry across hundreds of locations:
+          </p>
+          
+          <div class="grid md:grid-cols-2 gap-6 mb-8">
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+              <h3 class="text-lg font-bold text-white mb-3">Manual Processes Don't Scale</h3>
+              <p class="text-slate-300 text-sm">
+                Spreadsheet-based tracking, paper checklists, and ad-hoc inspections cannot maintain consistency across 200+ locations. Human error leads to missed expirations and compliance violations.
+              </p>
+            </div>
+            
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+              <h3 class="text-lg font-bold text-white mb-3">Reactive vs. Proactive</h3>
+              <p class="text-slate-300 text-sm">
+                Most chains discover expired products during audits or customer complaints, not before expiration. This reactive approach maximizes waste and increases legal risk.
+              </p>
+            </div>
+            
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+              <h3 class="text-lg font-bold text-white mb-3">Compliance Risk</h3>
+              <p class="text-slate-300 text-sm">
+                Regulatory requirements demand complete audit trails, but manual documentation is incomplete, inconsistent, and legally insufficient. Fines and lawsuits can cost $500K–$5M+ per incident.
+              </p>
+            </div>
+            
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+              <h3 class="text-lg font-bold text-white mb-3">Operational Overhead</h3>
+              <p class="text-slate-300 text-sm">
+                Managers spend hours compiling reports, walking aisles to verify status, and chasing down associates for updates. This overhead reduces time available for coaching and process improvement.
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- The Solution -->
+        <div class="mb-12">
+          <h2 class="text-3xl font-bold text-white mb-6">The Solution: Systematic Expiry Management</h2>
+          <p class="text-slate-300 leading-relaxed mb-6">
+            VeriShelf provides a comprehensive platform that transforms expiry management from a reactive burden into a proactive, scalable operation:
+          </p>
+          
+          <div class="space-y-6 mb-8">
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+              <h3 class="text-xl font-bold text-white mb-3">Real-Time Tracking & Prioritization</h3>
+              <p class="text-slate-300 text-sm leading-relaxed">
+                Automated expiry checks every 15 minutes identify expiring items before they expire. Store associates see prioritized lists organized by aisle and shelf, eliminating guesswork and ensuring urgent items are handled first.
+              </p>
+            </div>
+            
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+              <h3 class="text-xl font-bold text-white mb-3">Proactive Workflow</h3>
+              <p class="text-slate-300 text-sm leading-relaxed">
+                Associates mark items as removed, discounted, or re-merchandised with simple mobile taps. The system works offline and syncs automatically, ensuring updates are never lost. Managers see real-time progress without walking the floor.
+              </p>
+            </div>
+            
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+              <h3 class="text-xl font-bold text-white mb-3">Complete Audit Trails</h3>
+              <p class="text-slate-300 text-sm leading-relaxed">
+                Every action is logged with timestamp, user, location, and photos. Court-admissible documentation provides legal protection and regulatory compliance. Inspector Mode enables secure, read-only access for external auditors.
+              </p>
+            </div>
+            
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+              <h3 class="text-xl font-bold text-white mb-3">Automatic Reporting</h3>
+              <p class="text-slate-300 text-sm leading-relaxed">
+                Daily summaries are generated automatically and shared with regional and corporate teams. No manual reporting required—operations leadership gains reliable visibility without asking managers to compile data.
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Results & ROI -->
+        <div class="mb-12">
+          <h2 class="text-3xl font-bold text-white mb-6">Results & ROI</h2>
+          <p class="text-slate-300 leading-relaxed mb-6">
+            Retail chains implementing systematic expiry management report:
+          </p>
+          
+          <div class="grid md:grid-cols-3 gap-6 mb-8">
+            <div class="p-6 bg-gradient-to-br from-emerald-900/20 to-slate-950 rounded-xl border border-emerald-500/20 text-center">
+              <div class="text-4xl font-bold gradient-text mb-3">85%+</div>
+              <p class="text-slate-300 text-sm">Reduction in expired product waste</p>
+            </div>
+            
+            <div class="p-6 bg-gradient-to-br from-emerald-900/20 to-slate-950 rounded-xl border border-emerald-500/20 text-center">
+              <div class="text-4xl font-bold gradient-text mb-3">100%</div>
+              <p class="text-slate-300 text-sm">Compliance rate with zero violations</p>
+            </div>
+            
+            <div class="p-6 bg-gradient-to-br from-emerald-900/20 to-slate-950 rounded-xl border border-emerald-500/20 text-center">
+              <div class="text-4xl font-bold gradient-text mb-3">20–40x</div>
+              <p class="text-slate-300 text-sm">First-year ROI</p>
+            </div>
+          </div>
+          
+          <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+            <p class="text-slate-300 text-sm leading-relaxed italic mb-4">
+              "VeriShelf reduced our expiry-related losses by 92% in the first quarter, paying for itself in under 60 days. The operational visibility alone has transformed how we manage compliance across our 200+ locations."
+            </p>
+            <p class="text-slate-400 text-xs">
+              — Director of Operations, National Grocery Chain
+            </p>
+          </div>
+        </div>
+        
+        <!-- Implementation -->
+        <div class="mb-12">
+          <h2 class="text-3xl font-bold text-white mb-6">Implementation & Best Practices</h2>
+          <p class="text-slate-300 leading-relaxed mb-6">
+            Successful deployment requires:
+          </p>
+          
+          <ol class="list-decimal list-inside space-y-4 text-slate-300 ml-4">
+            <li class="leading-relaxed">
+              <strong class="text-white">Start with pilot locations:</strong> Deploy at 5–10 stores to validate workflow and train teams before scaling.
+            </li>
+            <li class="leading-relaxed">
+              <strong class="text-white">Establish clear processes:</strong> Define standard operating procedures for associates marking items and managers reviewing exceptions.
+            </li>
+            <li class="leading-relaxed">
+              <strong class="text-white">Train store teams:</strong> Ensure associates understand the prioritized list format and status options (removed, discounted, re-merchandised).
+            </li>
+            <li class="leading-relaxed">
+              <strong class="text-white">Monitor and iterate:</strong> Use manager exception views to identify process improvements and share best practices across locations.
+            </li>
+            <li class="leading-relaxed">
+              <strong class="text-white">Scale systematically:</strong> Roll out to additional locations once pilot stores demonstrate consistent execution.
+            </li>
+          </ol>
+        </div>
+        
+        <!-- Conclusion -->
+        <div class="mb-12 p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800">
+          <h2 class="text-2xl font-bold text-white mb-4">Conclusion</h2>
+          <p class="text-slate-300 leading-relaxed mb-4">
+            Systematic expiry management is no longer optional for enterprise retail operations. The combination of real-time tracking, proactive workflows, complete audit trails, and automatic reporting delivers measurable improvements in waste reduction, compliance, and operational efficiency.
+          </p>
+          <p class="text-slate-300 leading-relaxed">
+            VeriShelf provides the platform and processes needed to transform expiry management from a reactive burden into a strategic advantage. Retail chains implementing these systems report 20–40x ROI in the first year, with waste reductions of 85%+ and 100% compliance rates.
+          </p>
+        </div>
+        
+        <!-- Download CTA -->
+        <div class="text-center p-8 bg-gradient-to-br from-emerald-900/20 to-slate-950 rounded-2xl border border-emerald-500/20">
+          <h3 class="text-xl font-bold text-white mb-4">Download Full Whitepaper</h3>
+          <p class="text-slate-300 text-sm mb-6">
+            Get the complete research report with detailed case studies, ROI analysis, and implementation frameworks.
+          </p>
+          <a href="mailto:whitepaper@verishelf.com?subject=Whitepaper Request" class="inline-block px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl transition-all duration-200">
+            Request Full PDF
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- FOOTER -->
+  <footer class="py-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="text-2xl font-bold gradient-text mb-4">VeriShelf</div>
+          <p class="text-slate-400 text-sm">
+            Enterprise shelf expiry management for retail chains.
+          </p>
+        </div>
+        
+        <div>
+          <h4 class="text-white font-semibold mb-4">Product</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="index.html#features" class="text-slate-400 hover:text-emerald-300 transition-colors">Features</a></li>
+            <li><a href="index.html#pricing" class="text-slate-400 hover:text-emerald-300 transition-colors">Pricing</a></li>
+            <li><a href="tutorials.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Tutorials</a></li>
+            <li><a href="api-docs.html" class="text-slate-400 hover:text-emerald-300 transition-colors">API Documentation</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-white font-semibold mb-4">Company</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="about.html" class="text-slate-400 hover:text-emerald-300 transition-colors">About</a></li>
+            <li><a href="careers.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Careers</a></li>
+            <li><a href="blog.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Blog</a></li>
+            <li><a href="partners.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Partners</a></li>
+            <li><a href="whitepaper.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Whitepaper</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-white font-semibold mb-4">Contact</h4>
+          <ul class="space-y-2 text-sm">
+            <li class="text-slate-400">general@verishelf.com</li>
+            <li class="text-slate-400">+1 (555) 123-4567</li>
+            <li class="text-slate-400">San Francisco, CA</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="pt-8 border-t border-slate-800 text-center">
+        <p class="text-slate-500 text-sm">
+          © 2025 VeriShelf. All rights reserved. | 
+          <a href="privacy.html" class="hover:text-emerald-300 transition-colors">Privacy Policy</a> | 
+          <a href="terms.html" class="hover:text-emerald-300 transition-colors">Terms of Service</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+  
+  <script>
+    // Mobile menu toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (mobileMenuButton && mobileMenu) {
+      mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
+  </script>
+</body>
+</html>

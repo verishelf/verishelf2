@@ -182,17 +182,17 @@
         </p>
         
         <div class="mt-12 flex flex-col sm:flex-row justify-center gap-4">
-          <button onclick="openSignupModal()" class="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl transition-all duration-200 hover-lift group">
+          <a href="#daily-workflow" onclick="event.stopPropagation(); return true;" class="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl transition-all duration-200 hover-lift group">
             <span class="flex items-center justify-center gap-2">
-              Start Free Trial
+              See the Daily Store Workflow
               <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
               </svg>
             </span>
-          </button>
-          <a href="#value" class="px-8 py-4 border border-slate-700 hover:border-emerald-500/50 rounded-xl text-white hover:text-emerald-300 transition-all duration-200 group">
+          </a>
+          <a href="#daily-workflow" onclick="event.stopPropagation(); return true;" class="px-8 py-4 border border-slate-700 hover:border-emerald-500/50 rounded-xl text-white hover:text-emerald-300 transition-all duration-200 group">
             <span class="flex items-center justify-center gap-2">
-              See Business Impact
+              Explore How Store Teams Use VeriShelf
               <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
               </svg>
@@ -243,14 +243,14 @@
   </section>
   
   <!-- DAY IN THE LIFE (OPERATIONAL FLOW) -->
-  <section class="py-24 bg-gradient-to-b from-slate-950 to-slate-900">
+  <section id="daily-workflow" class="py-24 bg-gradient-to-b from-slate-950 to-slate-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-16">
         <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-          How VeriShelf Works in <span class="gradient-text">Real Store Operations</span>
+          How Store Teams Use <span class="gradient-text">VeriShelf</span>
         </h2>
         <p class="text-lg text-slate-300 max-w-3xl mx-auto">
-          See how store teams use VeriShelf every day to stay ahead of expiry issues and keep operations running smoothly.
+          A day-in-the-life view of how VeriShelf fits into real store operations, from shift start to end-of-day summary.
         </p>
       </div>
       
@@ -317,14 +317,14 @@
       </div>
       
       <div class="mt-12 text-center">
-        <button onclick="openSignupModal()" class="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl transition-all duration-200 hover-lift group">
+        <a href="mailto:sales@verishelf.com?subject=Operational Walkthrough Request" onclick="event.stopPropagation(); return true;" class="inline-block px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl transition-all duration-200 hover-lift group">
           <span class="flex items-center justify-center gap-2">
-            Request a Walkthrough
+            Request an Operational Walkthrough
             <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
           </span>
-        </button>
+        </a>
       </div>
     </div>
   </section>
@@ -418,7 +418,7 @@
   </section>
   
   <!-- CORE OPERATIONAL WIN -->
-  <section class="py-24 bg-gradient-to-b from-slate-900 to-slate-950">
+  <section id="operational-win" class="py-24 bg-gradient-to-b from-slate-900 to-slate-950">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-16">
         <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
@@ -481,10 +481,157 @@
       </div>
       
       <div class="max-w-3xl mx-auto p-8 bg-gradient-to-br from-emerald-900/20 to-slate-950 rounded-2xl border border-emerald-500/20">
-        <h3 class="text-2xl font-bold text-white mb-4 text-center">The Bottom Line</h3>
-        <p class="text-slate-300 text-center leading-relaxed">
-          VeriShelf reduces waste, smooths daily operations, and gives teams the tools they need to stay ahead of expiry issues. Shifts run more smoothly because associates know exactly what to do, managers can focus on coaching and exceptions, and operations leadership has reliable visibility without extra work.
+        <h3 class="text-2xl font-bold text-white mb-4 text-center">The Outcomes</h3>
+        <div class="grid md:grid-cols-3 gap-6 text-center">
+          <div>
+            <div class="text-3xl font-bold text-emerald-400 mb-2">Less Waste</div>
+            <p class="text-slate-300 text-sm">Proactive handling reduces expired product losses</p>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-emerald-400 mb-2">Fewer Surprises</div>
+            <p class="text-slate-300 text-sm">Compliance issues caught before they become problems</p>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-emerald-400 mb-2">Lower Overhead</div>
+            <p class="text-slate-300 text-sm">Managers manage exceptions, not manual tasks</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- WHO IT'S FOR (ROLE-BASED VALUE) -->
+  <section class="py-24 bg-gradient-to-b from-slate-900 to-slate-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+          Who It's <span class="gradient-text">For</span>
+        </h2>
+        <p class="text-lg text-slate-300 max-w-3xl mx-auto">
+          VeriShelf delivers value at every level of retail operations, from store associates to compliance teams.
         </p>
+      </div>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Store Associates -->
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300 hover-lift">
+          <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">Store Associates</h3>
+          <ul class="text-slate-300 space-y-2 text-sm">
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Clear tasks with prioritized lists by aisle and shelf</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Faster shifts with no guesswork or manual lists</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Simple mobile app works offline</span>
+            </li>
+          </ul>
+        </div>
+        
+        <!-- Store Managers -->
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300 hover-lift">
+          <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">Store Managers</h3>
+          <ul class="text-slate-300 space-y-2 text-sm">
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Real-time visibility without micromanagement</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Focus on exceptions, not manual reporting</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Automatic daily summaries eliminate paperwork</span>
+            </li>
+          </ul>
+        </div>
+        
+        <!-- Regional / Ops -->
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300 hover-lift">
+          <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">Regional / Operations</h3>
+          <ul class="text-slate-300 space-y-2 text-sm">
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Consistency across all store locations</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Trend detection across locations and time periods</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Reliable visibility without asking managers for reports</span>
+            </li>
+          </ul>
+        </div>
+        
+        <!-- Compliance / Legal -->
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300 hover-lift">
+          <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">Compliance / Legal</h3>
+          <ul class="text-slate-300 space-y-2 text-sm">
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Complete audit trails with timestamps and photos</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Court-admissible proof of due diligence</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="w-5 h-5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Reduced legal risk and regulatory exposure</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
@@ -780,14 +927,96 @@
         <p class="text-slate-300 mb-6 max-w-2xl mx-auto">
           VeriShelf's foundation in real-world store operations positions it to evolve into a comprehensive retail operations intelligence platform, while always maintaining its core focus: making expiry management simple, reliable, and effective for store teams.
         </p>
-        <button onclick="openSignupModal()" class="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl transition-all duration-200 hover-lift group">
+        <a href="#daily-workflow" onclick="event.stopPropagation(); return true;" class="inline-block px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl transition-all duration-200 hover-lift group">
           <span class="flex items-center justify-center gap-2">
             See Operational Flow
             <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
           </span>
-        </button>
+        </a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- USE CASES -->
+  <section class="py-24 bg-gradient-to-b from-slate-900 to-slate-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+          Real-World <span class="gradient-text">Use Cases</span>
+        </h2>
+        <p class="text-lg text-slate-300 max-w-3xl mx-auto">
+          See how VeriShelf fits into daily operations across different retail environments.
+        </p>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Grocery -->
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300">
+          <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">Grocery Stores</h3>
+          <p class="text-slate-400 text-sm mb-4 font-semibold">The Operational Problem</p>
+          <p class="text-slate-300 text-sm mb-4">
+            Perishable items expire daily across produce, dairy, deli, and bakery sections. Manual checks are time-consuming and error-prone, leading to expired products reaching customers and regulatory violations.
+          </p>
+          <p class="text-slate-400 text-sm mb-4 font-semibold">How VeriShelf Fits</p>
+          <p class="text-slate-300 text-sm mb-4">
+            Associates start each shift with a prioritized list organized by aisle and shelf. They verify items, mark status (removed, discounted, re-merchandised), and move on. Managers see real-time progress without walking the floor.
+          </p>
+          <p class="text-slate-400 text-sm mb-4 font-semibold">Measurable Outcome</p>
+          <p class="text-slate-300 text-sm">
+            Reduced waste by 85%+, zero expired products reaching customers, full FDA compliance with automatic audit trails.
+          </p>
+        </div>
+        
+        <!-- Pharmacy -->
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300">
+          <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">Pharmacy</h3>
+          <p class="text-slate-400 text-sm mb-4 font-semibold">The Operational Problem</p>
+          <p class="text-slate-300 text-sm mb-4">
+            Prescription medications and over-the-counter products have strict expiry requirements. Regulatory inspections require complete documentation, and expired medications pose serious health risks.
+          </p>
+          <p class="text-slate-400 text-sm mb-4 font-semibold">How VeriShelf Fits</p>
+          <p class="text-slate-300 text-sm mb-4">
+            Pharmacy staff scan items during daily checks. The system tracks every removal with timestamps, photos, and user attribution. Inspector Mode allows external auditors read-only access with full activity logs.
+          </p>
+          <p class="text-slate-400 text-sm mb-4 font-semibold">Measurable Outcome</p>
+          <p class="text-slate-300 text-sm">
+            100% compliance rate, zero regulatory violations, complete audit readiness for state board inspections.
+          </p>
+        </div>
+        
+        <!-- Convenience / Big-box -->
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300">
+          <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">Convenience / Big-Box</h3>
+          <p class="text-slate-400 text-sm mb-4 font-semibold">The Operational Problem</p>
+          <p class="text-slate-300 text-sm mb-4">
+            High-volume stores with multiple locations struggle to maintain consistency. Regional managers need visibility across stores without micromanaging, and corporate needs reliable compliance data.
+          </p>
+          <p class="text-slate-400 text-sm mb-4 font-semibold">How VeriShelf Fits</p>
+          <p class="text-slate-300 text-sm mb-4">
+            Store teams follow the same workflow across all locations. Regional dashboards show performance trends, risk scores, and exception patterns. Corporate gets automatic daily summaries with no manual reporting.
+          </p>
+          <p class="text-slate-400 text-sm mb-4 font-semibold">Measurable Outcome</p>
+          <p class="text-slate-300 text-sm">
+            Consistent execution across 200+ locations, 40% reduction in managerial overhead, enterprise-wide compliance visibility.
+          </p>
+        </div>
       </div>
     </div>
   </section>
@@ -999,6 +1228,182 @@
     </div>
   </section>
   
+  <!-- FAQ SECTION -->
+  <section class="py-24 bg-gradient-to-b from-slate-950 to-slate-900">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+          Frequently Asked <span class="gradient-text">Questions</span>
+        </h2>
+        <p class="text-lg text-slate-300 max-w-2xl mx-auto">
+          Operational questions about how VeriShelf works in real store environments.
+        </p>
+      </div>
+      
+      <div class="space-y-6">
+        <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800">
+          <h3 class="text-lg font-bold text-white mb-3">How do store teams actually interact with VeriShelf?</h3>
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Associates open VeriShelf on their phone at the start of shift and see a prioritized list of expiring items organized by aisle and shelf. They work through the list, marking items as removed, discounted, or re-merchandised with simple taps. The app works offline and syncs automatically when connection returns.
+          </p>
+        </div>
+        
+        <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800">
+          <h3 class="text-lg font-bold text-white mb-3">What devices are supported?</h3>
+          <p class="text-slate-300 text-sm leading-relaxed">
+            VeriShelf works on any device with a web browser: smartphones (iOS and Android), tablets, and desktop computers. The mobile experience is optimized for on-floor use, while managers and regional teams use the full dashboard on any device. No special hardware or apps to install.
+          </p>
+        </div>
+        
+        <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800">
+          <h3 class="text-lg font-bold text-white mb-3">What happens if a check is missed?</h3>
+          <p class="text-slate-300 text-sm leading-relaxed">
+            The system runs automated expiry checks every 15 minutes and sends alerts for expired items. If an item isn't handled, alerts escalate and managers see it in their exception view. The audit trail shows exactly when items were flagged and when they were addressed, providing full accountability.
+          </p>
+        </div>
+        
+        <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800">
+          <h3 class="text-lg font-bold text-white mb-3">How is data tracked and reviewed?</h3>
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Every action is logged with timestamp, user, location, and photos. Managers see real-time progress in the dashboard. At shift end, automatic summaries are generated and shared with regional and corporate teams. No manual reporting required—all data is audit-ready and accessible through the dashboard.
+          </p>
+        </div>
+        
+        <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800">
+          <h3 class="text-lg font-bold text-white mb-3">What are the integration expectations?</h3>
+          <p class="text-slate-300 text-sm leading-relaxed">
+            VeriShelf can integrate with POS and ERP systems via API to reduce manual data entry. Integration is optional—the system works standalone. For Enterprise plans, we provide API access and dedicated support for custom integrations. Most stores start with manual entry and add integrations as needed.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- INTEGRATIONS & ECOSYSTEM -->
+  <section class="py-24 bg-gradient-to-b from-slate-900 to-slate-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+          Integrations & <span class="gradient-text">Ecosystem</span>
+        </h2>
+        <p class="text-lg text-slate-300 max-w-3xl mx-auto">
+          VeriShelf connects with your existing systems to reduce manual work and ensure data consistency.
+        </p>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300">
+          <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">POS / ERP Compatibility</h3>
+          <p class="text-slate-300 text-sm leading-relaxed mb-4">
+            Connect VeriShelf with your point-of-sale or enterprise resource planning systems to automatically sync product data, reducing manual entry and ensuring consistency.
+          </p>
+          <p class="text-slate-400 text-xs">
+            Enterprise plans include dedicated integration support and custom API development.
+          </p>
+        </div>
+        
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300">
+          <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">API Availability</h3>
+          <p class="text-slate-300 text-sm leading-relaxed mb-4">
+            Full REST API access for Enterprise customers enables custom integrations, automated workflows, and data synchronization with your existing tools and platforms.
+          </p>
+          <p class="text-slate-400 text-xs">
+            API documentation and developer support included with Enterprise plans.
+          </p>
+        </div>
+        
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300">
+          <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-4">Reduced Manual Entry</h3>
+          <p class="text-slate-300 text-sm leading-relaxed mb-4">
+            Integrations eliminate duplicate data entry. Product information, pricing, and inventory counts flow automatically from your existing systems into VeriShelf, saving time and reducing errors.
+          </p>
+          <p class="text-slate-400 text-xs">
+            Start standalone and add integrations as your operations scale.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- TRUST & SECURITY -->
+  <section class="py-24 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+          Trust & <span class="gradient-text">Security</span>
+        </h2>
+        <p class="text-lg text-slate-300 max-w-3xl mx-auto">
+          Enterprise-grade security, compliance, and reliability for retail operations.
+        </p>
+      </div>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300 text-center">
+          <div class="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-3">SOC 2 Compliant</h3>
+          <p class="text-slate-300 text-sm">
+            Certified security controls and processes for enterprise data protection.
+          </p>
+        </div>
+        
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300 text-center">
+          <div class="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-3">Data Security</h3>
+          <p class="text-slate-300 text-sm">
+            Encrypted data transmission and storage, role-based access controls, and regular security audits.
+          </p>
+        </div>
+        
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300 text-center">
+          <div class="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-3">Audit Ready</h3>
+          <p class="text-slate-300 text-sm">
+            Complete audit trails with timestamps, photos, and user attribution. Court-admissible documentation for legal defense.
+          </p>
+        </div>
+        
+        <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300 text-center">
+          <div class="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-3">Enterprise Reliability</h3>
+          <p class="text-slate-300 text-sm">
+            99.99% uptime SLA, 24/7 monitoring, automatic backups, and disaster recovery protocols.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  
   <!-- FOOTER -->
   <footer class="py-12 border-t border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1026,6 +1431,8 @@
             <li><a href="about.html" class="text-slate-400 hover:text-emerald-300 transition-colors">About</a></li>
             <li><a href="careers.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Careers</a></li>
             <li><a href="blog.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Blog</a></li>
+            <li><a href="partners.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Partners</a></li>
+            <li><a href="whitepaper.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Whitepaper</a></li>
           </ul>
         </div>
         

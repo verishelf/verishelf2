@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="VeriShelf Partners - Technology integrations and strategic partnerships for enterprise retail compliance.">
+  <title>Partners — VeriShelf</title>
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BFSEZD1KE4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-BFSEZD1KE4');
+  </script>
+  
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.3s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-white antialiased">
+  
+  <!-- NAVBAR -->
+  <nav class="fixed w-full bg-slate-950/95 backdrop-blur-lg z-50 border-b border-slate-800 supports-[backdrop-filter]:bg-slate-950/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+      <div class="text-2xl font-bold">
+        <a href="index.html" class="gradient-text">VeriShelf</a>
+      </div>
+      
+      <!-- Mobile menu button -->
+      <button id="mobile-menu-button" class="md:hidden p-2 rounded-lg hover:bg-slate-800 transition-colors" aria-label="Toggle menu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      
+      <div id="nav-menu" class="hidden md:flex items-center space-x-8">
+        <a href="index.html#features" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Features</a>
+        <a href="index.html#value" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Value</a>
+        <a href="index.html#pricing" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Pricing</a>
+        <a href="index.html" onclick="if(typeof openLoginModal === 'function') { openLoginModal(); return false; }" class="text-slate-300 hover:text-emerald-300 transition-colors duration-200">Login</a>
+        <a href="index.html" onclick="if(typeof openSignupModal === 'function') { openSignupModal(); return false; }" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-all duration-200">
+          Get Started
+        </a>
+      </div>
+    </div>
+    
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden md:hidden px-4 pb-4 border-t border-slate-800">
+      <div class="flex flex-col space-y-4 pt-4">
+        <a href="index.html#features" class="text-slate-300 hover:text-white py-2">Features</a>
+        <a href="index.html#value" class="text-slate-300 hover:text-white py-2">Value</a>
+        <a href="index.html#pricing" class="text-slate-300 hover:text-white py-2">Pricing</a>
+        <a href="index.html" onclick="if(typeof openLoginModal === 'function') { openLoginModal(); return false; }" class="text-slate-300 hover:text-white py-2 text-left">Login</a>
+        <a href="index.html" onclick="if(typeof openSignupModal === 'function') { openSignupModal(); return false; }" class="px-4 py-2.5 bg-emerald-500 text-black font-semibold rounded-lg text-center">
+          Get Started
+        </a>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- HERO -->
+  <section class="pt-32 pb-24 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight mb-6">
+        <span class="gradient-text">Partners</span> & Integrations
+      </h1>
+      <p class="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+        VeriShelf integrates with leading retail technology platforms to streamline operations and reduce manual work.
+      </p>
+    </div>
+  </section>
+  
+  <!-- PARTNERS CONTENT -->
+  <section class="py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Technology Partners -->
+      <div class="mb-16">
+        <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-center">
+          Technology <span class="gradient-text">Partners</span>
+        </h2>
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300">
+            <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-6">
+              <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-4">POS Systems</h3>
+            <p class="text-slate-300 text-sm leading-relaxed mb-4">
+              Integrate with leading point-of-sale systems to automatically sync product data, pricing, and inventory counts. Reduce manual entry and ensure data consistency across platforms.
+            </p>
+            <p class="text-slate-400 text-xs">
+              Compatible with major POS providers including Square, Toast, Clover, and custom systems via API.
+            </p>
+          </div>
+          
+          <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300">
+            <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-6">
+              <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-4">ERP Platforms</h3>
+            <p class="text-slate-300 text-sm leading-relaxed mb-4">
+              Connect with enterprise resource planning systems to streamline inventory management, automate reporting, and maintain data integrity across your retail operations.
+            </p>
+            <p class="text-slate-400 text-xs">
+              API-based integrations available for SAP, Oracle, Microsoft Dynamics, and other enterprise platforms.
+            </p>
+          </div>
+          
+          <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800 hover:border-emerald-500/30 transition-all duration-300">
+            <div class="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center mb-6">
+              <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-4">API & Webhooks</h3>
+            <p class="text-slate-300 text-sm leading-relaxed mb-4">
+              Full REST API access for Enterprise customers enables custom integrations, automated workflows, and real-time data synchronization with your existing tools.
+            </p>
+            <p class="text-slate-400 text-xs">
+              Comprehensive API documentation, webhook support, and dedicated developer resources included.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Integration Benefits -->
+      <div class="mb-16">
+        <h2 class="text-3xl sm:text-4xl font-bold mb-8 text-center">
+          Integration <span class="gradient-text">Benefits</span>
+        </h2>
+        <div class="max-w-4xl mx-auto">
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800">
+              <h3 class="text-lg font-bold text-white mb-3">Reduced Manual Entry</h3>
+              <p class="text-slate-300 text-sm">
+                Product information, pricing, and inventory data flow automatically from your existing systems, eliminating duplicate data entry and reducing errors.
+              </p>
+            </div>
+            
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800">
+              <h3 class="text-lg font-bold text-white mb-3">Data Consistency</h3>
+              <p class="text-slate-300 text-sm">
+                Single source of truth across all platforms ensures expiry data stays synchronized with your inventory and POS systems.
+              </p>
+            </div>
+            
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800">
+              <h3 class="text-lg font-bold text-white mb-3">Automated Workflows</h3>
+              <p class="text-slate-300 text-sm">
+                Trigger actions in other systems based on expiry events, automate reporting, and streamline compliance workflows.
+              </p>
+            </div>
+            
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800">
+              <h3 class="text-lg font-bold text-white mb-3">Enterprise Scale</h3>
+              <p class="text-slate-300 text-sm">
+                Designed for multi-location operations with robust API performance and dedicated integration support for Enterprise customers.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Become a Partner -->
+      <div class="max-w-3xl mx-auto p-8 bg-gradient-to-br from-emerald-900/20 to-slate-950 rounded-2xl border border-emerald-500/20 text-center">
+        <h2 class="text-2xl font-bold text-white mb-4">Become a Partner</h2>
+        <p class="text-slate-300 mb-6">
+          Are you a technology provider or consultant serving retail operations? Partner with VeriShelf to offer integrated solutions to your clients.
+        </p>
+        <a href="mailto:partners@verishelf.com" class="inline-block px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl transition-all duration-200">
+          Contact Partnerships
+        </a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- FOOTER -->
+  <footer class="py-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="text-2xl font-bold gradient-text mb-4">VeriShelf</div>
+          <p class="text-slate-400 text-sm">
+            Enterprise shelf expiry management for retail chains.
+          </p>
+        </div>
+        
+        <div>
+          <h4 class="text-white font-semibold mb-4">Product</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="index.html#features" class="text-slate-400 hover:text-emerald-300 transition-colors">Features</a></li>
+            <li><a href="index.html#pricing" class="text-slate-400 hover:text-emerald-300 transition-colors">Pricing</a></li>
+            <li><a href="tutorials.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Tutorials</a></li>
+            <li><a href="api-docs.html" class="text-slate-400 hover:text-emerald-300 transition-colors">API Documentation</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-white font-semibold mb-4">Company</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="about.html" class="text-slate-400 hover:text-emerald-300 transition-colors">About</a></li>
+            <li><a href="careers.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Careers</a></li>
+            <li><a href="blog.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Blog</a></li>
+            <li><a href="partners.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Partners</a></li>
+            <li><a href="whitepaper.html" class="text-slate-400 hover:text-emerald-300 transition-colors">Whitepaper</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-white font-semibold mb-4">Contact</h4>
+          <ul class="space-y-2 text-sm">
+            <li class="text-slate-400">general@verishelf.com</li>
+            <li class="text-slate-400">+1 (555) 123-4567</li>
+            <li class="text-slate-400">San Francisco, CA</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="pt-8 border-t border-slate-800 text-center">
+        <p class="text-slate-500 text-sm">
+          © 2025 VeriShelf. All rights reserved. | 
+          <a href="privacy.html" class="hover:text-emerald-300 transition-colors">Privacy Policy</a> | 
+          <a href="terms.html" class="hover:text-emerald-300 transition-colors">Terms of Service</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+  
+  <script>
+    // Mobile menu toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (mobileMenuButton && mobileMenu) {
+      mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
+  </script>
+</body>
+</html>
