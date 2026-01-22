@@ -29,6 +29,9 @@ export default function EditItemModal({ item, onClose, onSave }) {
   const [batchNumber, setBatchNumber] = useState("");
   const [supplier, setSupplier] = useState("");
   const [notes, setNotes] = useState("");
+  const [aisle, setAisle] = useState("");
+  const [shelf, setShelf] = useState("");
+  const [itemStatus, setItemStatus] = useState("active"); // active, removed, discounted, re-merchandised
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -44,6 +47,14 @@ export default function EditItemModal({ item, onClose, onSave }) {
       setBatchNumber(item.batchNumber || "");
       setSupplier(item.supplier || "");
       setNotes(item.notes || "");
+      setAisle(item.aisle || "");
+      setShelf(item.shelf || "");
+      // Determine status: if removed is true, use "removed", otherwise use itemStatus or "active"
+      if (item.removed) {
+        setItemStatus("removed");
+      } else {
+        setItemStatus(item.itemStatus || item.status || "active");
+      }
     }
   }, [item]);
 
@@ -79,7 +90,7 @@ export default function EditItemModal({ item, onClose, onSave }) {
     e.preventDefault();
     if (!name || !expiry) return;
 
-    onSave({
+    const savedItem = {
       ...item,
       name,
       quantity: parseInt(qty) || 1,
@@ -91,8 +102,14 @@ export default function EditItemModal({ item, onClose, onSave }) {
       batchNumber: batchNumber || undefined,
       supplier: supplier || undefined,
       notes: notes || undefined,
+      aisle: aisle || undefined,
+      shelf: shelf || undefined,
+      itemStatus: itemStatus,
+      status: itemStatus, // Keep both for compatibility
+      removed: itemStatus === "removed", // Keep removed for backward compatibility
       updatedAt: new Date().toISOString(),
-    });
+    };
+    onSave(savedItem);
   };
 
   if (!item) return null;
@@ -245,6 +262,54 @@ export default function EditItemModal({ item, onClose, onSave }) {
                     : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
                 }`}
               />
+            </div>
+
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Aisle</label>
+              <input
+                type="text"
+                value={aisle}
+                onChange={(e) => setAisle(e.target.value)}
+                placeholder="e.g., A1, B3"
+                className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+                  theme === "light"
+                    ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900"
+                    : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
+                }`}
+              />
+            </div>
+
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Shelf</label>
+              <input
+                type="text"
+                value={shelf}
+                onChange={(e) => setShelf(e.target.value)}
+                placeholder="e.g., Top, Middle, Bottom"
+                className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+                  theme === "light"
+                    ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900"
+                    : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
+                }`}
+              />
+            </div>
+
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Status</label>
+              <select
+                value={itemStatus}
+                onChange={(e) => setItemStatus(e.target.value)}
+                className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+                  theme === "light"
+                    ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900"
+                    : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white"
+                }`}
+              >
+                <option value="active">Active</option>
+                <option value="removed">Removed</option>
+                <option value="discounted">Discounted</option>
+                <option value="re-merchandised">Re-merchandised</option>
+              </select>
             </div>
 
             <div className="md:col-span-2">

@@ -7,7 +7,7 @@ import SearchAndFilters from "../components/SearchAndFilters";
 import AlertBanner from "../components/AlertBanner";
 import EditItemModal from "../components/EditItemModal";
 import BulkOperations from "../components/BulkOperations";
-import { getStatus } from "../utils/expiry";
+import { getStatus, daysUntilExpiry } from "../utils/expiry";
 import { exportToCSV, importFromCSV, backupData, restoreData } from "../utils/export";
 import { addHistoryEntry, getHistory } from "../utils/history";
 import { requestNotificationPermission, checkExpiredItems } from "../utils/notifications";
@@ -55,6 +55,7 @@ export default function DashboardEnhanced() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [showExceptionsOnly, setShowExceptionsOnly] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [editingItem, setEditingItem] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -794,9 +795,9 @@ export default function DashboardEnhanced() {
     }
   };
 
-  // Filter items
+  // Filter items with default prioritization by urgency
   const filteredItems = useMemo(() => {
-    return items.filter((item) => {
+    let filtered = items.filter((item) => {
       const matchesSearch =
         item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.barcode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -805,12 +806,38 @@ export default function DashboardEnhanced() {
       const matchesLocation =
         selectedLocation === "All Locations" || item.location === selectedLocation;
       const matchesStatus =
-        statusFilter === "all" || getStatus(item.expiry) === statusFilter.toUpperCase();
+        statusFilter === "all" || getStatus(item.expiry || item.expiryDate) === statusFilter.toUpperCase();
       const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
 
       return matchesSearch && matchesLocation && matchesStatus && matchesCategory;
     });
-  }, [items, searchQuery, selectedLocation, statusFilter, categoryFilter]);
+
+    // Manager exception view: show only expired and expiring items
+    if (showExceptionsOnly) {
+      filtered = filtered.filter((item) => {
+        const status = getStatus(item.expiry || item.expiryDate);
+        return status === "EXPIRED" || status === "WARNING";
+      });
+    }
+
+    // Default prioritization: expired first, then expiring soon (WARNING), then safe
+    // This matches the homepage promise of "prioritized list by urgency"
+    return filtered.sort((a, b) => {
+      const statusA = getStatus(a.expiry || a.expiryDate);
+      const statusB = getStatus(b.expiry || b.expiryDate);
+      
+      // Priority order: EXPIRED (0) > WARNING (1) > SAFE (2)
+      const priorityOrder = { EXPIRED: 0, WARNING: 1, SAFE: 2 };
+      const priorityDiff = (priorityOrder[statusA] || 2) - (priorityOrder[statusB] || 2);
+      
+      if (priorityDiff !== 0) return priorityDiff;
+      
+      // If same priority, sort by days until expiry (most urgent first)
+      const daysA = daysUntilExpiry(a.expiry || a.expiryDate);
+      const daysB = daysUntilExpiry(b.expiry || b.expiryDate);
+      return daysA - daysB;
+    });
+  }, [items, searchQuery, selectedLocation, statusFilter, categoryFilter, showExceptionsOnly]);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -1537,6 +1564,8 @@ export default function DashboardEnhanced() {
               onCategoryFilterChange={setCategoryFilter}
               categories={stats.categories}
               searchInputRef={searchInputRef}
+              showExceptionsOnly={showExceptionsOnly}
+              onToggleExceptions={() => setShowExceptionsOnly(!showExceptionsOnly)}
             />
             <div className="mt-3 flex gap-2">
               <button

@@ -253,6 +253,10 @@ function mapDbItemToAppItem(item) {
     removed: item.removed || false,
     removedAt: item.removed_at,
     addedAt: item.added_at,
+    aisle: item.aisle || null,
+    shelf: item.shelf || null,
+    itemStatus: item.item_status || (item.removed ? 'removed' : 'active'),
+    status: item.item_status || (item.removed ? 'removed' : 'active'), // Keep both for compatibility
   };
 }
 
@@ -315,6 +319,9 @@ export async function saveItem(userId, item) {
     removed: item.removed || false,
     removed_at: item.removedAt || item.removed_at || null,
     added_at: item.addedAt || item.added_at || new Date().toISOString(),
+    aisle: item.aisle || null,
+    shelf: item.shelf || null,
+    item_status: item.itemStatus || item.status || (item.removed ? 'removed' : 'active'),
   };
 
   // Check if this is an update (item has an ID that exists in database) or insert (no ID or ID doesn't exist)

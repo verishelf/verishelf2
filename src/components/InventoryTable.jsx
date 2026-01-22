@@ -177,6 +177,12 @@ export default function InventoryTable({
               Location
             </th>
             <th className="px-2 py-2 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Aisle/Shelf
+            </th>
+            <th className="px-2 py-2 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Status
+            </th>
+            <th className="px-2 py-2 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Actions
             </th>
           </tr>
@@ -287,6 +293,23 @@ export default function InventoryTable({
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap">
                   <div className="text-xs text-slate-400">{item.location || "Store #001"}</div>
+                </td>
+                <td className="px-2 py-2 whitespace-nowrap">
+                  <div className="text-xs text-slate-400">
+                    {item.aisle && item.shelf ? `${item.aisle}/${item.shelf}` : item.aisle || item.shelf || "—"}
+                  </div>
+                </td>
+                <td className="px-2 py-2 whitespace-nowrap">
+                  {item.itemStatus && item.itemStatus !== "active" && (
+                    <span className={`text-xs px-2 py-0.5 rounded ${
+                      item.itemStatus === "removed" ? "bg-red-500/20 text-red-400" :
+                      item.itemStatus === "discounted" ? "bg-yellow-500/20 text-yellow-400" :
+                      item.itemStatus === "re-merchandised" ? "bg-blue-500/20 text-blue-400" :
+                      "bg-slate-500/20 text-slate-400"
+                    }`}>
+                      {item.itemStatus === "re-merchandised" ? "Re-merch." : item.itemStatus}
+                    </span>
+                  )}
                 </td>
                 <td className="px-2 py-2">
                   <div className="flex items-center gap-1 flex-wrap justify-end sm:justify-start max-w-full">

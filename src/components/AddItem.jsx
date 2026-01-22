@@ -35,6 +35,8 @@ export default function AddItem({ onAdd, selectedLocation, template, onTemplateS
   const [unit, setUnit] = useState("piece");
   const [reorderPoint, setReorderPoint] = useState("");
   const [variant, setVariant] = useState("");
+  const [aisle, setAisle] = useState("");
+  const [shelf, setShelf] = useState("");
   const fileInputRef = useRef(null);
   const settings = getSettings();
 
@@ -105,6 +107,10 @@ export default function AddItem({ onAdd, selectedLocation, template, onTemplateS
       unit: unit || "piece",
       reorderPoint: reorderPoint ? parseInt(reorderPoint) : undefined,
       variant: variant || undefined,
+      aisle: aisle || undefined,
+      shelf: shelf || undefined,
+      itemStatus: "active",
+      status: "active",
     });
 
     setName("");
@@ -123,6 +129,8 @@ export default function AddItem({ onAdd, selectedLocation, template, onTemplateS
     setUnit("piece");
     setReorderPoint("");
     setVariant("");
+    setAisle("");
+    setShelf("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -250,6 +258,36 @@ export default function AddItem({ onAdd, selectedLocation, template, onTemplateS
               }
             />
           </div>
+        </div>
+
+        <div>
+          <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Aisle</label>
+          <input
+            type="text"
+            placeholder="e.g., A1, B3"
+            value={aisle}
+            onChange={(e) => setAisle(e.target.value)}
+            className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+              theme === "light"
+                ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900 placeholder-gray-400"
+                : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white placeholder-slate-500"
+            }`}
+          />
+        </div>
+
+        <div>
+          <label className={`block text-sm font-medium mb-2 ${theme === "light" ? "text-gray-700" : "text-slate-300"}`}>Shelf</label>
+          <input
+            type="text"
+            placeholder="e.g., Top, Middle, Bottom"
+            value={shelf}
+            onChange={(e) => setShelf(e.target.value)}
+            className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+              theme === "light"
+                ? "bg-white border-gray-300 hover:border-emerald-500/50 focus:border-emerald-500 text-gray-900 placeholder-gray-400"
+                : "bg-slate-950 border-slate-700 hover:border-emerald-500/30 focus:border-emerald-500 text-white placeholder-slate-500"
+            }`}
+          />
         </div>
 
         <div className="lg:col-span-4">

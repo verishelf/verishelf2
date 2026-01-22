@@ -104,7 +104,10 @@ CREATE TABLE IF NOT EXISTS items (
   removed BOOLEAN DEFAULT FALSE,
   removed_at TIMESTAMPTZ,
   added_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  aisle TEXT,
+  shelf TEXT,
+  item_status TEXT DEFAULT 'active'
 );
 
 -- Create indexes for items table
@@ -112,6 +115,8 @@ CREATE INDEX IF NOT EXISTS idx_items_user_id ON items(user_id);
 CREATE INDEX IF NOT EXISTS idx_items_location ON items(user_id, location);
 CREATE INDEX IF NOT EXISTS idx_items_expiry_date ON items(user_id, expiry_date);
 CREATE INDEX IF NOT EXISTS idx_items_removed ON items(user_id, removed);
+CREATE INDEX IF NOT EXISTS idx_items_item_status ON items(user_id, item_status);
+CREATE INDEX IF NOT EXISTS idx_items_aisle_shelf ON items(user_id, aisle, shelf);
 
 -- Enable RLS for items table
 ALTER TABLE items ENABLE ROW LEVEL SECURITY;
