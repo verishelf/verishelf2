@@ -26,6 +26,7 @@ import { printLabel } from "../utils/print";
 import StoreManager from "../components/StoreManager";
 import { getStores } from "../utils/stores";
 import { generatePDFReport } from "../utils/pdf";
+import { generateDailySummary, sendDailySummaryEmail, exportDailySummaryPDF, exportDailySummaryCSV } from "../utils/dailySummary";
 import QRCodeGenerator from "../components/QRCodeGenerator";
 import ExpiryCalendar from "../components/ExpiryCalendar";
 import ProductHistoryTimeline from "../components/ProductHistoryTimeline";
@@ -45,6 +46,7 @@ import { getTimezones } from "../utils/timezone";
 import { initSupabase, checkAuth, getCurrentUserProfile, getUserSubscription, loadItems, saveItem, deleteItem as deleteItemFromSupabase, logout, getCurrentUserWithRole, getActiveInspectorLink, loadItemsForOwnerWithScope, logInspectorEvent, loadStoresForUser, saveStoresForUser } from "../utils/supabase";
 import { computeAccountRiskScore } from "../utils/riskScore";
 import InspectorBanner from "../components/InspectorBanner";
+import ApiKeyManager from "../components/ApiKeyManager";
 
 export default function DashboardEnhanced() {
   const [user, setUser] = useState(null);
@@ -504,6 +506,39 @@ export default function DashboardEnhanced() {
     setEditingItem(null);
   };
 
+  const updateItemStatus = async (id, newStatus) => {
+    if (isInspector) {
+      alert("Read-only inspector access – changes are disabled.");
+      return;
+    }
+    if (!user || !user.id) return;
+
+    const item = items.find((i) => i.id === id);
+    if (!item) return;
+
+    const updatedItem = {
+      ...item,
+      itemStatus: newStatus,
+      status: newStatus, // Keep both for compatibility
+      removed: newStatus === "removed", // Update removed flag if status is removed
+      removedAt: newStatus === "removed" ? new Date().toISOString() : item.removedAt,
+    };
+
+    // Save to Supabase
+    if (user.id) {
+      await saveItem(user.id, updatedItem);
+    }
+
+    setItems(items.map((i) => (i.id === id ? updatedItem : i)));
+    addHistoryEntry("edited", id, item.name, { changes: `Status changed to ${newStatus}` });
+    createAuditLog("status_changed", id, item.name, {
+      location: item.location,
+      oldStatus: item.itemStatus || "active",
+      newStatus: newStatus,
+      notes: `Item status updated to ${newStatus}`,
+    });
+  };
+
   const removeItem = async (id) => {
     if (isInspector) {
       alert("Read-only inspector access – changes are disabled.");
@@ -621,7 +656,63 @@ export default function DashboardEnhanced() {
 
   const handleExportPDF = (reportType = "full") => {
     const activeItems = items.filter((i) => !i.removed);
-    generatePDFReport(activeItems, reportType);
+    if (reportType === "summary") {
+      exportDailySummaryPDF(items, settings);
+    } else {
+      generatePDFReport(activeItems, reportType);
+    }
+  };
+
+  const handleDailySummary = async () => {
+    const summary = generateDailySummary(items, settings);
+    
+    // Show summary in a modal or alert
+    const summaryText = `
+Daily Summary - ${new Date(summary.date).toLocaleDateString()}
+
+Key Metrics:
+- Total Items: ${summary.metrics.totalItems}
+- Expired: ${summary.metrics.expired}
+- Expiring Soon: ${summary.metrics.expiringSoon}
+- Items Handled Today: ${summary.metrics.itemsHandledToday}
+- Total Value: $${summary.metrics.totalValue}
+- Expired Value: $${summary.metrics.expiredValue}
+
+Compliance Status:
+- Risk Level: ${summary.compliance.riskLevel}
+- Compliance Rate: ${summary.compliance.complianceRate}%
+
+Outstanding Issues: ${summary.outstandingIssues.length}
+${summary.outstandingIssues.slice(0, 5).map(issue => 
+  `- ${issue.item} (${issue.location}): ${issue.type === "expired" ? `Expired ${issue.daysOverdue} days ago` : `Expires in ${issue.daysUntil} days`}`
+).join("\n")}
+${summary.outstandingIssues.length > 5 ? `... and ${summary.outstandingIssues.length - 5} more` : ""}
+    `;
+
+    const action = window.confirm(
+      summaryText + "\n\n" +
+      "Choose an action:\n" +
+      "OK = Send Email Summary\n" +
+      "Cancel = Export as PDF/CSV"
+    );
+
+    if (action) {
+      // Send email
+      const result = await sendDailySummaryEmail(items, settings, user?.email);
+      if (result.success) {
+        alert("Daily summary email sent successfully!");
+      } else {
+        alert(`Failed to send email: ${result.error}\n\nYou can export the summary as PDF or CSV instead.`);
+      }
+    } else {
+      // Export options
+      const exportChoice = window.confirm("Export as PDF? (OK = PDF, Cancel = CSV)");
+      if (exportChoice) {
+        exportDailySummaryPDF(items, settings);
+      } else {
+        exportDailySummaryCSV(items, settings);
+      }
+    }
   };
 
   const handleSaveSearch = () => {
@@ -802,7 +893,9 @@ export default function DashboardEnhanced() {
         item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.barcode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.supplier?.toLowerCase().includes(searchQuery.toLowerCase());
+        item.supplier?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.aisle?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.shelf?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesLocation =
         selectedLocation === "All Locations" || item.location === selectedLocation;
       const matchesStatus =
@@ -1012,6 +1105,12 @@ export default function DashboardEnhanced() {
                       className={dropdownItemClass}
                     >
                       Export Expiring (PDF)
+                    </button>
+                    <button
+                      onClick={handleDailySummary}
+                      className={dropdownItemClass}
+                    >
+                      Daily Summary
                     </button>
                   </div>
                 </div>
@@ -1674,6 +1773,7 @@ export default function DashboardEnhanced() {
             onDuplicate={duplicateItem}
             onShowQR={(item) => setShowQRCode(item)}
             onShowHistory={(item) => setShowHistory(item)}
+            onUpdateStatus={updateItemStatus}
             selectedItems={selectedItems}
             onSelectionChange={setSelectedItems}
             isInspector={isInspector}
@@ -1701,6 +1801,8 @@ export default function DashboardEnhanced() {
       {showSettings && (
         <SettingsModal
           settings={settings}
+          user={user}
+          subscription={subscription}
           onClose={() => setShowSettings(false)}
           onSave={(newSettings) => {
             setSettings(newSettings);
@@ -1897,7 +1999,7 @@ export default function DashboardEnhanced() {
 }
 
 // Settings Modal Component
-function SettingsModal({ settings, onClose, onSave }) {
+function SettingsModal({ settings, user, subscription, onClose, onSave }) {
   const [localSettings, setLocalSettings] = useState(settings);
   const [activeTab, setActiveTab] = useState("general");
 
@@ -1909,6 +2011,7 @@ function SettingsModal({ settings, onClose, onSave }) {
     { id: "general", label: "General" },
     { id: "notifications", label: "Notifications" },
     { id: "appearance", label: "Appearance" },
+    { id: "api", label: "API Access" },
     { id: "advanced", label: "Advanced" },
   ];
 
@@ -2104,6 +2207,11 @@ function SettingsModal({ settings, onClose, onSave }) {
                 </select>
               </div>
             </>
+          )}
+
+          {/* API Access Tab */}
+          {activeTab === "api" && (
+            <ApiKeyManager user={user} subscription={subscription} />
           )}
 
           {/* Advanced Tab */}

@@ -14,6 +14,7 @@ export default function InventoryTable({
   onDuplicate,
   onShowQR,
   onShowHistory,
+  onUpdateStatus,
   selectedItems = [],
   onSelectionChange,
   isInspector = false,
@@ -368,6 +369,28 @@ export default function InventoryTable({
                     )}
                     {!isInspector && (
                       <>
+                        {onUpdateStatus && item.itemStatus === 'active' && (
+                          <>
+                            <button
+                              onClick={() => onUpdateStatus(item.id, 'discounted')}
+                              className="p-1.5 sm:p-1.5 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 rounded transition-all duration-200 hover:scale-105 flex-shrink-0"
+                              title="Mark as Discounted"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18V11a2 2 0 01-2 2H5a2 2 0 01-2-2V4z"/>
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => onUpdateStatus(item.id, 're-merchandised')}
+                              className="p-1.5 sm:p-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded transition-all duration-200 hover:scale-105 flex-shrink-0"
+                              title="Mark as Re-merchandised"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                              </svg>
+                            </button>
+                          </>
+                        )}
                         <RemoveButton removed={item.removed} onRemove={() => onRemove(item.id)} />
                         <button
                           onClick={() => onDelete(item.id)}

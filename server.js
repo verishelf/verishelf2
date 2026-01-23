@@ -6,6 +6,7 @@ import Stripe from 'stripe';
 import cors from 'cors';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -454,6 +455,845 @@ app.get('/', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// ============================================
+// REST API v1 - Enterprise API Access
+// ============================================
+
+// API Key authentication middleware
+async function authenticateAPIKey(req, res, next) {
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ 
+      error: 'Unauthorized',
+      message: 'API key required. Include in Authorization header as: Bearer YOUR_API_KEY'
+    });
+  }
+
+  const apiKey = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+  try {
+    // Check if API key exists in database
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, email, name, company, api_key_enabled')
+      .eq('api_key', apiKey)
+      .single();
+
+    if (error || !user || !user.api_key_enabled) {
+      return res.status(401).json({ 
+        error: 'Unauthorized',
+        message: 'Invalid or disabled API key'
+      });
+    }
+
+    // Check if user has Enterprise plan
+    const { data: subscription } = await supabase
+      .from('subscriptions')
+      .select('plan, status')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .single();
+
+    if (!subscription || subscription.plan !== 'Enterprise') {
+      return res.status(403).json({ 
+        error: 'Forbidden',
+        message: 'API access requires Enterprise plan'
+      });
+    }
+
+    // Update last used timestamp
+    await supabase
+      .from('users')
+      .update({ api_key_last_used_at: new Date().toISOString() })
+      .eq('id', user.id);
+
+    // Attach user to request
+    req.user = user;
+    req.userId = user.id;
+    next();
+  } catch (error) {
+    console.error('API authentication error:', error);
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      message: 'Authentication failed'
+    });
+  }
+}
+
+// Rate limiting (simple in-memory store - use Redis in production)
+const rateLimitStore = new Map();
+const RATE_LIMITS = {
+  professional: { requests: 1000, window: 3600000 }, // 1000 per hour
+  enterprise: { requests: 10000, window: 3600000 }, // 10000 per hour
+};
+
+function rateLimitMiddleware(req, res, next) {
+  const userId = req.userId;
+  const now = Date.now();
+
+  // Get user's subscription plan
+  supabase
+    .from('subscriptions')
+    .select('plan')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .single()
+    .then(({ data: subscription }) => {
+      const plan = subscription?.plan?.toLowerCase() || 'professional';
+      const limit = RATE_LIMITS[plan] || RATE_LIMITS.professional;
+
+      if (!rateLimitStore.has(userId)) {
+        rateLimitStore.set(userId, { count: 0, resetTime: now + limit.window });
+      }
+
+      const userLimit = rateLimitStore.get(userId);
+
+      // Reset if window expired
+      if (now > userLimit.resetTime) {
+        userLimit.count = 0;
+        userLimit.resetTime = now + limit.window;
+      }
+
+      // Check limit
+      if (userLimit.count >= limit.requests) {
+        return res.status(429).json({
+          error: 'Rate limit exceeded',
+          message: `Rate limit of ${limit.requests} requests per hour exceeded. Please try again later.`,
+          retryAfter: Math.ceil((userLimit.resetTime - now) / 1000)
+        });
+      }
+
+      // Increment counter
+      userLimit.count++;
+      
+      // Add rate limit headers
+      res.setHeader('X-RateLimit-Limit', limit.requests);
+      res.setHeader('X-RateLimit-Remaining', Math.max(0, limit.requests - userLimit.count));
+      res.setHeader('X-RateLimit-Reset', Math.ceil(userLimit.resetTime / 1000));
+      
+      next();
+    })
+    .catch(() => next()); // Continue on error
+}
+
+// API Routes
+const apiRouter = express.Router();
+
+// Apply authentication and rate limiting to all API routes
+apiRouter.use(authenticateAPIKey);
+apiRouter.use(rateLimitMiddleware);
+
+// GET /api/v1/items - Get all items (with pagination, filtering, sorting)
+apiRouter.get('/items', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = Math.min(parseInt(req.query.limit) || 50, 100); // Max 100 per page
+    const offset = (page - 1) * limit;
+    
+    // Filtering
+    const location = req.query.location;
+    const category = req.query.category;
+    const status = req.query.status; // active, removed, discounted, re-merchandised
+    const search = req.query.search; // Search in name, barcode
+    
+    // Sorting
+    const sortBy = req.query.sort_by || 'added_at';
+    const sortOrder = req.query.sort_order === 'asc' ? 'asc' : 'desc';
+    
+    // Build query
+    let query = supabase
+      .from('items')
+      .select('*', { count: 'exact' })
+      .eq('user_id', req.userId);
+    
+    // Apply filters
+    if (location) query = query.eq('location', location);
+    if (category) query = query.eq('category', category);
+    if (status) {
+      if (status === 'removed') {
+        query = query.eq('removed', true);
+      } else {
+        query = query.eq('item_status', status).eq('removed', false);
+      }
+    } else {
+      // Default: only active items unless status specified
+      query = query.eq('removed', false);
+    }
+    
+    // Search filter
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,barcode.ilike.%${search}%`);
+    }
+    
+    // Apply sorting
+    const validSortFields = ['name', 'expiry_date', 'added_at', 'quantity', 'cost', 'location'];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : 'added_at';
+    query = query.order(sortField, { ascending: sortOrder === 'asc' });
+    
+    // Apply pagination
+    query = query.range(offset, offset + limit - 1);
+    
+    const { data: items, error, count } = await query;
+
+    if (error) {
+      return res.status(500).json({ error: 'Database error', message: error.message });
+    }
+
+    // Transform to API format
+    const formattedItems = items.map(item => ({
+      id: item.id,
+      name: item.name,
+      barcode: item.barcode,
+      location: item.location,
+      aisle: item.aisle,
+      shelf: item.shelf,
+      expiry_date: item.expiry_date,
+      quantity: item.quantity,
+      category: item.category,
+      price: item.cost,
+      status: item.item_status || (item.removed ? 'removed' : 'active'),
+      removed: item.removed,
+      added_at: item.added_at,
+      removed_at: item.removed_at,
+    }));
+
+    res.json({
+      data: formattedItems,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        total_pages: Math.ceil((count || 0) / limit),
+        has_next: offset + limit < (count || 0),
+        has_prev: page > 1
+      },
+      meta: {
+        filters: {
+          location: location || null,
+          category: category || null,
+          status: status || 'active',
+          search: search || null,
+        },
+        sort: {
+          by: sortBy,
+          order: sortOrder,
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching items:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// GET /api/v1/items/expiring - Get expiring items
+apiRouter.get('/items/expiring', async (req, res) => {
+  try {
+    const days = parseInt(req.query.days) || 7;
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() + days);
+
+    const { data: items, error } = await supabase
+      .from('items')
+      .select('*')
+      .eq('user_id', req.userId)
+      .eq('removed', false)
+      .lte('expiry_date', cutoffDate.toISOString().split('T')[0])
+      .gte('expiry_date', new Date().toISOString().split('T')[0])
+      .order('expiry_date', { ascending: true });
+
+    if (error) {
+      return res.status(500).json({ error: 'Database error', message: error.message });
+    }
+
+    const formattedItems = items.map(item => ({
+      id: item.id,
+      name: item.name,
+      barcode: item.barcode,
+      location: item.location,
+      aisle: item.aisle,
+      shelf: item.shelf,
+      expiry_date: item.expiry_date,
+      quantity: item.quantity,
+      category: item.category,
+      price: item.cost,
+      days_until_expiry: Math.ceil((new Date(item.expiry_date) - new Date()) / (1000 * 60 * 60 * 24)),
+    }));
+
+    res.json({
+      data: formattedItems,
+      count: formattedItems.length,
+      days: days
+    });
+  } catch (error) {
+    console.error('Error fetching expiring items:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// GET /api/v1/items/:id - Get single item
+apiRouter.get('/items/:id', async (req, res) => {
+  try {
+    const { data: item, error } = await supabase
+      .from('items')
+      .select('*')
+      .eq('id', req.params.id)
+      .eq('user_id', req.userId)
+      .single();
+
+    if (error || !item) {
+      return res.status(404).json({ error: 'Not found', message: 'Item not found' });
+    }
+
+    res.json({
+      id: item.id,
+      name: item.name,
+      barcode: item.barcode,
+      location: item.location,
+      aisle: item.aisle,
+      shelf: item.shelf,
+      expiry_date: item.expiry_date,
+      quantity: item.quantity,
+      category: item.category,
+      price: item.cost,
+      status: item.item_status || (item.removed ? 'removed' : 'active'),
+      removed: item.removed,
+      added_at: item.added_at,
+      removed_at: item.removed_at,
+    });
+  } catch (error) {
+    console.error('Error fetching item:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// POST /api/v1/items - Create item (with validation)
+apiRouter.post('/items', async (req, res) => {
+  try {
+    const { name, barcode, location, aisle, shelf, expiry_date, quantity, category, price } = req.body;
+
+    // Validation
+    if (!name || name.trim().length === 0) {
+      return res.status(400).json({ 
+        error: 'Validation error', 
+        message: 'name is required and cannot be empty',
+        field: 'name'
+      });
+    }
+
+    if (quantity !== undefined && (isNaN(quantity) || quantity < 0)) {
+      return res.status(400).json({ 
+        error: 'Validation error', 
+        message: 'quantity must be a positive number',
+        field: 'quantity'
+      });
+    }
+
+    if (price !== undefined && (isNaN(price) || price < 0)) {
+      return res.status(400).json({ 
+        error: 'Validation error', 
+        message: 'price must be a positive number',
+        field: 'price'
+      });
+    }
+
+    if (expiry_date && isNaN(Date.parse(expiry_date))) {
+      return res.status(400).json({ 
+        error: 'Validation error', 
+        message: 'expiry_date must be a valid date (YYYY-MM-DD)',
+        field: 'expiry_date'
+      });
+    }
+
+    const { data: item, error } = await supabase
+      .from('items')
+      .insert({
+        user_id: req.userId,
+        name: name.trim(),
+        barcode: barcode ? barcode.trim() : null,
+        location: location ? location.trim() : null,
+        aisle: aisle ? aisle.trim() : null,
+        shelf: shelf ? shelf.trim() : null,
+        expiry_date: expiry_date || null,
+        quantity: quantity || 1,
+        category: category ? category.trim() : null,
+        cost: price || null,
+        item_status: 'active',
+        removed: false,
+        added_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) {
+      // Handle unique constraint violations
+      if (error.code === '23505') {
+        return res.status(409).json({ 
+          error: 'Conflict', 
+          message: 'Item with this barcode already exists',
+          field: 'barcode'
+        });
+      }
+      return res.status(500).json({ error: 'Database error', message: error.message });
+    }
+
+    res.status(201).json({
+      data: {
+        id: item.id,
+        name: item.name,
+        barcode: item.barcode,
+        location: item.location,
+        aisle: item.aisle,
+        shelf: item.shelf,
+        expiry_date: item.expiry_date,
+        quantity: item.quantity,
+        category: item.category,
+        price: item.cost,
+        status: item.item_status,
+      }
+    });
+  } catch (error) {
+    console.error('Error creating item:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// PUT /api/v1/items/:id - Update item
+apiRouter.put('/items/:id', async (req, res) => {
+  try {
+    const { expiry_date, quantity, location, aisle, shelf, price, status } = req.body;
+
+    // Check item exists and belongs to user
+    const { data: existingItem } = await supabase
+      .from('items')
+      .select('id')
+      .eq('id', req.params.id)
+      .eq('user_id', req.userId)
+      .single();
+
+    if (!existingItem) {
+      return res.status(404).json({ error: 'Not found', message: 'Item not found' });
+    }
+
+    const updateData = {};
+    if (expiry_date !== undefined) updateData.expiry_date = expiry_date;
+    if (quantity !== undefined) updateData.quantity = quantity;
+    if (location !== undefined) updateData.location = location;
+    if (aisle !== undefined) updateData.aisle = aisle;
+    if (shelf !== undefined) updateData.shelf = shelf;
+    if (price !== undefined) updateData.cost = price;
+    if (status !== undefined) {
+      updateData.item_status = status;
+      updateData.removed = status === 'removed';
+      if (status === 'removed') {
+        updateData.removed_at = new Date().toISOString();
+      }
+    }
+
+    const { data: item, error } = await supabase
+      .from('items')
+      .update(updateData)
+      .eq('id', req.params.id)
+      .eq('user_id', req.userId)
+      .select()
+      .single();
+
+    if (error) {
+      return res.status(500).json({ error: 'Database error', message: error.message });
+    }
+
+    res.json({
+      data: {
+        id: item.id,
+        name: item.name,
+        barcode: item.barcode,
+        location: item.location,
+        aisle: item.aisle,
+        shelf: item.shelf,
+        expiry_date: item.expiry_date,
+        quantity: item.quantity,
+        category: item.category,
+        price: item.cost,
+        status: item.item_status,
+      }
+    });
+  } catch (error) {
+    console.error('Error updating item:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// DELETE /api/v1/items/:id - Delete item
+apiRouter.delete('/items/:id', async (req, res) => {
+  try {
+    const { error } = await supabase
+      .from('items')
+      .delete()
+      .eq('id', req.params.id)
+      .eq('user_id', req.userId);
+
+    if (error) {
+      return res.status(500).json({ error: 'Database error', message: error.message });
+    }
+
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting item:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// GET /api/v1/locations - Get all locations
+apiRouter.get('/locations', async (req, res) => {
+  try {
+    const { data: stores, error } = await supabase
+      .from('stores')
+      .select('*')
+      .eq('user_id', req.userId)
+      .order('name', { ascending: true });
+
+    if (error) {
+      return res.status(500).json({ error: 'Database error', message: error.message });
+    }
+
+    res.json({
+      data: stores.map(store => ({
+        id: store.id,
+        name: store.name,
+        created_at: store.created_at,
+      })),
+      count: stores.length
+    });
+  } catch (error) {
+    console.error('Error fetching locations:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// API Key Management Endpoints (require Supabase auth session)
+// POST /api/generate-api-key - Generate API key for Enterprise users
+app.post('/api/generate-api-key', async (req, res) => {
+  try {
+    // Get user from Supabase auth token
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'Authentication required' });
+    }
+
+    const token = authHeader.substring(7);
+    
+    // Verify token with Supabase
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'Invalid authentication token' });
+    }
+
+    const userId = user.id;
+
+    // Check if user has Enterprise plan
+    const { data: subscription } = await supabase
+      .from('subscriptions')
+      .select('plan, status')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .single();
+
+    if (!subscription || subscription.plan !== 'Enterprise') {
+      return res.status(403).json({ 
+        error: 'Forbidden',
+        message: 'API key generation requires Enterprise plan'
+      });
+    }
+
+    // Generate API key
+    const apiKey = `vs_live_${crypto.randomBytes(16).toString('hex')}`;
+
+    // Save to database
+    const { data: userData, error } = await supabase
+      .from('users')
+      .update({
+        api_key: apiKey,
+        api_key_enabled: true,
+        api_key_created_at: new Date().toISOString(),
+      })
+      .eq('id', userId)
+      .select('id, email')
+      .single();
+
+    if (error) {
+      return res.status(500).json({ error: 'Database error', message: error.message });
+    }
+
+    res.json({
+      api_key: apiKey,
+      created_at: new Date().toISOString(),
+      message: 'API key generated successfully. Store this key securely - it will not be shown again.',
+      warning: 'Keep your API key secret. If compromised, regenerate it immediately.'
+    });
+  } catch (error) {
+    console.error('Error generating API key:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// GET /api/api-key-status - Get API key status (requires auth)
+app.get('/api/api-key-status', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'Authentication required' });
+    }
+
+    const token = authHeader.substring(7);
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'Invalid authentication token' });
+    }
+
+    const { data: userData, error } = await supabase
+      .from('users')
+      .select('api_key_enabled, api_key_created_at, api_key_last_used_at')
+      .eq('id', user.id)
+      .single();
+
+    if (error) {
+      return res.status(500).json({ error: 'Database error', message: error.message });
+    }
+
+    res.json({
+      has_api_key: !!userData.api_key_enabled,
+      enabled: userData.api_key_enabled || false,
+      created_at: userData.api_key_created_at,
+      last_used_at: userData.api_key_last_used_at,
+      // Don't return the actual key for security
+    });
+  } catch (error) {
+    console.error('Error getting API key status:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// POST /api/regenerate-api-key - Regenerate API key (requires auth)
+app.post('/api/regenerate-api-key', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'Authentication required' });
+    }
+
+    const token = authHeader.substring(7);
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'Invalid authentication token' });
+    }
+
+    const userId = user.id;
+
+    // Check Enterprise plan
+    const { data: subscription } = await supabase
+      .from('subscriptions')
+      .select('plan, status')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .single();
+
+    if (!subscription || subscription.plan !== 'Enterprise') {
+      return res.status(403).json({ 
+        error: 'Forbidden',
+        message: 'API key regeneration requires Enterprise plan'
+      });
+    }
+
+    // Generate new API key
+    const apiKey = `vs_live_${crypto.randomBytes(16).toString('hex')}`;
+
+    // Update in database
+    const { error } = await supabase
+      .from('users')
+      .update({
+        api_key: apiKey,
+        api_key_enabled: true,
+        api_key_created_at: new Date().toISOString(),
+        api_key_last_used_at: null, // Reset last used
+      })
+      .eq('id', userId);
+
+    if (error) {
+      return res.status(500).json({ error: 'Database error', message: error.message });
+    }
+
+    res.json({
+      api_key: apiKey,
+      created_at: new Date().toISOString(),
+      message: 'API key regenerated successfully. Your old key is now invalid.',
+      warning: 'Update all integrations with the new key immediately.'
+    });
+  } catch (error) {
+    console.error('Error regenerating API key:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// POST /api/disable-api-key - Disable API key (requires auth)
+app.post('/api/disable-api-key', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'Authentication required' });
+    }
+
+    const token = authHeader.substring(7);
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'Invalid authentication token' });
+    }
+
+    const { error } = await supabase
+      .from('users')
+      .update({
+        api_key_enabled: false,
+      })
+      .eq('id', user.id);
+
+    if (error) {
+      return res.status(500).json({ error: 'Database error', message: error.message });
+    }
+
+    res.json({
+      message: 'API key disabled successfully. All API requests will now be rejected.'
+    });
+  } catch (error) {
+    console.error('Error disabling API key:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// POST /api/v1/items/bulk - Bulk create items
+apiRouter.post('/items/bulk', async (req, res) => {
+  try {
+    const { items } = req.body;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ 
+        error: 'Validation error', 
+        message: 'items must be a non-empty array'
+      });
+    }
+
+    if (items.length > 100) {
+      return res.status(400).json({ 
+        error: 'Validation error', 
+        message: 'Maximum 100 items per bulk operation'
+      });
+    }
+
+    // Validate each item
+    const validatedItems = items.map((item, index) => {
+      if (!item.name || item.name.trim().length === 0) {
+        throw new Error(`Item at index ${index}: name is required`);
+      }
+      return {
+        user_id: req.userId,
+        name: item.name.trim(),
+        barcode: item.barcode ? item.barcode.trim() : null,
+        location: item.location ? item.location.trim() : null,
+        aisle: item.aisle ? item.aisle.trim() : null,
+        shelf: item.shelf ? item.shelf.trim() : null,
+        expiry_date: item.expiry_date || null,
+        quantity: item.quantity || 1,
+        category: item.category ? item.category.trim() : null,
+        cost: item.price || null,
+        item_status: 'active',
+        removed: false,
+        added_at: new Date().toISOString(),
+      };
+    });
+
+    const { data: createdItems, error } = await supabase
+      .from('items')
+      .insert(validatedItems)
+      .select();
+
+    if (error) {
+      return res.status(500).json({ error: 'Database error', message: error.message });
+    }
+
+    res.status(201).json({
+      data: createdItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        barcode: item.barcode,
+        location: item.location,
+        aisle: item.aisle,
+        shelf: item.shelf,
+        expiry_date: item.expiry_date,
+        quantity: item.quantity,
+        category: item.category,
+        price: item.cost,
+        status: item.item_status,
+      })),
+      count: createdItems.length
+    });
+  } catch (error) {
+    console.error('Error bulk creating items:', error);
+    res.status(400).json({ error: 'Validation error', message: error.message });
+  }
+});
+
+// GET /api/v1/stats - Get account statistics
+apiRouter.get('/stats', async (req, res) => {
+  try {
+    const { data: items, error } = await supabase
+      .from('items')
+      .select('*')
+      .eq('user_id', req.userId);
+
+    if (error) {
+      return res.status(500).json({ error: 'Database error', message: error.message });
+    }
+
+    const activeItems = items.filter(i => !i.removed);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const expired = activeItems.filter(i => {
+      if (!i.expiry_date) return false;
+      return new Date(i.expiry_date) < today;
+    });
+
+    const expiringSoon = activeItems.filter(i => {
+      if (!i.expiry_date) return false;
+      const expiry = new Date(i.expiry_date);
+      const daysUntil = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+      return daysUntil > 0 && daysUntil <= 7;
+    });
+
+    const totalValue = activeItems.reduce((sum, item) => sum + (item.cost || 0) * item.quantity, 0);
+    const expiredValue = expired.reduce((sum, item) => sum + (item.cost || 0) * item.quantity, 0);
+
+    res.json({
+      total_items: activeItems.length,
+      expired_count: expired.length,
+      expiring_soon_count: expiringSoon.length,
+      total_value: totalValue,
+      expired_value: expiredValue,
+      locations: [...new Set(activeItems.map(i => i.location).filter(Boolean))].length,
+      categories: [...new Set(activeItems.map(i => i.category).filter(Boolean))].length,
+    });
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// Mount API router
+app.use('/api/v1', apiRouter);
 
 // Start server
 app.listen(PORT, () => {

@@ -126,13 +126,51 @@
             </p>
             <pre><code>Authorization: Bearer YOUR_API_KEY</code></pre>
             <p class="text-slate-400 text-sm mt-4">
-              You can generate API keys from your dashboard settings after signing up.
+              <strong>Requirements:</strong> API access requires an Enterprise plan subscription. 
+              Generate API keys using the <code>POST /api/generate-api-key</code> endpoint or from your dashboard settings.
             </p>
           </section>
           
           <section>
             <h2 class="text-2xl font-bold text-white mb-4">Base URL</h2>
-            <pre><code>https://api.verishelf.com/v1</code></pre>
+            <pre><code>https://api.verishelf.com/api/v1</code></pre>
+            <p class="text-slate-400 text-sm mt-4">
+              <strong>Note:</strong> If your API is deployed to a different domain (e.g., Heroku, Railway), 
+              use that domain instead. The base URL format is: <code>https://YOUR_API_DOMAIN/api/v1</code>
+            </p>
+          </section>
+          
+          <section>
+            <h2 class="text-2xl font-bold text-white mb-4">Getting Started</h2>
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+              <h3 class="text-xl font-bold text-white mb-4">Step 1: Run Database Migration</h3>
+              <p class="text-slate-300 mb-4">
+                First, run the API keys migration in your Supabase SQL Editor:
+              </p>
+              <pre><code>-- Run supabase/api_keys_migration.sql in Supabase SQL Editor</code></pre>
+            </div>
+            
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800 mt-6">
+              <h3 class="text-xl font-bold text-white mb-4">Step 2: Generate API Key</h3>
+              <p class="text-slate-300 mb-4">
+                Generate an API key using the API endpoint (requires Enterprise plan):
+              </p>
+              <pre><code>POST https://YOUR_API_DOMAIN/api/generate-api-key
+Content-Type: application/json
+
+{
+  "userId": "your-user-uuid"
+}</code></pre>
+              <p class="text-slate-400 text-sm mt-4">
+                <strong>Important:</strong> Store your API key securely. It will only be shown once.
+              </p>
+            </div>
+            
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800 mt-6">
+              <h3 class="text-xl font-bold text-white mb-4">Step 3: Make Your First API Call</h3>
+              <pre><code>curl -X GET https://YOUR_API_DOMAIN/api/v1/items \
+  -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
+            </div>
           </section>
           
           <section>
@@ -142,15 +180,34 @@
               <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
                 <h3 class="text-xl font-bold text-white mb-3">Get Items</h3>
                 <p class="text-slate-300 mb-4">Retrieve all items for your account.</p>
-                <pre><code>GET /items
+                <pre><code>GET /api/v1/items
 Authorization: Bearer YOUR_API_KEY</code></pre>
                 <p class="text-slate-400 text-sm mt-4">Returns a list of all items with expiry dates, locations, and status.</p>
+                <p class="text-slate-400 text-sm mt-2"><strong>Response:</strong></p>
+                <pre class="mt-2"><code>{
+  "data": [
+    {
+      "id": 123,
+      "name": "Product Name",
+      "barcode": "1234567890",
+      "location": "Store #001",
+      "aisle": "A3",
+      "shelf": "S2",
+      "expiry_date": "2025-12-31",
+      "quantity": 1,
+      "category": "Food",
+      "price": 9.99,
+      "status": "active"
+    }
+  ],
+  "count": 1
+}</code></pre>
               </div>
               
               <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
                 <h3 class="text-xl font-bold text-white mb-3">Create Item</h3>
                 <p class="text-slate-300 mb-4">Add a new item to your inventory.</p>
-                <pre><code>POST /items
+                <pre><code>POST /api/v1/items
 Authorization: Bearer YOUR_API_KEY
 Content-Type: application/json
 
@@ -158,39 +215,113 @@ Content-Type: application/json
   "name": "Product Name",
   "barcode": "1234567890",
   "location": "Store #001",
+  "aisle": "A3",
+  "shelf": "S2",
   "expiry_date": "2025-12-31",
   "quantity": 1,
-  "category": "Food"
+  "category": "Food",
+  "price": 9.99
 }</code></pre>
+                <p class="text-slate-400 text-sm mt-4"><strong>Required:</strong> <code>name</code></p>
+                <p class="text-slate-400 text-sm"><strong>Optional:</strong> barcode, location, aisle, shelf, expiry_date, quantity, category, price</p>
               </div>
               
               <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
                 <h3 class="text-xl font-bold text-white mb-3">Update Item</h3>
                 <p class="text-slate-300 mb-4">Update an existing item.</p>
-                <pre><code>PUT /items/{item_id}
+                <pre><code>PUT /api/v1/items/{item_id}
 Authorization: Bearer YOUR_API_KEY
 Content-Type: application/json
 
 {
   "expiry_date": "2025-12-31",
-  "quantity": 2
+  "quantity": 2,
+  "status": "discounted"
 }</code></pre>
+                <p class="text-slate-400 text-sm mt-4"><strong>Status values:</strong> <code>active</code>, <code>removed</code>, <code>discounted</code>, <code>re-merchandised</code></p>
+              </div>
+              
+              <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+                <h3 class="text-xl font-bold text-white mb-3">Get Single Item</h3>
+                <p class="text-slate-300 mb-4">Retrieve a specific item by ID.</p>
+                <pre><code>GET /api/v1/items/{item_id}
+Authorization: Bearer YOUR_API_KEY</code></pre>
+              </div>
+              
+              <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+                <h3 class="text-xl font-bold text-white mb-3">Delete Item</h3>
+                <p class="text-slate-300 mb-4">Permanently delete an item.</p>
+                <pre><code>DELETE /api/v1/items/{item_id}
+Authorization: Bearer YOUR_API_KEY</code></pre>
+                <p class="text-slate-400 text-sm mt-4">Returns 204 No Content on success.</p>
               </div>
               
               <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
                 <h3 class="text-xl font-bold text-white mb-3">Get Locations</h3>
                 <p class="text-slate-300 mb-4">Retrieve all locations for your account.</p>
-                <pre><code>GET /locations
+                <pre><code>GET /api/v1/locations
 Authorization: Bearer YOUR_API_KEY</code></pre>
               </div>
               
               <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
                 <h3 class="text-xl font-bold text-white mb-3">Get Expiring Items</h3>
                 <p class="text-slate-300 mb-4">Get items expiring within a specified timeframe.</p>
-                <pre><code>GET /items/expiring?days=7
+                <pre><code>GET /api/v1/items/expiring?days=7
 Authorization: Bearer YOUR_API_KEY</code></pre>
-                <p class="text-slate-400 text-sm mt-4">Returns items expiring within the next N days.</p>
+                <p class="text-slate-400 text-sm mt-4">Returns items expiring within the next N days (default: 7 days).</p>
               </div>
+              
+              <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+                <h3 class="text-xl font-bold text-white mb-3">Bulk Create Items</h3>
+                <p class="text-slate-300 mb-4">Create multiple items in a single request (up to 100 items).</p>
+                <pre><code>POST /api/v1/items/bulk
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "name": "Product 1",
+      "location": "Store #001",
+      "expiry_date": "2025-12-31"
+    },
+    {
+      "name": "Product 2",
+      "location": "Store #001",
+      "expiry_date": "2025-12-31"
+    }
+  ]
+}</code></pre>
+                <p class="text-slate-400 text-sm mt-4">Efficient for importing large batches of items from POS/ERP systems.</p>
+              </div>
+              
+              <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+                <h3 class="text-xl font-bold text-white mb-3">Get Account Statistics</h3>
+                <p class="text-slate-300 mb-4">Get summary statistics for your account.</p>
+                <pre><code>GET /api/v1/stats
+Authorization: Bearer YOUR_API_KEY</code></pre>
+                <p class="text-slate-400 text-sm mt-4">Returns total items, expired count, expiring soon count, total value, and location/category counts.</p>
+              </div>
+            </div>
+          </section>
+          
+          <section>
+            <h2 class="text-2xl font-bold text-white mb-4">Query Parameters & Filtering</h2>
+            <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+              <h3 class="text-xl font-bold text-white mb-3">GET /api/v1/items</h3>
+              <p class="text-slate-300 mb-4">The items endpoint supports advanced filtering, sorting, and pagination:</p>
+              <ul class="text-slate-300 space-y-2 text-sm mb-4">
+                <li><code>?page=1</code> - Page number (default: 1)</li>
+                <li><code>?limit=50</code> - Items per page (default: 50, max: 100)</li>
+                <li><code>?location=Store%20%23001</code> - Filter by location</li>
+                <li><code>?category=Food</code> - Filter by category</li>
+                <li><code>?status=active</code> - Filter by status (active, removed, discounted, re-merchandised)</li>
+                <li><code>?search=milk</code> - Search in name and barcode</li>
+                <li><code>?sort_by=expiry_date</code> - Sort field (name, expiry_date, added_at, quantity, cost, location)</li>
+                <li><code>?sort_order=asc</code> - Sort order (asc, desc)</li>
+              </ul>
+              <pre><code>GET /api/v1/items?page=1&limit=50&status=active&sort_by=expiry_date&sort_order=asc
+Authorization: Bearer YOUR_API_KEY</code></pre>
             </div>
           </section>
           
@@ -221,18 +352,111 @@ Authorization: Bearer YOUR_API_KEY</code></pre>
           </section>
           
           <section>
-            <h2 class="text-2xl font-bold text-white mb-4">SDKs & Libraries</h2>
+            <h2 class="text-2xl font-bold text-white mb-4">Code Examples</h2>
             <p class="text-slate-300 mb-4">
-              Official SDKs are available for popular languages:
+              Here are working examples for common languages:
             </p>
-            <div class="grid md:grid-cols-2 gap-4">
-              <div class="p-4 bg-slate-900 rounded-lg border border-slate-800">
-                <code>npm install @verishelf/sdk</code>
+            
+            <div class="space-y-6">
+              <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+                <h3 class="text-xl font-bold text-white mb-3">JavaScript/Node.js</h3>
+                <pre><code>const API_KEY = 'your-api-key-here';
+const BASE_URL = 'https://YOUR_API_DOMAIN/api/v1';
+
+// Get all items
+async function getItems() {
+  const response = await fetch(`${BASE_URL}/items`, {
+    headers: {
+      'Authorization': `Bearer ${API_KEY}`
+    }
+  });
+  const data = await response.json();
+  return data;
+}
+
+// Create item
+async function createItem(item) {
+  const response = await fetch(`${BASE_URL}/items`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(item)
+  });
+  return await response.json();
+}</code></pre>
               </div>
-              <div class="p-4 bg-slate-900 rounded-lg border border-slate-800">
-                <code>pip install verishelf</code>
+              
+              <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+                <h3 class="text-xl font-bold text-white mb-3">Python</h3>
+                <pre><code>import requests
+
+API_KEY = 'your-api-key-here'
+BASE_URL = 'https://YOUR_API_DOMAIN/api/v1'
+HEADERS = {
+    'Authorization': f'Bearer {API_KEY}',
+    'Content-Type': 'application/json'
+}
+
+# Get all items
+def get_items():
+    response = requests.get(f'{BASE_URL}/items', headers=HEADERS)
+    return response.json()
+
+# Create item
+def create_item(item_data):
+    response = requests.post(
+        f'{BASE_URL}/items',
+        headers=HEADERS,
+        json=item_data
+    )
+    return response.json()</code></pre>
+              </div>
+              
+              <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
+                <h3 class="text-xl font-bold text-white mb-3">cURL</h3>
+                <pre><code># Get all items
+curl -X GET https://YOUR_API_DOMAIN/api/v1/items \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Create item
+curl -X POST https://YOUR_API_DOMAIN/api/v1/items \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Product Name",
+    "location": "Store #001",
+    "expiry_date": "2025-12-31"
+  }'</code></pre>
               </div>
             </div>
+            
+            <div class="p-6 bg-gradient-to-br from-emerald-900/20 to-slate-950 rounded-xl border border-emerald-500/30 mt-6">
+              <h3 class="text-xl font-bold text-white mb-3">JavaScript SDK (Browser/Node.js)</h3>
+              <p class="text-slate-300 mb-4">
+                Download our simple JavaScript SDK for easy integration:
+              </p>
+              <pre><code>&lt;!-- Include in HTML --&gt;
+&lt;script src="verishelf-sdk.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const client = new VeriShelfClient('YOUR_API_KEY', 'https://YOUR_API_DOMAIN');
+  const items = await client.getItems();
+&lt;/script&gt;
+
+// Or in Node.js
+const VeriShelfClient = require('./verishelf-sdk.js');
+const client = new VeriShelfClient('YOUR_API_KEY', 'https://YOUR_API_DOMAIN');</code></pre>
+              <p class="text-slate-400 text-sm mt-4">
+                <a href="verishelf-sdk.js" download class="text-emerald-400 hover:text-emerald-300 underline">
+                  Download verishelf-sdk.js
+                </a>
+              </p>
+            </div>
+            
+            <p class="text-slate-400 text-sm mt-6">
+              <strong>Note:</strong> Official npm/pip packages are coming soon. For now, use the JavaScript SDK above or the REST API directly.
+            </p>
           </section>
           
           <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
