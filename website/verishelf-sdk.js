@@ -8,7 +8,7 @@
  */
 
 class VeriShelfClient {
-  constructor(apiKey, baseUrl = 'https://verishelf-e0b90033152c.herokuapp.com') {
+  constructor(apiKey, baseUrl = 'https://api.verishelf.com') {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl.replace(/\/$/, ''); // Remove trailing slash
     this.apiVersion = 'v1';

@@ -1587,8 +1587,6 @@ app.listen(PORT, () => {
   } else {
     console.log(`📊 Dashboard: Not built. Run "npm run build" to enable.`);
   }
-  console.log(`📡 API Base URL: http://localhost:${PORT}/api/v1`);
-  console.log(`📡 Production API: https://verishelf-e0b90033152c.herokuapp.com/api/v1`);
-  console.log(`📡 Health Check: http://localhost:${PORT}/api/health\n`);
+  console.log(`📡 API: http://localhost:${PORT}/api/health\n`);
 });
 

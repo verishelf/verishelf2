@@ -17,7 +17,7 @@ import VeriShelfAPI from '@/services/api';
 export default function LoginScreen() {
   const { login } = useAuth();
   const [apiKey, setApiKey] = useState('');
-  const [baseUrl, setBaseUrl] = useState('https://verishelf-e0b90033152c.herokuapp.com');
+  const [baseUrl, setBaseUrl] = useState('https://api.verishelf.com');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -103,7 +103,7 @@ export default function LoginScreen() {
               <TouchableOpacity
                 style={[styles.button, styles.skipButton]}
                 onPress={async () => {
-                  const defaultBaseUrl = baseUrl || 'https://verishelf-e0b90033152c.herokuapp.com';
+                  const defaultBaseUrl = baseUrl || 'http://localhost:3000';
                   const defaultApiKey = 'dev-bypass';
                   try {
                     await login(defaultApiKey, defaultBaseUrl);

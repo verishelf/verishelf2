@@ -32,12 +32,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setApiBaseUrl(storedBaseUrl);
         setIsAuthenticated(true);
       } else {
-        // Development mode: Auto-authenticate with production URL
+        // Development mode: Auto-authenticate with default localhost settings
         // This bypasses API key requirement for local development
         // @ts-ignore - __DEV__ is a React Native global
         const devMode = typeof __DEV__ !== 'undefined' ? __DEV__ : (process.env.NODE_ENV !== 'production');
         if (devMode) {
-          const defaultBaseUrl = 'https://verishelf-e0b90033152c.herokuapp.com';
+          const defaultBaseUrl = 'http://localhost:3000';
           const defaultApiKey = 'dev-bypass'; // Dummy key for dev mode
           setApiKey(defaultApiKey);
           setApiBaseUrl(defaultBaseUrl);

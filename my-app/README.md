@@ -20,8 +20,8 @@ React Native mobile app for VeriShelf retail compliance platform, built with Exp
 
 4. **Login:**
    - Open the app
-   - Enter API Base URL: `https://verishelf-e0b90033152c.herokuapp.com`
-   - Enter your API key (or use dashboard session token)
+   - Enter API Base URL (e.g., `http://localhost:3000` for local)
+   - Enter your API key
    - Click "Connect"
 
 ## Development Mode
@@ -34,14 +34,14 @@ This app supports **development mode** which allows API key generation without E
 
 ## API Configuration
 
-### Production API (Default)
-- **API Base URL:** `https://verishelf-e0b90033152c.herokuapp.com`
-- All API endpoints are available at this URL
-- Generate API key from dashboard → Settings → API Access
-
 ### Local Development
-- **API Base URL:** `http://localhost:3000` (if running server locally)
-- For production use, always use: `https://verishelf-e0b90033152c.herokuapp.com`
+- **API Base URL:** `http://localhost:3000`
+- Generate API key from `http://localhost:3000/dashboard` → Settings → API Access
+
+### Production
+- **API Base URL:** `https://verishelf-e0b90033152c.herokuapp.com`
+- Or: `https://api.verishelf.com` (if DNS configured)
+- Requires Enterprise plan subscription
 
 ## Features
 

@@ -267,7 +267,7 @@ export default function ApiKeyManager({ user, subscription }) {
             <p className="text-slate-300 text-xs mb-2"><strong>How to use in mobile app:</strong></p>
             <ol className="text-slate-400 text-xs space-y-1 list-decimal list-inside">
               <li>Open the VeriShelf mobile app</li>
-              <li>Enter API Base URL: <code className="text-emerald-400">https://verishelf-e0b90033152c.herokuapp.com</code></li>
+              <li>Enter API Base URL: <code className="text-emerald-400">http://localhost:3000</code></li>
               <li>Paste the API key above</li>
               <li>Click "Connect"</li>
             </ol>
@@ -313,7 +313,7 @@ export default function ApiKeyManager({ user, subscription }) {
                 <p className="text-slate-300 text-xs mb-2 font-semibold">📱 Mobile App Setup:</p>
                 <ol className="text-slate-400 text-xs space-y-2 list-decimal list-inside mb-3">
                   <li>Open VeriShelf mobile app</li>
-                  <li>Enter API Base URL: <code className="text-emerald-400">https://verishelf-e0b90033152c.herokuapp.com</code></li>
+                  <li>Enter API Base URL: <code className="text-emerald-400">http://localhost:3000</code></li>
                   <li>Enter your API key (you should have saved it when generated)</li>
                   <li>Click "Connect"</li>
                 </ol>
