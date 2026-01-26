@@ -42,24 +42,49 @@ const corsOptions = {
       return callback(null, true);
     }
     
-    // Allow verishelf.com domains
+    // Allow verishelf.com domains (both www and non-www)
     if (origin.includes('verishelf.com')) {
       return callback(null, true);
     }
     
-    callback(null, true); // Allow all origins for now (can restrict later)
+    // Allow all origins for now (can restrict later)
+    callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Stripe-Signature'],
+  exposedHeaders: ['Content-Type', 'Authorization'],
   preflightContinue: false,
-  optionsSuccessStatus: 204
+  optionsSuccessStatus: 204,
+  maxAge: 86400 // 24 hours
 };
 
+// Apply CORS to all routes
 app.use(cors(corsOptions));
 
-// Handle preflight requests explicitly
+// Handle preflight requests explicitly for all routes
 app.options('*', cors(corsOptions));
+
+// Additional CORS headers for API routes
+app.use('/api', (req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Set CORS headers explicitly
+  if (origin && (origin.includes('verishelf.com') || origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Stripe-Signature');
+    res.header('Access-Control-Max-Age', '86400');
+  }
+  
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+  
+  next();
+});
 
 app.use(express.json());
 app.use(express.raw({ type: 'application/json' })); // For webhook signature verification
