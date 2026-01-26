@@ -118,16 +118,13 @@ export default function LoginScreen() {
 
             <View style={styles.infoContainer}>
               <Text style={styles.infoText}>
-                <Text style={{ fontWeight: 'bold' }}>Option 1:</Text> Use your dashboard session token (developers)
-              </Text>
-              <Text style={styles.infoText}>
-                <Text style={{ fontWeight: 'bold' }}>Option 2:</Text> Get API key from dashboard:
+                Get your API key from your VeriShelf dashboard:
               </Text>
               <Text style={styles.infoText}>
                 Settings → API Access → Generate API Key
               </Text>
               <Text style={styles.infoNote}>
-                Note: In development mode, you can skip authentication.
+                Note: API access requires an Enterprise plan subscription.
               </Text>
             </View>
           </View>

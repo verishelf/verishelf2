@@ -476,8 +476,8 @@ export default function DashboardEnhanced() {
         addHistoryEntry("added", savedItem.id, savedItem.name);
         createAuditLog("added", savedItem.id, savedItem.name, {
           location: savedItem.location,
-          notes: "Product added via dashboard",
-        });
+      notes: "Product added via dashboard",
+    });
         sendWebhookEvent("item_added", savedItem);
       } else {
         console.error("Failed to save item to Supabase:", result.error);
@@ -659,7 +659,7 @@ export default function DashboardEnhanced() {
     if (reportType === "summary") {
       exportDailySummaryPDF(items, settings);
     } else {
-      generatePDFReport(activeItems, reportType);
+    generatePDFReport(activeItems, reportType);
     }
   };
 
@@ -1566,11 +1566,11 @@ ${summary.outstandingIssues.length > 5 ? `... and ${summary.outstandingIssues.le
                   </svg>
                 </button>
               </div>
-              <AlertsPanel
-                items={items}
-                settings={settings}
-                onItemClick={(item) => setEditingItem(item)}
-              />
+            <AlertsPanel
+              items={items}
+              settings={settings}
+              onItemClick={(item) => setEditingItem(item)}
+            />
             </div>
           </div>
         )}
@@ -1591,7 +1591,7 @@ ${summary.outstandingIssues.length > 5 ? `... and ${summary.outstandingIssues.le
                   </svg>
                 </button>
               </div>
-              <CostAnalysis items={items} />
+            <CostAnalysis items={items} />
             </div>
           </div>
         )}
@@ -1612,7 +1612,7 @@ ${summary.outstandingIssues.length > 5 ? `... and ${summary.outstandingIssues.le
                   </svg>
                 </button>
               </div>
-              <ExpiryCalendar items={items} onDateClick={handleDateClick} />
+            <ExpiryCalendar items={items} onDateClick={handleDateClick} />
             </div>
           </div>
         )}
@@ -1725,12 +1725,12 @@ ${summary.outstandingIssues.length > 5 ? `... and ${summary.outstandingIssues.le
             </div>
           </div>
           {!isInspector && (
-            <AddItem
-              onAdd={addItem}
-              selectedLocation={selectedLocation}
-              template={selectedTemplate}
-              onTemplateSelect={setSelectedTemplate}
-            />
+          <AddItem
+            onAdd={addItem}
+            selectedLocation={selectedLocation}
+            template={selectedTemplate}
+            onTemplateSelect={setSelectedTemplate}
+          />
           )}
           {isInspector && (
             <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 text-xs text-amber-100">
@@ -1748,20 +1748,20 @@ ${summary.outstandingIssues.length > 5 ? `... and ${summary.outstandingIssues.le
                 <span className="text-emerald-400 font-semibold">{stats.total}</span> active
               </div>
               <div className="flex gap-2">
-                <button
-                  onClick={() => setShowAnalytics(!showAnalytics)}
+              <button
+                onClick={() => setShowAnalytics(!showAnalytics)}
                   className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
-                  title="View Analytics"
-                >
-                  {showAnalytics ? "Hide" : "Show"} Analytics
-                </button>
-                <button
-                  onClick={handleBackup}
+                title="View Analytics"
+              >
+                {showAnalytics ? "Hide" : "Show"} Analytics
+              </button>
+              <button
+                onClick={handleBackup}
                   className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm transition-colors whitespace-nowrap"
-                  title="Backup data"
-                >
-                  Backup
-                </button>
+                title="Backup data"
+              >
+                Backup
+              </button>
               </div>
             </div>
           </div>
@@ -1790,12 +1790,12 @@ ${summary.outstandingIssues.length > 5 ? `... and ${summary.outstandingIssues.le
       )}
 
       {!isInspector && (
-        <BulkOperations
-          selectedItems={selectedItems}
-          onBulkRemove={handleBulkRemove}
-          onBulkDelete={handleBulkDelete}
-          onClearSelection={() => setSelectedItems([])}
-        />
+      <BulkOperations
+        selectedItems={selectedItems}
+        onBulkRemove={handleBulkRemove}
+        onBulkDelete={handleBulkDelete}
+        onClearSelection={() => setSelectedItems([])}
+      />
       )}
 
       {showSettings && (
@@ -1925,7 +1925,7 @@ ${summary.outstandingIssues.length > 5 ? `... and ${summary.outstandingIssues.le
           onImport={async (importedItems) => {
             if (!user || !user.id) {
               alert("Error: You must be logged in to import items.");
-              setShowImportWizard(false);
+            setShowImportWizard(false);
               return;
             }
 

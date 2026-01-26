@@ -42,67 +42,24 @@ const corsOptions = {
       return callback(null, true);
     }
     
-    // Allow verishelf.com domains (both www and non-www)
+    // Allow verishelf.com domains
     if (origin.includes('verishelf.com')) {
       return callback(null, true);
     }
     
-    // Allow all origins for now (can restrict later)
-    callback(null, true);
+    callback(null, true); // Allow all origins for now (can restrict later)
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Stripe-Signature'],
-  exposedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   preflightContinue: false,
-  optionsSuccessStatus: 204,
-  maxAge: 86400 // 24 hours
+  optionsSuccessStatus: 204
 };
 
-// Handle preflight OPTIONS requests FIRST, before CORS middleware
-// This is critical - OPTIONS must be handled before other middleware
-app.options('*', (req, res) => {
-  const origin = req.headers.origin;
-  
-  // Allow verishelf.com domains (www and non-www) and localhost
-  if (origin && (origin.includes('verishelf.com') || origin.includes('localhost') || origin.includes('127.0.0.1'))) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Stripe-Signature');
-    res.header('Access-Control-Max-Age', '86400');
-  } else if (!origin) {
-    // No origin header (mobile app, curl, etc.)
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Stripe-Signature');
-  }
-  
-  return res.status(204).send();
-});
-
-// Apply CORS to all routes
 app.use(cors(corsOptions));
 
-// Additional CORS headers for API routes (for non-OPTIONS requests)
-app.use('/api', (req, res, next) => {
-  // Skip if already handled by OPTIONS
-  if (req.method === 'OPTIONS') {
-    return next();
-  }
-  
-  const origin = req.headers.origin;
-  
-  // Set CORS headers explicitly for all API routes
-  if (origin && (origin.includes('verishelf.com') || origin.includes('localhost') || origin.includes('127.0.0.1'))) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-  } else if (!origin) {
-    res.header('Access-Control-Allow-Origin', '*');
-  }
-  
-  next();
-});
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 app.use(express.raw({ type: 'application/json' })); // For webhook signature verification
@@ -223,13 +180,6 @@ app.post('/api/create-checkout-session', async (req, res) => {
 
     console.log('Checkout session created:', session.id, 'with product:', product.id, 'and price:', price.id);
 
-    // Set CORS headers for response
-    const origin = req.headers.origin;
-    if (origin && (origin.includes('verishelf.com') || origin.includes('localhost') || origin.includes('127.0.0.1'))) {
-      res.header('Access-Control-Allow-Origin', origin);
-      res.header('Access-Control-Allow-Credentials', 'true');
-    }
-    
     res.json({ 
       sessionId: session.id,
       productId: product.id,
@@ -237,14 +187,6 @@ app.post('/api/create-checkout-session', async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating checkout session:', error);
-    
-    // Set CORS headers even for errors
-    const origin = req.headers.origin;
-    if (origin && (origin.includes('verishelf.com') || origin.includes('localhost') || origin.includes('127.0.0.1'))) {
-      res.header('Access-Control-Allow-Origin', origin);
-      res.header('Access-Control-Allow-Credentials', 'true');
-    }
-    
     res.status(500).json({ error: error.message });
   }
 });
@@ -529,98 +471,6 @@ app.get('/api/health', (req, res) => {
 // REST API v1 - Enterprise API Access
 // ============================================
 
-// Alternative: Stripe session authentication middleware
-async function authenticateStripeSession(req, res, next) {
-  const authHeader = req.headers.authorization;
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return next(); // Try API key auth instead
-  }
-
-  const token = authHeader.substring(7);
-  
-  // Check if it's a Stripe session token (starts with cs_ or sess_)
-  if (!token.startsWith('cs_') && !token.startsWith('sess_')) {
-    return next(); // Not a Stripe session, try API key auth
-  }
-
-  try {
-    let customerId = null;
-    
-    // If it's a customer ID (starts with cus_), use it directly
-    if (token.startsWith('cus_')) {
-      customerId = token;
-    } else {
-      // Otherwise, it's a session ID - retrieve the session
-      const session = await stripe.checkout.sessions.retrieve(token);
-      
-      if (!session || session.status !== 'complete') {
-        return res.status(401).json({ 
-          error: 'Unauthorized',
-          message: 'Invalid or incomplete Stripe session'
-        });
-      }
-
-      // Get customer ID from session
-      customerId = session.customer;
-      if (!customerId) {
-        return res.status(401).json({ 
-          error: 'Unauthorized',
-          message: 'No customer associated with this session'
-        });
-      }
-    }
-
-    // Find user by Stripe customer ID
-    const { data: subscription, error: subError } = await supabase
-      .from('subscriptions')
-      .select('user_id, plan, status, stripe_customer_id')
-      .eq('stripe_customer_id', customerId)
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (subError || !subscription) {
-      return res.status(401).json({ 
-        error: 'Unauthorized',
-        message: 'No active subscription found for this Stripe customer'
-      });
-    }
-
-    // Get user details
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('id, email, name, company')
-      .eq('id', subscription.user_id)
-      .single();
-
-    if (userError || !user) {
-      return res.status(401).json({ 
-        error: 'Unauthorized',
-        message: 'User not found'
-      });
-    }
-
-    // Check Enterprise plan requirement (unless dev mode)
-    const isDevelopment = process.env.NODE_ENV !== 'production' || process.env.DEV_MODE === 'true';
-    if (!isDevelopment && subscription.plan !== 'Enterprise') {
-      return res.status(403).json({ 
-        error: 'Forbidden',
-        message: 'API access requires Enterprise plan'
-      });
-    }
-
-    // Attach user to request
-    req.user = user;
-    req.userId = user.id;
-    return next();
-  } catch (error) {
-    // Not a valid Stripe session, try API key auth
-    return next();
-  }
-}
-
 // API Key authentication middleware
 async function authenticateAPIKey(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -631,7 +481,7 @@ async function authenticateAPIKey(req, res, next) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ 
       error: 'Unauthorized',
-      message: 'API key or Stripe session required. Include in Authorization header as: Bearer YOUR_API_KEY or Bearer cs_STRIPE_SESSION'
+      message: 'API key required. Include in Authorization header as: Bearer YOUR_API_KEY'
     });
   }
 
@@ -759,9 +609,6 @@ function rateLimitMiddleware(req, res, next) {
 const apiRouter = express.Router();
 
 // Apply authentication and rate limiting to all API routes
-// Try Supabase session first (for developers), then Stripe, then API key
-apiRouter.use(authenticateSupabaseSession);
-apiRouter.use(authenticateStripeSession);
 apiRouter.use(authenticateAPIKey);
 apiRouter.use(rateLimitMiddleware);
 
@@ -1222,91 +1069,6 @@ app.post('/api/generate-api-key', async (req, res) => {
   } catch (error) {
     console.error('Error generating API key:', error);
     res.status(500).json({ error: 'Internal server error', message: error.message });
-  }
-});
-
-// GET /api/stripe-session - Get Stripe customer ID for API access (requires Supabase auth)
-app.get('/api/stripe-session', async (req, res) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Unauthorized', message: 'Authentication required' });
-    }
-
-    const token = authHeader.substring(7);
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Unauthorized', message: 'Invalid authentication token' });
-    }
-
-    // Get user's subscription with Stripe customer ID
-    const { data: subscription, error: subError } = await supabase
-      .from('subscriptions')
-      .select('stripe_customer_id, stripe_subscription_id, plan, status')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (subError) {
-      console.error('Error fetching subscription:', subError);
-      return res.status(500).json({ 
-        error: 'Database error', 
-        message: subError.message 
-      });
-    }
-
-    if (!subscription) {
-      return res.status(404).json({ 
-        error: 'Not found', 
-        message: 'No active subscription found. Please complete a payment first.' 
-      });
-    }
-
-    if (!subscription.stripe_customer_id) {
-      return res.status(404).json({ 
-        error: 'Not found', 
-        message: 'No Stripe customer ID found. Your subscription may not be linked to Stripe.' 
-      });
-    }
-
-    // Try to get existing checkout sessions for this customer
-    let sessionId = null;
-    try {
-      const sessions = await stripe.checkout.sessions.list({
-        customer: subscription.stripe_customer_id,
-        limit: 1,
-      });
-      
-      if (sessions.data.length > 0 && sessions.data[0].status === 'complete') {
-        sessionId = sessions.data[0].id;
-      }
-    } catch (stripeError) {
-      console.warn('Could not retrieve Stripe sessions:', stripeError.message);
-      // Continue without session ID
-    }
-
-    // Return customer ID and any available session ID
-    res.json({
-      customer_id: subscription.stripe_customer_id,
-      session_id: sessionId,
-      plan: subscription.plan,
-      status: subscription.status,
-      message: sessionId 
-        ? `Use this for API authentication: Authorization: Bearer ${sessionId}`
-        : `Use your Stripe customer ID: ${subscription.stripe_customer_id}`,
-      note: sessionId 
-        ? 'You can use the session ID above for API authentication'
-        : 'No active session found. You may need to complete a payment to get a session ID.'
-    });
-  } catch (error) {
-    console.error('Error getting Stripe session:', error);
-    res.status(500).json({ 
-      error: 'Internal server error', 
-      message: error.message 
-    });
   }
 });
 
