@@ -133,10 +133,9 @@
           
           <section>
             <h2 class="text-2xl font-bold text-white mb-4">Base URL</h2>
-            <pre><code>https://api.verishelf.com/api/v1</code></pre>
+            <pre><code>https://verishelf-e0b90033152c.herokuapp.com/api/v1</code></pre>
             <p class="text-slate-400 text-sm mt-4">
-              <strong>Note:</strong> If your API is deployed to a different domain (e.g., Heroku, Railway), 
-              use that domain instead. The base URL format is: <code>https://YOUR_API_DOMAIN/api/v1</code>
+              <strong>Production API:</strong> All endpoints are available at <code>https://verishelf-e0b90033152c.herokuapp.com/api/v1</code>
             </p>
           </section>
           
@@ -155,7 +154,7 @@
               <p class="text-slate-300 mb-4">
                 Generate an API key using the API endpoint (requires Enterprise plan):
               </p>
-              <pre><code>POST https://YOUR_API_DOMAIN/api/generate-api-key
+              <pre><code>POST https://verishelf-e0b90033152c.herokuapp.com/api/generate-api-key
 Content-Type: application/json
 
 {
@@ -168,7 +167,7 @@ Content-Type: application/json
             
             <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800 mt-6">
               <h3 class="text-xl font-bold text-white mb-4">Step 3: Make Your First API Call</h3>
-              <pre><code>curl -X GET https://YOUR_API_DOMAIN/api/v1/items \
+              <pre><code>curl -X GET https://verishelf-e0b90033152c.herokuapp.com/api/v1/items \
   -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
             </div>
           </section>
@@ -361,7 +360,7 @@ Authorization: Bearer YOUR_API_KEY</code></pre>
               <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
                 <h3 class="text-xl font-bold text-white mb-3">JavaScript/Node.js</h3>
                 <pre><code>const API_KEY = 'your-api-key-here';
-const BASE_URL = 'https://YOUR_API_DOMAIN/api/v1';
+const BASE_URL = 'https://verishelf-e0b90033152c.herokuapp.com/api/v1';
 
 // Get all items
 async function getItems() {
@@ -393,7 +392,7 @@ async function createItem(item) {
                 <pre><code>import requests
 
 API_KEY = 'your-api-key-here'
-BASE_URL = 'https://YOUR_API_DOMAIN/api/v1'
+BASE_URL = 'https://verishelf-e0b90033152c.herokuapp.com/api/v1'
 HEADERS = {
     'Authorization': f'Bearer {API_KEY}',
     'Content-Type': 'application/json'
@@ -417,11 +416,11 @@ def create_item(item_data):
               <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl border border-slate-800">
                 <h3 class="text-xl font-bold text-white mb-3">cURL</h3>
                 <pre><code># Get all items
-curl -X GET https://YOUR_API_DOMAIN/api/v1/items \
+curl -X GET https://verishelf-e0b90033152c.herokuapp.com/api/v1/items \
   -H "Authorization: Bearer YOUR_API_KEY"
 
 # Create item
-curl -X POST https://YOUR_API_DOMAIN/api/v1/items \
+curl -X POST https://verishelf-e0b90033152c.herokuapp.com/api/v1/items \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -440,7 +439,7 @@ curl -X POST https://YOUR_API_DOMAIN/api/v1/items \
               <pre><code>&lt;!-- Include in HTML --&gt;
 &lt;script src="verishelf-sdk.js"&gt;&lt;/script&gt;
 &lt;script&gt;
-  const client = new VeriShelfClient('YOUR_API_KEY', 'https://YOUR_API_DOMAIN');
+  const client = new VeriShelfClient('YOUR_API_KEY', 'https://verishelf-e0b90033152c.herokuapp.com');
   const items = await client.getItems();
 &lt;/script&gt;
 

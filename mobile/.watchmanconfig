@@ -1,0 +1,14 @@
+{
+  "ignore_dirs": [
+    "node_modules",
+    ".git",
+    ".expo",
+    "dist",
+    "build",
+    ".expo-shared",
+    "ios",
+    "android",
+    "web-build"
+  ],
+  "settle": 20
+}

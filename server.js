@@ -7,6 +7,12 @@ import cors from 'cors';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import { readFileSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 dotenv.config();
 
@@ -437,18 +443,23 @@ function calculateDiscount(locationCount) {
   return 0;
 }
 
-// Root endpoint
+// Root endpoint - serve website index.html
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'VeriShelf Payment API',
-    status: 'running',
-    endpoints: {
-      health: '/api/health',
-      createCheckout: '/api/create-checkout-session',
-      webhook: '/api/webhook'
-    },
-    timestamp: new Date().toISOString()
-  });
+  const indexPath = join(__dirname, 'website', 'index.html');
+  if (existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.json({ 
+      message: 'VeriShelf Payment API',
+      status: 'running',
+      endpoints: {
+        health: '/api/health',
+        createCheckout: '/api/create-checkout-session',
+        webhook: '/api/webhook'
+      },
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Health check endpoint
@@ -460,18 +471,126 @@ app.get('/api/health', (req, res) => {
 // REST API v1 - Enterprise API Access
 // ============================================
 
+// Alternative: Stripe session authentication middleware
+async function authenticateStripeSession(req, res, next) {
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next(); // Try API key auth instead
+  }
+
+  const token = authHeader.substring(7);
+  
+  // Check if it's a Stripe session token (starts with cs_ or sess_)
+  if (!token.startsWith('cs_') && !token.startsWith('sess_')) {
+    return next(); // Not a Stripe session, try API key auth
+  }
+
+  try {
+    let customerId = null;
+    
+    // If it's a customer ID (starts with cus_), use it directly
+    if (token.startsWith('cus_')) {
+      customerId = token;
+    } else {
+      // Otherwise, it's a session ID - retrieve the session
+      const session = await stripe.checkout.sessions.retrieve(token);
+      
+      if (!session || session.status !== 'complete') {
+        return res.status(401).json({ 
+          error: 'Unauthorized',
+          message: 'Invalid or incomplete Stripe session'
+        });
+      }
+
+      // Get customer ID from session
+      customerId = session.customer;
+      if (!customerId) {
+        return res.status(401).json({ 
+          error: 'Unauthorized',
+          message: 'No customer associated with this session'
+        });
+      }
+    }
+
+    // Find user by Stripe customer ID
+    const { data: subscription, error: subError } = await supabase
+      .from('subscriptions')
+      .select('user_id, plan, status, stripe_customer_id')
+      .eq('stripe_customer_id', customerId)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (subError || !subscription) {
+      return res.status(401).json({ 
+        error: 'Unauthorized',
+        message: 'No active subscription found for this Stripe customer'
+      });
+    }
+
+    // Get user details
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('id, email, name, company')
+      .eq('id', subscription.user_id)
+      .single();
+
+    if (userError || !user) {
+      return res.status(401).json({ 
+        error: 'Unauthorized',
+        message: 'User not found'
+      });
+    }
+
+    // Check Enterprise plan requirement (unless dev mode)
+    const isDevelopment = process.env.NODE_ENV !== 'production' || process.env.DEV_MODE === 'true';
+    if (!isDevelopment && subscription.plan !== 'Enterprise') {
+      return res.status(403).json({ 
+        error: 'Forbidden',
+        message: 'API access requires Enterprise plan'
+      });
+    }
+
+    // Attach user to request
+    req.user = user;
+    req.userId = user.id;
+    return next();
+  } catch (error) {
+    // Not a valid Stripe session, try API key auth
+    return next();
+  }
+}
+
 // API Key authentication middleware
 async function authenticateAPIKey(req, res, next) {
   const authHeader = req.headers.authorization;
   
+  // Development mode: Allow dev-bypass key
+  const isDevelopment = process.env.NODE_ENV !== 'production' || process.env.DEV_MODE === 'true';
+  
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ 
       error: 'Unauthorized',
-      message: 'API key required. Include in Authorization header as: Bearer YOUR_API_KEY'
+      message: 'API key or Stripe session required. Include in Authorization header as: Bearer YOUR_API_KEY or Bearer cs_STRIPE_SESSION'
     });
   }
 
   const apiKey = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+  // Allow dev-bypass in development mode
+  if (isDevelopment && apiKey === 'dev-bypass') {
+    // Create a dummy user object for dev mode
+    req.user = {
+      id: 'dev-user-id',
+      email: 'dev@verishelf.local',
+      name: 'Development User',
+      company: 'Dev Company'
+    };
+    req.userId = 'dev-user-id';
+    return next();
+  }
 
   try {
     // Check if API key exists in database
@@ -582,6 +701,9 @@ function rateLimitMiddleware(req, res, next) {
 const apiRouter = express.Router();
 
 // Apply authentication and rate limiting to all API routes
+// Try Supabase session first (for developers), then Stripe, then API key
+apiRouter.use(authenticateSupabaseSession);
+apiRouter.use(authenticateStripeSession);
 apiRouter.use(authenticateAPIKey);
 apiRouter.use(rateLimitMiddleware);
 
@@ -993,19 +1115,24 @@ app.post('/api/generate-api-key', async (req, res) => {
 
     const userId = user.id;
 
-    // Check if user has Enterprise plan
-    const { data: subscription } = await supabase
-      .from('subscriptions')
-      .select('plan, status')
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .single();
+    // Development mode: Allow API key generation without Enterprise plan
+    const isDevelopment = process.env.NODE_ENV !== 'production' || process.env.DEV_MODE === 'true';
+    
+    if (!isDevelopment) {
+      // Check if user has Enterprise plan (production only)
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('plan, status')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .single();
 
-    if (!subscription || subscription.plan !== 'Enterprise') {
-      return res.status(403).json({ 
-        error: 'Forbidden',
-        message: 'API key generation requires Enterprise plan'
-      });
+      if (!subscription || subscription.plan !== 'Enterprise') {
+        return res.status(403).json({ 
+          error: 'Forbidden',
+          message: 'API key generation requires Enterprise plan'
+        });
+      }
     }
 
     // Generate API key
@@ -1026,16 +1153,102 @@ app.post('/api/generate-api-key', async (req, res) => {
     if (error) {
       return res.status(500).json({ error: 'Database error', message: error.message });
     }
-
+    
     res.json({
       api_key: apiKey,
       created_at: new Date().toISOString(),
       message: 'API key generated successfully. Store this key securely - it will not be shown again.',
-      warning: 'Keep your API key secret. If compromised, regenerate it immediately.'
+      warning: 'Keep your API key secret. If compromised, regenerate it immediately.',
+      ...(isDevelopment && { dev_mode: true, note: 'Development mode: Enterprise plan not required' })
     });
   } catch (error) {
     console.error('Error generating API key:', error);
     res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// GET /api/stripe-session - Get Stripe customer ID for API access (requires Supabase auth)
+app.get('/api/stripe-session', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'Authentication required' });
+    }
+
+    const token = authHeader.substring(7);
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'Invalid authentication token' });
+    }
+
+    // Get user's subscription with Stripe customer ID
+    const { data: subscription, error: subError } = await supabase
+      .from('subscriptions')
+      .select('stripe_customer_id, stripe_subscription_id, plan, status')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (subError) {
+      console.error('Error fetching subscription:', subError);
+      return res.status(500).json({ 
+        error: 'Database error', 
+        message: subError.message 
+      });
+    }
+
+    if (!subscription) {
+      return res.status(404).json({ 
+        error: 'Not found', 
+        message: 'No active subscription found. Please complete a payment first.' 
+      });
+    }
+
+    if (!subscription.stripe_customer_id) {
+      return res.status(404).json({ 
+        error: 'Not found', 
+        message: 'No Stripe customer ID found. Your subscription may not be linked to Stripe.' 
+      });
+    }
+
+    // Try to get existing checkout sessions for this customer
+    let sessionId = null;
+    try {
+      const sessions = await stripe.checkout.sessions.list({
+        customer: subscription.stripe_customer_id,
+        limit: 1,
+      });
+      
+      if (sessions.data.length > 0 && sessions.data[0].status === 'complete') {
+        sessionId = sessions.data[0].id;
+      }
+    } catch (stripeError) {
+      console.warn('Could not retrieve Stripe sessions:', stripeError.message);
+      // Continue without session ID
+    }
+
+    // Return customer ID and any available session ID
+    res.json({
+      customer_id: subscription.stripe_customer_id,
+      session_id: sessionId,
+      plan: subscription.plan,
+      status: subscription.status,
+      message: sessionId 
+        ? `Use this for API authentication: Authorization: Bearer ${sessionId}`
+        : `Use your Stripe customer ID: ${subscription.stripe_customer_id}`,
+      note: sessionId 
+        ? 'You can use the session ID above for API authentication'
+        : 'No active session found. You may need to complete a payment to get a session ID.'
+    });
+  } catch (error) {
+    console.error('Error getting Stripe session:', error);
+    res.status(500).json({ 
+      error: 'Internal server error', 
+      message: error.message 
+    });
   }
 });
 
@@ -1054,21 +1267,50 @@ app.get('/api/api-key-status', async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized', message: 'Invalid authentication token' });
     }
 
-    const { data: userData, error } = await supabase
-      .from('users')
-      .select('api_key_enabled, api_key_created_at, api_key_last_used_at')
-      .eq('id', user.id)
-      .single();
+    // Fetch API key status with error handling
+    let userData = null;
+    let hasError = false;
+    
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('api_key, api_key_enabled, api_key_created_at, api_key_last_used_at')
+        .eq('id', user.id)
+        .maybeSingle();
 
-    if (error) {
-      return res.status(500).json({ error: 'Database error', message: error.message });
+      if (error) {
+        // Check if error is due to missing columns
+        if (error.code === '42703' || error.message?.includes('column') || error.message?.includes('does not exist')) {
+          console.warn('API key columns may not exist. Run the migration: supabase/api_keys_migration.sql');
+          hasError = true;
+        } else {
+          console.error('Error fetching API key status:', error);
+          return res.status(500).json({ error: 'Database error', message: error.message });
+        }
+      } else {
+        userData = data;
+      }
+    } catch (err) {
+      console.error('Exception fetching API key status:', err);
+      hasError = true;
     }
 
+    // Return safe default values if error or no data
+    if (hasError || !userData) {
+      return res.json({
+        has_api_key: false,
+        enabled: false,
+        created_at: null,
+        last_used_at: null,
+      });
+    }
+
+    // Handle NULL values safely
     res.json({
-      has_api_key: !!userData.api_key_enabled,
-      enabled: userData.api_key_enabled || false,
-      created_at: userData.api_key_created_at,
-      last_used_at: userData.api_key_last_used_at,
+      has_api_key: !!(userData.api_key && userData.api_key_enabled),
+      enabled: userData.api_key_enabled === true,
+      created_at: userData.api_key_created_at || null,
+      last_used_at: userData.api_key_last_used_at || null,
       // Don't return the actual key for security
     });
   } catch (error) {
@@ -1094,19 +1336,24 @@ app.post('/api/regenerate-api-key', async (req, res) => {
 
     const userId = user.id;
 
-    // Check Enterprise plan
-    const { data: subscription } = await supabase
-      .from('subscriptions')
-      .select('plan, status')
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .single();
+    // Development mode: Allow API key regeneration without Enterprise plan
+    const isDevelopment = process.env.NODE_ENV !== 'production' || process.env.DEV_MODE === 'true';
+    
+    if (!isDevelopment) {
+      // Check Enterprise plan (production only)
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('plan, status')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .single();
 
-    if (!subscription || subscription.plan !== 'Enterprise') {
-      return res.status(403).json({ 
-        error: 'Forbidden',
-        message: 'API key regeneration requires Enterprise plan'
-      });
+      if (!subscription || subscription.plan !== 'Enterprise') {
+        return res.status(403).json({ 
+          error: 'Forbidden',
+          message: 'API key regeneration requires Enterprise plan'
+        });
+      }
     }
 
     // Generate new API key
@@ -1126,12 +1373,13 @@ app.post('/api/regenerate-api-key', async (req, res) => {
     if (error) {
       return res.status(500).json({ error: 'Database error', message: error.message });
     }
-
+    
     res.json({
       api_key: apiKey,
       created_at: new Date().toISOString(),
       message: 'API key regenerated successfully. Your old key is now invalid.',
-      warning: 'Update all integrations with the new key immediately.'
+      warning: 'Update all integrations with the new key immediately.',
+      ...(isDevelopment && { dev_mode: true, note: 'Development mode: Enterprise plan not required' })
     });
   } catch (error) {
     console.error('Error regenerating API key:', error);
@@ -1295,9 +1543,27 @@ apiRouter.get('/stats', async (req, res) => {
 // Mount API router
 app.use('/api/v1', apiRouter);
 
+// Serve static website files (after all API routes)
+app.use(express.static(join(__dirname, 'website')));
+
+// Serve built React app at /dashboard
+const distPath = join(__dirname, 'dist');
+if (existsSync(distPath)) {
+  app.use('/dashboard', express.static(distPath));
+  // Serve index.html for all /dashboard routes (SPA routing)
+  app.get('/dashboard/*', (req, res) => {
+    const indexPath = join(distPath, 'index.html');
+    if (existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.status(404).send('Dashboard not built. Run "npm run build" first.');
+    }
+  });
+}
+
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 VeriShelf Payment Server running on port ${PORT}`);
+  console.log(`🚀 VeriShelf Server running on port ${PORT}`);
   if (process.env.STRIPE_SECRET_KEY) {
     const keyPreview = process.env.STRIPE_SECRET_KEY.substring(0, 20) + '...';
     console.log(`✅ Stripe Secret Key loaded: ${keyPreview}`);
@@ -1314,5 +1580,15 @@ app.listen(PORT, () => {
     console.warn('⚠️  STRIPE_WEBHOOK_SECRET not set. Webhook signature verification disabled.');
     console.warn('   For production, add STRIPE_WEBHOOK_SECRET to .env');
   }
+  
+  console.log(`\n🌐 Website: http://localhost:${PORT}/`);
+  if (existsSync(distPath)) {
+    console.log(`📊 Dashboard: http://localhost:${PORT}/dashboard/`);
+  } else {
+    console.log(`📊 Dashboard: Not built. Run "npm run build" to enable.`);
+  }
+  console.log(`📡 API Base URL: http://localhost:${PORT}/api/v1`);
+  console.log(`📡 Production API: https://verishelf-e0b90033152c.herokuapp.com/api/v1`);
+  console.log(`📡 Health Check: http://localhost:${PORT}/api/health\n`);
 });
 

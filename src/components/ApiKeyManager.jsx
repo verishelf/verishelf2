@@ -10,11 +10,15 @@ export default function ApiKeyManager({ user, subscription }) {
 
   const isEnterprise = subscription?.plan === "Enterprise";
 
+  // Check if development mode is enabled (localhost = dev mode)
+  const isDevelopment = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1';
+
   useEffect(() => {
-    if (isEnterprise && user) {
+    if ((isEnterprise || isDevelopment) && user) {
       loadApiKeyStatus();
     }
-  }, [user, isEnterprise]);
+  }, [user, isEnterprise, isDevelopment]);
 
   const loadApiKeyStatus = async () => {
     try {
@@ -37,9 +41,26 @@ export default function ApiKeyManager({ user, subscription }) {
       if (response.ok) {
         const data = await response.json();
         setApiKeyStatus(data);
+      } else {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        console.error('Error loading API key status:', errorData);
+        // Set default status if error
+        setApiKeyStatus({
+          has_api_key: false,
+          enabled: false,
+          created_at: null,
+          last_used_at: null,
+        });
       }
     } catch (error) {
       console.error('Error loading API key status:', error);
+      // Set default status on error
+      setApiKeyStatus({
+        has_api_key: false,
+        enabled: false,
+        created_at: null,
+        last_used_at: null,
+      });
     }
   };
 
@@ -123,7 +144,7 @@ export default function ApiKeyManager({ user, subscription }) {
         setNewApiKey(data.api_key);
         setShowKey(true);
         await loadApiKeyStatus();
-        alert('API key regenerated! Copy the new key and update all your integrations immediately.');
+        // Don't show alert - the key is displayed in the UI
       } else {
         alert(`Error: ${data.message || 'Failed to regenerate API key'}`);
       }
@@ -185,7 +206,7 @@ export default function ApiKeyManager({ user, subscription }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (!isEnterprise) {
+  if (!isEnterprise && !isDevelopment) {
     return (
       <div className="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800">
         <h2 className="text-2xl font-bold text-white mb-4">API Access</h2>
@@ -202,6 +223,13 @@ export default function ApiKeyManager({ user, subscription }) {
   return (
     <div className="p-6 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border border-slate-800">
       <h2 className="text-2xl font-bold text-white mb-4">API Key Management</h2>
+      {isDevelopment && !isEnterprise && (
+        <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+          <p className="text-blue-200 text-xs">
+            🔧 <strong>Development Mode:</strong> API key generation is enabled without Enterprise plan for testing purposes.
+          </p>
+        </div>
+      )}
       <p className="text-slate-400 text-sm mb-6">
         Manage your API keys for programmatic access to VeriShelf. Use these keys to integrate with your POS, ERP, or custom systems.
       </p>
@@ -219,16 +247,30 @@ export default function ApiKeyManager({ user, subscription }) {
               </svg>
             </button>
           </div>
-          <div className="flex items-center gap-2 mb-3">
-            <code className="flex-1 px-3 py-2 bg-slate-950 border border-slate-700 rounded text-emerald-400 text-sm font-mono break-all">
-              {newApiKey}
-            </code>
-            <button
-              onClick={() => copyToClipboard(newApiKey)}
-              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-colors"
-            >
-              {copied ? 'Copied!' : 'Copy'}
-            </button>
+          <div className="mb-3">
+            <label className="block text-slate-400 text-xs mb-2 font-semibold">Your API Key (Copy this now!):</label>
+            <div className="flex flex-col gap-2">
+              <div className="relative">
+                <code className="block w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded text-emerald-400 text-sm font-mono break-all overflow-x-auto">
+                  {newApiKey}
+                </code>
+              </div>
+              <button
+                onClick={() => copyToClipboard(newApiKey)}
+                className="w-full px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-black font-semibold rounded-lg transition-colors"
+              >
+                {copied ? '✅ Copied to Clipboard!' : '📋 Copy API Key'}
+              </button>
+            </div>
+          </div>
+          <div className="p-3 bg-slate-900/50 rounded border border-slate-700 mb-3">
+            <p className="text-slate-300 text-xs mb-2"><strong>How to use in mobile app:</strong></p>
+            <ol className="text-slate-400 text-xs space-y-1 list-decimal list-inside">
+              <li>Open the VeriShelf mobile app</li>
+              <li>Enter API Base URL: <code className="text-emerald-400">https://verishelf-e0b90033152c.herokuapp.com</code></li>
+              <li>Paste the API key above</li>
+              <li>Click "Connect"</li>
+            </ol>
           </div>
           <p className="text-amber-200 text-xs">
             ⚠️ <strong>Important:</strong> Copy this key now. It will not be shown again. Store it securely.
@@ -239,7 +281,7 @@ export default function ApiKeyManager({ user, subscription }) {
       {apiKeyStatus && (
         <div className="mb-6 p-4 bg-slate-800/50 border border-slate-700 rounded-lg">
           <h3 className="text-white font-semibold mb-3">API Key Status</h3>
-          <div className="space-y-2 text-sm">
+          <div className="space-y-2 text-sm mb-4">
             <div className="flex items-center justify-between">
               <span className="text-slate-400">Status:</span>
               <span className={`font-semibold ${apiKeyStatus.enabled ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -263,6 +305,26 @@ export default function ApiKeyManager({ user, subscription }) {
               </div>
             )}
           </div>
+          
+          {apiKeyStatus.has_api_key && apiKeyStatus.enabled && (
+            <div className="pt-4 border-t border-slate-700">
+              <p className="text-slate-300 text-sm mb-3 font-semibold">✅ API Key Active</p>
+              <div className="p-4 bg-slate-900/50 rounded border border-slate-700">
+                <p className="text-slate-300 text-xs mb-2 font-semibold">📱 Mobile App Setup:</p>
+                <ol className="text-slate-400 text-xs space-y-2 list-decimal list-inside mb-3">
+                  <li>Open VeriShelf mobile app</li>
+                  <li>Enter API Base URL: <code className="text-emerald-400">https://verishelf-e0b90033152c.herokuapp.com</code></li>
+                  <li>Enter your API key (you should have saved it when generated)</li>
+                  <li>Click "Connect"</li>
+                </ol>
+                <div className="p-2 bg-amber-500/10 border border-amber-500/30 rounded">
+                  <p className="text-amber-200 text-xs">
+                    ⚠️ <strong>Important:</strong> API keys are only shown once when generated. If you lost your key, click "Regenerate API Key" above to create a new one.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -293,6 +355,94 @@ export default function ApiKeyManager({ user, subscription }) {
             </button>
           </>
         )}
+      </div>
+
+      <div className="mt-6 p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
+        <h4 className="text-white font-semibold mb-2 text-sm">Developer / Dashboard Session</h4>
+        <p className="text-slate-400 text-xs mb-3">
+          As a developer, you can use your current dashboard login session for API access. No API key needed!
+        </p>
+        <button
+          onClick={async () => {
+            try {
+              const supabase = getSupabase();
+              if (!supabase) {
+                alert('Supabase not available');
+                return;
+              }
+              
+              const { data: { session } } = await supabase.auth.getSession();
+              if (!session || !session.access_token) {
+                alert('Please log in to the dashboard first');
+                return;
+              }
+
+              // Copy session token to clipboard
+              navigator.clipboard.writeText(session.access_token);
+              
+              alert(`✅ Session Token Copied!\n\nUse this in API requests:\nAuthorization: Bearer ${session.access_token.substring(0, 20)}...\n\nThis token is valid while you're logged into the dashboard.`);
+            } catch (error) {
+              console.error('Error getting session:', error);
+              alert(`Error: ${error.message || 'Failed to get session token'}`);
+            }
+          }}
+          className="text-emerald-400 hover:text-emerald-300 text-sm underline mb-3"
+        >
+          Copy Dashboard Session Token →
+        </button>
+        
+        <div className="mt-4 pt-4 border-t border-slate-700">
+          <h4 className="text-white font-semibold mb-2 text-sm">Stripe Session (Optional)</h4>
+          <p className="text-slate-400 text-xs mb-3">
+            Users with active Stripe subscriptions can also use their Stripe session ID.
+          </p>
+          <button
+            onClick={async () => {
+              try {
+                const supabase = getSupabase();
+                if (!supabase) return;
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                  alert('Please log in first');
+                  return;
+                }
+
+                const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                  ? 'http://localhost:3000/api'
+                  : 'https://verishelf-e0b90033152c.herokuapp.com/api';
+
+                const response = await fetch(`${API_BASE_URL}/stripe-session`, {
+                  headers: {
+                    'Authorization': `Bearer ${session.access_token}`,
+                  },
+                });
+
+                if (!response.ok) {
+                  const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+                  throw new Error(errorData.message || `Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.session_id) {
+                  navigator.clipboard.writeText(data.session_id);
+                  alert(`✅ Stripe Session ID Copied!\n\n${data.session_id}\n\nUse: Authorization: Bearer ${data.session_id}`);
+                } else if (data.customer_id) {
+                  navigator.clipboard.writeText(data.customer_id);
+                  alert(`✅ Customer ID Copied!\n\n${data.customer_id}\n\n${data.message || 'Use this customer ID for API authentication'}`);
+                } else {
+                  alert(data.message || 'No Stripe information available');
+                }
+              } catch (error) {
+                console.error('Error getting Stripe session:', error);
+                alert(`Error: ${error.message || 'Failed to get Stripe session'}`);
+              }
+            }}
+            className="text-emerald-400 hover:text-emerald-300 text-sm underline"
+          >
+            Get Stripe Session ID →
+          </button>
+        </div>
       </div>
 
       <div className="mt-6 p-4 bg-slate-800/30 border border-slate-700 rounded-lg">
