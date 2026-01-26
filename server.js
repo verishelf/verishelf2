@@ -113,21 +113,6 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY || 'sb_publishable_1aD8kxQVjJqLjo2LoSx7Ww_f6ucmEvS'
 );
 
-// Handle OPTIONS for create-checkout-session explicitly
-app.options('/api/create-checkout-session', (req, res) => {
-  const origin = req.headers.origin;
-  
-  if (origin && (origin.includes('verishelf.com') || origin.includes('localhost') || origin.includes('127.0.0.1'))) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-    res.header('Access-Control-Max-Age', '86400');
-  }
-  
-  return res.status(204).send();
-});
-
 // Create Stripe Checkout Session
 app.post('/api/create-checkout-session', async (req, res) => {
   try {
