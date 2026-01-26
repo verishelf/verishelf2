@@ -238,6 +238,13 @@ app.post('/api/create-checkout-session', async (req, res) => {
 
     console.log('Checkout session created:', session.id, 'with product:', product.id, 'and price:', price.id);
 
+    // Set CORS headers for response
+    const origin = req.headers.origin;
+    if (origin && (origin.includes('verishelf.com') || origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+    }
+    
     res.json({ 
       sessionId: session.id,
       productId: product.id,
@@ -245,6 +252,14 @@ app.post('/api/create-checkout-session', async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating checkout session:', error);
+    
+    // Set CORS headers even for errors
+    const origin = req.headers.origin;
+    if (origin && (origin.includes('verishelf.com') || origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+    }
+    
     res.status(500).json({ error: error.message });
   }
 });
