@@ -59,28 +59,35 @@ const corsOptions = {
   maxAge: 86400 // 24 hours
 };
 
+// CORS must be applied BEFORE other middleware
+// Handle preflight OPTIONS requests first
+app.options('*', cors(corsOptions));
+
 // Apply CORS to all routes
 app.use(cors(corsOptions));
 
-// Handle preflight requests explicitly for all routes
-app.options('*', cors(corsOptions));
-
-// Additional CORS headers for API routes
+// Additional explicit CORS handling for API routes
 app.use('/api', (req, res, next) => {
   const origin = req.headers.origin;
   
-  // Set CORS headers explicitly
-  if (origin && (origin.includes('verishelf.com') || origin.includes('localhost') || origin.includes('127.0.0.1'))) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Stripe-Signature');
-    res.header('Access-Control-Max-Age', '86400');
+  // Set CORS headers explicitly for all API routes
+  if (origin) {
+    // Allow verishelf.com domains (www and non-www)
+    if (origin.includes('verishelf.com') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Stripe-Signature');
+      res.header('Access-Control-Max-Age', '86400');
+    }
+  } else {
+    // No origin (mobile app, curl, etc.) - allow
+    res.header('Access-Control-Allow-Origin', '*');
   }
   
-  // Handle preflight
+  // Handle preflight OPTIONS requests
   if (req.method === 'OPTIONS') {
-    return res.status(204).end();
+    return res.status(204).send();
   }
   
   next();
