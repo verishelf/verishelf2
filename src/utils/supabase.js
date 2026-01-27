@@ -1,8 +1,17 @@
 // Supabase Client for React Dashboard
+// NOTE: As part of the Core API migration, some read paths are
+// feature-flagged to go through the Core API instead of Supabase
+// directly. Supabase remains the source of authentication and
+// backing database.
 const SUPABASE_URL = 'https://bblwhwobkthawkbyhiwb.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_1aD8kxQVjJqLjo2LoSx7Ww_f6ucmEvS';
 
 let supabaseClient = null;
+
+// Core API feature flag and inventory API module
+// (used for gradual migration away from direct Supabase access)
+import { USE_CORE_API } from '../config/features';
+import { getInventory } from '../api/inventory';
 
 // Initialize Supabase client
 export function initSupabase() {
@@ -197,9 +206,24 @@ export async function getActiveInspectorLink(inspectorUserId) {
 
 // Load items from Supabase
 export async function loadItems(userId) {
+  // When migrating to Core API, use it as the primary read path,
+  // but keep Supabase and localStorage fallbacks to avoid breaking
+  // existing workflows during rollout.
+  if (USE_CORE_API) {
+    try {
+      const apiItems = await getInventory();
+      if (Array.isArray(apiItems) && apiItems.length > 0) {
+        return apiItems.map(mapDbItemToAppItem);
+      }
+    } catch (e) {
+      console.error('Error loading items from Core API, falling back to Supabase:', e);
+      // Fall through to Supabase/localStorage path below
+    }
+  }
+
   const supabase = getSupabase();
   if (!supabase) {
-    // Fallback to localStorage
+    // Fallback to localStorage (legacy behaviour)
     const saved = localStorage.getItem('verishelf-items');
     return saved ? JSON.parse(saved) : [];
   }
@@ -211,29 +235,14 @@ export async function loadItems(userId) {
     .order('added_at', { ascending: false });
 
   if (error) {
-    console.error('Error loading items:', error);
+    console.error('Error loading items from Supabase:', error);
     // Fallback to localStorage
     const saved = localStorage.getItem('verishelf-items');
     return saved ? JSON.parse(saved) : [];
   }
 
   // Convert database format to app format
-  return data.map(item => ({
-    id: item.id,
-    name: item.name,
-    barcode: item.barcode,
-    location: item.location,
-    expiryDate: item.expiry_date,
-    expiry: item.expiry_date, // Keep both for compatibility
-    quantity: item.quantity || 1,
-    category: item.category,
-    cost: item.cost,
-    price: item.cost, // Keep both for compatibility
-    notes: item.notes,
-    removed: item.removed || false,
-    removedAt: item.removed_at,
-    addedAt: item.added_at,
-  }));
+  return (data || []).map(mapDbItemToAppItem);
 }
 
 // Internal helper to map DB item to app item format
@@ -262,6 +271,43 @@ function mapDbItemToAppItem(item) {
 
 // Load items for an owner account with inspector scope applied
 export async function loadItemsForOwnerWithScope(ownerUserId, scope = {}) {
+  // Core API path: fetch inventory and apply inspector scope filtering
+  // on the client while the Core API surface stabilizes. This keeps
+  // behaviour consistent while still centralizing data access.
+  if (USE_CORE_API) {
+    try {
+      const apiItems = await getInventory();
+      let mapped = (apiItems || []).map(mapDbItemToAppItem);
+
+      if (Array.isArray(scope.locations) && scope.locations.length > 0) {
+        mapped = mapped.filter((item) =>
+          item.location && scope.locations.includes(item.location)
+        );
+      }
+
+      if (scope.start) {
+        const startTs = new Date(scope.start).getTime();
+        mapped = mapped.filter((item) => {
+          if (!item.addedAt) return false;
+          return new Date(item.addedAt).getTime() >= startTs;
+        });
+      }
+
+      if (scope.end) {
+        const endTs = new Date(scope.end).getTime();
+        mapped = mapped.filter((item) => {
+          if (!item.addedAt) return false;
+          return new Date(item.addedAt).getTime() <= endTs;
+        });
+      }
+
+      return mapped;
+    } catch (e) {
+      console.error('Error loading scoped items from Core API, falling back to Supabase:', e);
+      // Fall through to Supabase path below
+    }
+  }
+
   const supabase = getSupabase();
   if (!supabase || !ownerUserId) {
     return [];
@@ -288,7 +334,7 @@ export async function loadItemsForOwnerWithScope(ownerUserId, scope = {}) {
 
     const { data, error } = await query;
     if (error) {
-      console.error('Error loading scoped items for owner:', error);
+      console.error('Error loading scoped items for owner from Supabase:', error);
       return [];
     }
 

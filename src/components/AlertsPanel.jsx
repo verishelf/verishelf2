@@ -1,8 +1,45 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getAlerts } from "../utils/alerts";
+import { USE_CORE_API } from "../config/features";
+import { getExpiryAlerts } from "../api/expiry";
 
 export default function AlertsPanel({ items, settings, onItemClick }) {
-  const alerts = useMemo(() => getAlerts(items, settings), [items, settings]);
+  const [alerts, setAlerts] = useState([]);
+
+  // Fallback / legacy calculation (client-side)
+  const legacyAlerts = useMemo(() => getAlerts(items, settings), [items, settings]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAlerts() {
+      // When feature flag is off, keep existing behaviour entirely client-side
+      if (!USE_CORE_API) {
+        if (!cancelled) setAlerts(legacyAlerts);
+        return;
+      }
+
+      try {
+        const apiAlerts = await getExpiryAlerts();
+        if (!cancelled) {
+          // Core API is the source of truth when enabled
+          setAlerts(Array.isArray(apiAlerts) ? apiAlerts : []);
+        }
+      } catch (error) {
+        console.error("Error loading expiry alerts from Core API, falling back to legacy alerts:", error);
+        if (!cancelled) {
+          // Non-breaking fallback to previous logic
+          setAlerts(legacyAlerts);
+        }
+      }
+    }
+
+    loadAlerts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [items, settings, legacyAlerts]);
 
   if (alerts.length === 0) {
     return (
